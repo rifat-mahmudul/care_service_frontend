@@ -1,3 +1,4 @@
+import Navbar from "@/components/shared/navbar";
 import React from "react";
 
 const layout = ({
@@ -5,7 +6,15 @@ const layout = ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  return <div>{children}</div>;
+  return (
+    <div>
+      <header>
+        <Navbar />
+      </header>
+
+      <main>{children}</main>
+    </div>
+  );
 };
 
 export default layout;
