@@ -39,7 +39,7 @@ const Hero = () => {
           />
           <Separator
             orientation="vertical"
-            className="w-px !h-[30px] bg-black"
+            className="w-px bg-black"
           ></Separator>{" "}
           <div className="relative">
             <input
@@ -52,7 +52,7 @@ const Hero = () => {
               <MapPin className="text-red-500" />
             </div>
 
-            <div className="absolute top-[10%] right-2">
+            <div className="absolute top-[10%] right-[5px]">
               <Button className="rounded-3xl h-[40px]">
                 <Search /> Search
               </Button>

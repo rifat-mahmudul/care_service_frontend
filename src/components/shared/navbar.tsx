@@ -43,7 +43,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="w-full backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="w-full fixed z-50 top-0">
       <div className="container flex items-center justify-between py-4">
         {/* Logo */}
         <Link href={`/`}>
