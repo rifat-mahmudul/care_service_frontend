@@ -23,9 +23,33 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [scrolled, setScrolled] = React.useState(false);
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
+
+  React.useEffect(() => {
+    if (!isHomePage) {
+      setScrolled(true);
+      return;
+    }
+
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      setScrolled(isScrolled);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [isHomePage]);
 
   const navItems = [
     {
@@ -42,8 +66,14 @@ const Navbar = () => {
     },
   ];
 
+  const navbarClasses = `w-full fixed z-50 top-0 transition-all duration-300 ${
+    scrolled 
+      ? "bg-white"
+      : "bg-transparent"
+  }`;
+
   return (
-    <nav className="w-full fixed z-50 top-0">
+    <nav className={navbarClasses}>
       <div className="container flex items-center justify-between py-4">
         {/* Logo */}
         <Link href={`/`}>
