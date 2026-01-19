@@ -1,8 +1,13 @@
 import "./globals.css";
-import { Inter } from "next/font/google";
+import { Merriweather } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const merriWeather = Merriweather({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  weight: ["300", "400", "700", "900"],
+  display: "swap",
+});
 
 export default function RootLayout({
   children,
@@ -11,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={cn("antialiased", inter.className)}>{children}</body>
+      <body className={cn("antialiased", merriWeather.className)}>{children}</body>
     </html>
   );
 }
