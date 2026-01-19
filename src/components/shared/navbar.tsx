@@ -22,6 +22,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import Link from "next/link";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -45,16 +46,18 @@ const Navbar = () => {
     <nav className="w-full backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex items-center justify-between py-4">
         {/* Logo */}
-        <div className="flex items-center">
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={60}
-            height={60}
-            className="h-[50px] w-[50px] object-cover sm:h-[60px] sm:w-[60px]"
-            priority
-          />
-        </div>
+        <Link href={`/`}>
+          <div className="flex items-center">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={60}
+              height={60}
+              className="h-[50px] w-[50px] object-cover sm:h-[55px] sm:w-[55px]"
+              priority
+            />
+          </div>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden items-center gap-5 lg:flex">
