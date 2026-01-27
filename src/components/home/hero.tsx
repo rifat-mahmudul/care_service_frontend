@@ -27,14 +27,14 @@ const Hero = () => {
         </div>
 
         <div className="mt-8 space-x-4">
-          <Button className="rounded-3xl px-8">Hire a Professional</Button>
-          <Button className="rounded-3xl px-8">Offer a Service</Button>
+          <Button className="rounded-3xl px-8 h-[45px]">Hire a Professional</Button>
+          <Button className="rounded-3xl px-8 h-[45px]">Offer a Service</Button>
         </div>
 
         <div className="w-full mt-8 flex items-center">
           <input
             type="text"
-            className="h-[50px] rounded-l-3xl pl-4 focus:outline-none"
+            className="h-[50px] w-[250px] rounded-l-3xl pl-4 focus:outline-none"
             placeholder="Search by services name"
           />
           <Separator
@@ -44,11 +44,11 @@ const Hero = () => {
           <div className="relative">
             <input
               type="text"
-              className="h-[50px] w-[300px] rounded-r-3xl pl-8 pr-28 focus:outline-none"
+              className="h-[50px] w-[350px] rounded-r-3xl pl-12 pr-28 focus:outline-none"
               placeholder="City"
             />
 
-            <div className="absolute top-[28%] left-1">
+            <div className="absolute top-[28%] left-5">
               <MapPin className="text-red-500" />
             </div>
 
