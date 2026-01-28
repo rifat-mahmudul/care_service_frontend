@@ -1,5 +1,6 @@
 import Categories from "@/components/home/categories";
 import Hero from "@/components/home/hero";
+import OurCommunity from "@/components/home/our-community";
 import WhenYou from "@/components/home/when-you";
 
 export default function Home() {
@@ -8,6 +9,7 @@ export default function Home() {
       <Hero />
       <Categories />
       <WhenYou />
+      <OurCommunity />
     </div>
   );
 }
