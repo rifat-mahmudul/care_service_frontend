@@ -2,6 +2,7 @@ import Categories from "@/components/home/categories";
 import Hero from "@/components/home/hero";
 import OurCommunity from "@/components/home/our-community";
 import WhenYou from "@/components/home/when-you";
+import WhyChooseUs from "@/components/home/why-choose-us";
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
       <Categories />
       <WhenYou />
       <OurCommunity />
+      <WhyChooseUs />
     </div>
   );
 }
