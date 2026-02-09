@@ -1,4 +1,5 @@
 import Categories from "@/components/home/categories";
+import Faq from "@/components/home/faq";
 import Hero from "@/components/home/hero";
 import MarqueeSection from "@/components/home/marque-section";
 import OurCommunity from "@/components/home/our-community";
@@ -14,6 +15,7 @@ export default function Home() {
       <OurCommunity />
       <WhyChooseUs />
       <MarqueeSection />
+      <Faq />
     </div>
   );
 }
