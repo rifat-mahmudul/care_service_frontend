@@ -1,3 +1,4 @@
+import CareSection from "@/components/home/care-section";
 import Categories from "@/components/home/categories";
 import Faq from "@/components/home/faq";
 import Hero from "@/components/home/hero";
@@ -16,6 +17,7 @@ export default function Home() {
       <WhyChooseUs />
       <MarqueeSection />
       <Faq />
+      <CareSection />
     </div>
   );
 }
