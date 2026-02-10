@@ -1,13 +1,11 @@
 "use client";
-import * as React from "react";
 import Image from "next/image";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import FindCareNav from "./nav-component/find-care-nav";
 import { Button } from "../ui/button";
 import {
   Sheet,
@@ -24,14 +22,19 @@ import {
 } from "@/components/ui/accordion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import FindCareCategory from "./nav-component/find-care-category";
+import FindJobCategory from "./nav-component/find-job-category";
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [scrolled, setScrolled] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const isHomePage = pathname === "/";
 
-  React.useEffect(() => {
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+  useEffect(() => {
     if (!isHomePage) {
       setScrolled(true);
       return;
@@ -43,9 +46,9 @@ const Navbar = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-    
+
     handleScroll();
-    
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -54,22 +57,20 @@ const Navbar = () => {
   const navItems = [
     {
       title: "Find Care",
-      content: <FindCareNav />,
+      content: <FindCareCategory />,
     },
     {
       title: "Find Jobs",
-      content: <FindCareNav />,
+      content: <FindJobCategory />,
     },
-    {
-      title: "Resources",
-      content: <FindCareNav />,
-    },
+    // {
+    //   title: "Resources",
+    //   content: <NavCategory />,
+    // },
   ];
 
-  const navbarClasses = `w-full fixed z-30  top-0 transition-all duration-300 ${
-    scrolled 
-      ? "bg-white"
-      : "bg-transparent"
+  const navbarClasses = `w-full fixed z-30 top-0 transition-all duration-300 ${
+    scrolled ? "bg-white" : "bg-transparent"
   }`;
 
   return (
@@ -92,11 +93,22 @@ const Navbar = () => {
         {/* Desktop Navigation */}
         <div className="hidden items-center gap-5 lg:flex">
           {navItems.map((item) => (
-            <DropdownMenu key={item.title}>
+            <DropdownMenu
+              key={item.title}
+              modal={false}
+              onOpenChange={(open) => {
+                setOpenDropdown(open ? item.title : null);
+              }}
+            >
               <DropdownMenuTrigger className="flex items-center gap-1 focus-visible:ring-0 focus-visible:ring-offset-0">
-                {item.title} <ChevronDown className="h-4 w-4" />
+                {item.title}
+                {openDropdown === item.title ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuContent align="start">
                 {item.content}
               </DropdownMenuContent>
             </DropdownMenu>
