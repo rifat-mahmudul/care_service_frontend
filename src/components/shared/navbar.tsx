@@ -23,8 +23,8 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import NavCategory from "./nav-component/nav-category";
 import FindCareCategory from "./nav-component/find-care-category";
+import FindJobCategory from "./nav-component/find-job-category";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,12 +61,12 @@ const Navbar = () => {
     },
     {
       title: "Find Jobs",
-      content: <NavCategory />,
+      content: <FindJobCategory />,
     },
-    {
-      title: "Resources",
-      content: <NavCategory />,
-    },
+    // {
+    //   title: "Resources",
+    //   content: <NavCategory />,
+    // },
   ];
 
   const navbarClasses = `w-full fixed z-30 top-0 transition-all duration-300 ${
