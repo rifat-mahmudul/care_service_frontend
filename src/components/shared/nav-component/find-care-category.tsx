@@ -22,7 +22,7 @@ interface ApiResponse {
   data: Category[];
 }
 
-const NavCategory = () => {
+const FindCareCategory = () => {
   const { data, isLoading, error } = useQuery<ApiResponse>({
     queryKey: ["nav-categories"],
     queryFn: async () => {
@@ -175,35 +175,9 @@ const NavCategory = () => {
         </div>
       )}
 
-      {/* Stats - Optional, you can remove if not needed */}
-      {categories.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-gray-100">
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 text-center">
-            <div>
-              <div className="text-2xl font-bold text-blue-600">
-                {categories.length}
-              </div>
-              <div className="text-xs text-gray-500">Total Categories</div>
-            </div>
-            <div className="w-px h-8 bg-gray-200 hidden md:block" />
-            <div>
-              <div className="text-2xl font-bold text-purple-600">
-                {categories.reduce((acc, cat) => acc + (cat.image ? 1 : 0), 0)}
-              </div>
-              <div className="text-xs text-gray-500">With Images</div>
-            </div>
-            <div className="w-px h-8 bg-gray-200 hidden md:block" />
-            <div>
-              <div className="text-2xl font-bold text-green-600">
-                {data?.meta?.total || categories.length}
-              </div>
-              <div className="text-xs text-gray-500">In System</div>
-            </div>
-          </div>
-        </div>
-      )}
+    
     </div>
   );
 };
 
-export default NavCategory;
+export default FindCareCategory;

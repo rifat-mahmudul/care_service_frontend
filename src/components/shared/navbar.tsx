@@ -24,6 +24,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import NavCategory from "./nav-component/nav-category";
+import FindCareCategory from "./nav-component/find-care-category";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,7 +57,7 @@ const Navbar = () => {
   const navItems = [
     {
       title: "Find Care",
-      content: <NavCategory />,
+      content: <FindCareCategory />,
     },
     {
       title: "Find Jobs",
