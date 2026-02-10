@@ -27,9 +27,12 @@ export default function RoleSelectionModal({
     };
 
     const handleFindJob = () => {
-        // Example: /find-job?category=pet-care
-        const slug = categoryName.toLowerCase().replace(/\s+/g, "-");
-        router.push(`/find-job?=${slug}`);
+        // // Example: /find-job?category=pet-care
+        // const slug = categoryName.toLowerCase().replace(/\s+/g, "-");
+        // router.push(`/find-job?=${slug}`);
+        // onClose();
+
+        router.push(`/find-job/1`);
         onClose();
     };
 
@@ -78,7 +81,7 @@ export default function RoleSelectionModal({
                         >
                             <div className="mb-6 w-[104px] h-[104px]">
                                 <Image
-                                    src={`/icon2.png`}   
+                                    src={`/icon2.png`}
                                     alt="Caregiving jobs"
                                     width={1000}
                                     height={1000}
