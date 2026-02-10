@@ -10,7 +10,7 @@ interface PasswordStepProps {
   onBack: () => void
 }
 
-export function PasswordStep({ email, onNext, onBack }: PasswordStepProps) {
+export function PasswordStep({  onNext, onBack }: PasswordStepProps) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
@@ -21,32 +21,37 @@ export function PasswordStep({ email, onNext, onBack }: PasswordStepProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      {/* Title (same as other steps) */}
+      <h1 className="text-3xl text-[#0A0A23] font-bold text-center mb-8">
+       Finish setting up your account
+      </h1>
+
       <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-8">
-          Glad you&apos;re here, {email.split('@')[0]}! Let&apos;s set your password.
-        </h1>
-        
         <div className="space-y-6">
+          {/* Password */}
           <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-full focus:outline-none focus:border-blue-400"
-              />
-              <button
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-2.5 text-gray-600"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Write password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-4 pr-12 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-[#8E8E9A]"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="relative -mt-[52px] ml-auto flex h-[52px] w-[52px] items-center justify-center text-gray-600"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+
             <p className="text-xs text-gray-500 mt-2">At least 6 characters</p>
           </div>
 
+          {/* Buttons (same as other steps) */}
           <div className="flex gap-3">
             <Button
               onClick={onBack}
@@ -55,10 +60,11 @@ export function PasswordStep({ email, onNext, onBack }: PasswordStepProps) {
             >
               Back
             </Button>
+
             <Button
               onClick={handleSetPassword}
               disabled={password.length < 6}
-              className="flex-1 bg-blue-900 hover:bg-blue-800 text-white py-2 rounded-full font-semibold"
+              className="flex-1 bg-[#003366] hover:bg-[#003366] text-white py-2 rounded-full font-semibold disabled:opacity-50"
             >
               Set Password
             </Button>
