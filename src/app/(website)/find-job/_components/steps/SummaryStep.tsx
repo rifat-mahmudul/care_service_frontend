@@ -34,8 +34,8 @@ export function SummaryStep({ formData, onBack }: SummaryStepProps) {
     console.log('Location:', formData.location)
     console.log('ZIP Code:', formData.zipCode)
     console.log('Selected Days:', formData.selectedDays)
-    console.log('Time Range:', `${formData.timeRange[0]}AM - ${formData.timeRange[1]}PM`)
-    console.log('Apply for All Days:', formData.applyForAllDays)
+    // console.log('Time Range:', `${formData.timeRange[0]}AM - ${formData.timeRange[1]}PM`)
+    // console.log('Apply for All Days:', formData.applyForAllDays)
     console.log('Schedule Varies:', formData.scheduleVaries)
     console.log('Selected Plan:', formData.plan)
     console.log('First Name:', formData.firstName)
@@ -68,11 +68,11 @@ export function SummaryStep({ formData, onBack }: SummaryStepProps) {
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Days:</span>
-              <span>{formData.selectedDays.join(', ')}</span>
+              {/* <span>{formData.selectedDays.join(', ')}</span> */}
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Hours:</span>
-              <span>{formData.timeRange[0]}AM - {formData.timeRange[1]}PM</span>
+              {/* <span>{formData.timeRange[0]}AM - {formData.timeRange[1]}PM</span> */}
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Plan:</span>
