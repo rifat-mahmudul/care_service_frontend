@@ -8,43 +8,31 @@ interface LocationStepProps {
   onBack: () => void
 }
 
-export function LocationStep({ onNext, onBack }: LocationStepProps) {
+export function HelpStep({ onNext, onBack }: LocationStepProps) {
   const [zipCode, setZipCode] = useState('')
 
   const handleContinue = () => {
-    if (zipCode.trim()) {
+    if (zipCode) {
       onNext({ location: 'Cina PK', zipCode })
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      
-      {/* Title - same style as TypeStep */}
-      <h1 className="text-3xl text-[#0A0A23] font-bold text-center mb-8">
-        Where are you looking for care?
-      </h1>
-
+    <div className="min-h-screen bg-gray-100 flex  flex-col items-center justify-center p-4">
+        <h1 className="text-3xl text-[#0A0A23] font-bold text-center mb-8">What kind of help are you looking for?</h1>
       <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-lg">
+        
         <div className="space-y-6">
-
-          {/* Input */}
           <div>
             <input
               type="text"
-              placeholder="Enter zip code..."
+              placeholder="type here..."
               value={zipCode}
               onChange={(e) => setZipCode(e.target.value)}
               className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-[#8E8E9A]"
             />
           </div>
 
-          {/* Selected location text */}
-          <p className="text-sm text-gray-600 ">
-            Cina PK
-          </p>
-
-          {/* Buttons */}
           <div className="flex gap-3">
             <Button
               onClick={onBack}
@@ -53,7 +41,6 @@ export function LocationStep({ onNext, onBack }: LocationStepProps) {
             >
               Back
             </Button>
-
             <Button
               onClick={handleContinue}
               disabled={!zipCode}
@@ -62,7 +49,6 @@ export function LocationStep({ onNext, onBack }: LocationStepProps) {
               Continue
             </Button>
           </div>
-
         </div>
       </div>
     </div>
