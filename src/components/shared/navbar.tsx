@@ -6,7 +6,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import FindCareNav from "./nav-component/find-care-nav";
 import { Button } from "../ui/button";
 import {
   Sheet,
@@ -24,6 +23,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import NavCategory from "./nav-component/nav-category";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,15 +56,15 @@ const Navbar = () => {
   const navItems = [
     {
       title: "Find Care",
-      content: <FindCareNav />,
+      content: <NavCategory />,
     },
     {
       title: "Find Jobs",
-      content: <FindCareNav />,
+      content: <NavCategory />,
     },
     {
       title: "Resources",
-      content: <FindCareNav />,
+      content: <NavCategory />,
     },
   ];
 
@@ -107,7 +107,7 @@ const Navbar = () => {
                   <ChevronDown className="h-4 w-4" />
                 )}
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuContent align="start">
                 {item.content}
               </DropdownMenuContent>
             </DropdownMenu>
