@@ -1,5 +1,5 @@
 import React from 'react'
-import { MultiStepForm } from '../_components/MultiStepForm/MultiStepForm'
+import MultiStepForm from '../_components/MultiStepForm/MultiStepForm'
 
 const FindJob = () => {
   return (
