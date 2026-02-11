@@ -68,7 +68,8 @@ export function ScheduleStep({
   }
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded shadow">
+    <div className='min-h-screen bg-gray-100 flex items-center justify-center p-4'>
+ <div className="max-w-md mx-auto bg-white p-6 rounded shadow">
       <h2 className="text-2xl font-bold mb-4 text-center">Which days?</h2>
 
       <div className="flex flex-wrap gap-2 mb-4">
@@ -114,6 +115,8 @@ export function ScheduleStep({
         <Button onClick={handleContinue}>Continue</Button>
       </div>
     </div>
+    </div>
+   
   )
 }
 

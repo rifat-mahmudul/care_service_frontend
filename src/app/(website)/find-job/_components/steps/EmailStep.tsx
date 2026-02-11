@@ -7,9 +7,10 @@ import { FindJobDataTypes } from '../find-job-data-type'
 interface EmailStepProps {
   data: Partial<FindJobDataTypes>
   onNext: (data: Partial<FindJobDataTypes>) => void
+  onBack: () => void
 }
 
-export function EmailStep({ data, onNext }: EmailStepProps) {
+export function EmailStep({ data, onNext, onBack }: EmailStepProps) {
   const [email, setEmail] = useState(data.email || '')
   const [ageVerified, setAgeVerified] = useState(false)
 
@@ -69,13 +70,30 @@ export function EmailStep({ data, onNext }: EmailStepProps) {
             </label>
           </div>
 
-          <Button
+          {/* <Button
             onClick={handleContinue}
             disabled={!email || !ageVerified}
             className="w-full bg-blue-900 text-white rounded-full"
           >
             Continue
-          </Button>
+          </Button> */}
+          <div className="flex gap-3">
+            <Button
+              onClick={onBack}
+              variant="outline"
+              className="flex-1 rounded-full"
+            >
+              Back
+            </Button>
+
+            <Button
+              onClick={handleContinue}
+              disabled={!email || !ageVerified}
+              className="flex-1 bg-blue-900 text-white rounded-full"
+            >
+              Continue
+            </Button>
+          </div>
         </div>
       </div>
     </div>

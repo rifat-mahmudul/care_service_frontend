@@ -10,6 +10,7 @@ import { PersonalDetailsStep } from '../steps/PersonalDetailsStep'
 import { PasswordStep } from '../steps/PasswordStep'
 import { SummaryStep } from '../steps/SummaryStep'
 import { FindJobDataTypes } from '../find-job-data-type'
+import { PricingStep } from '../steps/PricingStep'
 
 
 const INITIAL_DATA: FindJobDataTypes = {
@@ -47,10 +48,11 @@ export default function MultiStepForm() {
     <LocationStep key={0} data={formData} onNext={next} />,
     <HourlyRateStep key={1} data={formData} onNext={next} onBack={back} />,
     <ScheduleStep key={2} data={formData} onNext={next} onBack={back} />,
-    <EmailStep key={3} data={formData} onNext={next} />,
+    <EmailStep key={3} data={formData} onNext={next} onBack={back} />,
     <PersonalDetailsStep key={4} data={formData} onNext={next} onBack={back} />,
     <PasswordStep key={5} data={formData} onNext={next} onBack={back} />,
-    <SummaryStep key={6} formData={formData} />,
+    <PricingStep key={6} data={formData} onNext={next} onBack={back} />,
+    <SummaryStep key={step} data={formData} onBack={back}/>
   ]
 
   return <>{steps[step]}</>
