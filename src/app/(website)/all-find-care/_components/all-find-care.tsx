@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { DollarSign, ListFilter, MapPin, Smile, Star } from "lucide-react";
 import React from "react";
+import FindCareReviewCarousel from "./find-care-review-carousel";
 
 const stats = [
   {
@@ -45,6 +46,7 @@ const AllFindCare = () => {
   return (
     <div className="space-y-16">
       <Banner />
+
       <div className="container flex lg:flex-row flex-col-reverse gap-10">
         {/* all card here */}
         <div className="space-y-8">
@@ -110,6 +112,8 @@ const AllFindCare = () => {
           </div>
         </div>
       </div>
+
+      <FindCareReviewCarousel />
     </div>
   );
 };

@@ -22,7 +22,7 @@ const CareSection = () => {
   ];
 
   return (
-    <section className="container grid grid-cols-1 lg:grid-cols-2 gap-12 items-center font-sans">
+    <section className="container grid grid-cols-1 lg:grid-cols-2 gap-12 items-center font-sans pb-16">
       {/* Left Content Column */}
       <div className="space-y-10">
         <h2 className="text-4xl md:text-5xl font-bold text-[#0A1D37] leading-tight">
