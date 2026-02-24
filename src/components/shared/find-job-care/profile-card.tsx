@@ -5,7 +5,7 @@ const ProfileCard = () => {
   const tags = ["Part time", "$18 - $25/hr", "starts Jan 23", "Warwick, RI"];
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8 flex flex-col gap-6 relative">
         {/* Top Section: Image and Info */}
         <div className="flex flex-col md:flex-row gap-6">
