@@ -23,8 +23,8 @@ const reviews = [
 
 export default function FindCareReviewCarousel() {
   return (
-    <section className="bg-[#BDE3F9] py-16 px-8 overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+    <section className="bg-[#BDE3F9] py-16 overflow-hidden">
+      <div className="container">
         <Carousel
           opts={{ align: "start", loop: true }}
           className="w-full relative"
