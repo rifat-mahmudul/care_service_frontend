@@ -42,7 +42,7 @@ const ProfileCard = () => {
 
         {/* Bottom Section: Description and Button */}
         <div className="space-y-4">
-          <p className="text-[#4A4A4A] text-base md:text-lg leading-relaxed max-w-[90%]">
+          <p className="text-[#4A4A4A] text-base md:text-lg leading-relaxed max-w-[80%]">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
             eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
             ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
