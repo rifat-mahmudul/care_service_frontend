@@ -2,6 +2,7 @@ import React from "react";
 import { ProfileHero } from "./_components/profile-hero";
 import About from "./_components/about";
 import BookingComponent from "./_components/booking";
+import ReviewSection from "./_components/review-section";
 
 const page = () => {
   return (
@@ -9,6 +10,7 @@ const page = () => {
       <ProfileHero />
       <About />
       <BookingComponent />
+      <ReviewSection />
     </div>
   );
 };
