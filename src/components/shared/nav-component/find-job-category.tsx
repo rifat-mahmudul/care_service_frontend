@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface Category {
   _id: string;
@@ -23,6 +24,7 @@ interface ApiResponse {
 }
 
 const FindJobCategory = () => {
+  const router = useRouter();
   const { data, isLoading, error } = useQuery<ApiResponse>({
     queryKey: ["nav-categories"],
     queryFn: async () => {
@@ -33,6 +35,10 @@ const FindJobCategory = () => {
       return await res.json();
     },
   });
+
+  const handleCategoryClick = (categoryId: string) => {
+    router.push(`/all-find-jobs?id=${categoryId}`);
+  };
 
   // Loading state with Shadcn Skeleton
   if (isLoading) {
@@ -50,10 +56,7 @@ const FindJobCategory = () => {
         {/* Grid Skeleton with 6 columns */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {Array.from({ length: 12 }).map((_, index) => (
-            <Skeleton
-              key={index}
-              className="h-10 rounded-full w-full"
-            />
+            <Skeleton key={index} className="h-10 rounded-full w-full" />
           ))}
         </div>
 
@@ -130,6 +133,7 @@ const FindJobCategory = () => {
           {categories.map((category, index) => (
             <motion.button
               key={category._id}
+              onClick={() => handleCategoryClick(category._id)}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -174,8 +178,6 @@ const FindJobCategory = () => {
           </p>
         </div>
       )}
-
-    
     </div>
   );
 };
