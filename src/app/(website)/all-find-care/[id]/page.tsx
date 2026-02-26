@@ -3,6 +3,7 @@ import { ProfileHero } from "./_components/profile-hero";
 import About from "./_components/about";
 import BookingComponent from "./_components/booking";
 import ReviewSection from "./_components/review-section";
+import { ServiceDetails } from "./_components/service-details";
 
 const page = () => {
   return (
@@ -11,6 +12,7 @@ const page = () => {
       <About />
       <BookingComponent />
       <ReviewSection />
+      <ServiceDetails />
     </div>
   );
 };
