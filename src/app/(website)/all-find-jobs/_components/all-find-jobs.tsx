@@ -95,7 +95,7 @@ const stats = [
   },
 ];
 
-const AllFindCare = () => {
+const AllFindJobs = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
@@ -105,7 +105,7 @@ const AllFindCare = () => {
     queryKey: ["all-find-care"],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/service/service-base-user/699489273ab231272513e4dc?role=find care`,
+        `${process.env.NEXT_PUBLIC_API_URL}/service/service-base-user/699489273ab231272513e4dc?role=find job`,
       );
       const data = await res.json();
       return data;
@@ -117,28 +117,28 @@ const AllFindCare = () => {
   // Generate tags from user data
   const generateTags = (caregiver: ServiceBaseUser) => {
     const tags = [];
-
+    
     // Add availability based on days
     if (caregiver.days && caregiver.days.length > 0) {
       tags.push(`${caregiver.days.length} days availability`);
     }
-
+    
     // Add hourly rate
     if (caregiver.hourRate) {
       tags.push(`$${caregiver.hourRate}/hr`);
     }
-
+    
     // Add location (first part of location)
     if (caregiver.location) {
-      const locationParts = caregiver.location.split(",");
-      tags.push(locationParts[0]?.trim() || "Location available");
+      const locationParts = caregiver.location.split(',');
+      tags.push(locationParts[0]?.trim() || 'Location available');
     }
-
+    
     // Add preferences/skills as tags (limited to 2-3)
     if (caregiver.user?.perferences && caregiver.user.perferences.length > 0) {
       tags.push(...caregiver.user.perferences.slice(0, 2));
     }
-
+    
     return tags.slice(0, 4); // Limit to 4 tags max
   };
 
@@ -195,15 +195,10 @@ const AllFindCare = () => {
               {caregivers.map((caregiver) => (
                 <ProfileCard
                   key={caregiver._id}
-                  image={
-                    caregiver.user?.profileImage || "/placeholder-image.jpg"
-                  }
-                  title={
-                    `${caregiver.user?.firstName || ""} ${caregiver.user?.lastName || ""}`.trim() ||
-                    "Caregiver"
-                  }
+                  image={caregiver.user?.profileImage || "/placeholder-image.jpg"}
+                  title={`${caregiver.user?.firstName || ''} ${caregiver.user?.lastName || ''}`.trim() || 'Caregiver'}
                   tags={generateTags(caregiver)}
-                  bio={caregiver.user?.bio || "No bio available"}
+                  bio={caregiver.user?.bio || 'No bio available'}
                   hourRate={caregiver.hourRate}
                   location={caregiver.location}
                   userId={caregiver.user?._id}
@@ -214,7 +209,7 @@ const AllFindCare = () => {
         </div>
 
         {/* all states here */}
-        <div className="lg:w-[40%]">
+        <div className="lg:w-[25%]">
           <div className="flex flex-col gap-6 sticky top-24 z-30">
             {stats.map((stat, index) => (
               <div
@@ -239,4 +234,4 @@ const AllFindCare = () => {
   );
 };
 
-export default AllFindCare;
+export default AllFindJobs;
