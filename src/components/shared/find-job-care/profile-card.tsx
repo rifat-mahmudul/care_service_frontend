@@ -2,6 +2,7 @@ import Image from "next/image";
 import React from "react";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 interface ProfileCardType {
   image: string;
@@ -22,6 +23,8 @@ const ProfileCard = ({
   location,
   userId,
 }: ProfileCardType) => {
+  const pathName = usePathname();
+
   const truncateBio = (text: string, maxLength: number = 150) => {
     if (text?.length <= maxLength) return text;
     return text?.substr(0, maxLength).lastIndexOf(" ") > 0
@@ -103,7 +106,11 @@ const ProfileCard = ({
             {displayBio}
             {bio?.length > 150 && (
               <Link
-                href={`/profile/${userId}`}
+                href={
+                  pathName === "/all-find-jobs"
+                    ? `/all-find-jobs/${userId}`
+                    : `/all-find-care/${userId}`
+                }
                 className="text-[#003566] font-bold underline ml-1 hover:text-[#001D3D] transition-colors"
               >
                 read more
@@ -113,7 +120,13 @@ const ProfileCard = ({
 
           {/* See Profile Button - Absolute positioned on desktop for precise alignment */}
           <div className="md:absolute md:bottom-8 md:right-8 flex justify-end">
-            <Link href={`/profile/${userId}`}>
+            <Link
+              href={
+                pathName === "/all-find-jobs"
+                  ? `/all-find-jobs/${userId}`
+                  : `/all-find-care/${userId}`
+              }
+            >
               <button className="bg-[#003566] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#001D3D] transition-all shadow-md active:scale-95">
                 See Profile
               </button>
