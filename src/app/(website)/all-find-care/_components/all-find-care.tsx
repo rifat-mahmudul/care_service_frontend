@@ -214,7 +214,7 @@ const AllFindCare = () => {
         </div>
 
         {/* all states here */}
-        <div className="lg:w-[40%]">
+        <div className="lg:w-[25%]">
           <div className="flex flex-col gap-6 sticky top-24 z-30">
             {stats.map((stat, index) => (
               <div
