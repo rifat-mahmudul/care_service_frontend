@@ -147,7 +147,8 @@ const FindJobsDetails = () => {
 
   const userInfo = serviceData.data.userId;
   const reviews = userInfo?.reviewRatting || [];
-  
+  const categoryInfo = serviceData.data.categoryId;
+
   // Calculate average rating
   const averageRating =
     reviews.length > 0
@@ -159,10 +160,8 @@ const FindJobsDetails = () => {
         ).toFixed(1)
       : "0.0";
 
-  // Get the most recent review (last item in the array)
-  const mostRecentReview = reviews.length > 0 
-    ? reviews[reviews.length - 1] 
-    : null;
+  const mostRecentReview =
+    reviews.length > 0 ? reviews[reviews.length - 1] : null;
 
   return (
     <div className="mt-20 space-y-16">
@@ -179,19 +178,24 @@ const FindJobsDetails = () => {
         profileImage={userInfo?.profileImage}
         isVerified={userInfo?.verified}
       />
-      <About 
-        experience={userInfo?.exprience || 0} 
-        bio={userInfo?.bio || ""} 
-        
-      />
+      <About experience={userInfo?.exprience || 0} bio={userInfo?.bio || ""} />
       <Booking />
-      <ReviewSection 
+      <ReviewSection
         reviews={reviews}
         averageRating={parseFloat(averageRating)}
         totalReviews={reviews.length}
         mostRecentReview={mostRecentReview}
       />
-      <ServiceDetails />
+      <ServiceDetails
+        ageGroups={userInfo?.agegroup || []}
+        canHelpWith={userInfo?.canHelpWith || []}
+        education={userInfo?.education || []}
+        professionalSkills={userInfo?.professionalSkill || []}
+        hourlyRate={serviceData.data.hourRate || 0}
+        days={serviceData.data.days || []}
+        categoryName={categoryInfo?.name}
+        categoryDescription={categoryInfo?.description}
+      />
     </div>
   );
 };
