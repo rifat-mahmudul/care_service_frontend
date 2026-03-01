@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import About from "@/app/(website)/all-find-care/[id]/_components/about";
+import Booking from "@/app/(website)/all-find-care/[id]/_components/booking";
 import { ProfileHero } from "@/app/(website)/all-find-care/[id]/_components/profile-hero";
+import ReviewSection from "@/app/(website)/all-find-care/[id]/_components/review-section";
+import { ServiceDetails } from "@/app/(website)/all-find-care/[id]/_components/service-details";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import React from "react";
@@ -144,6 +147,8 @@ const FindJobsDetails = () => {
 
   const userInfo = serviceData.data.userId;
   const reviews = userInfo?.reviewRatting || [];
+  
+  // Calculate average rating
   const averageRating =
     reviews.length > 0
       ? (
@@ -153,6 +158,11 @@ const FindJobsDetails = () => {
           ) / reviews.length
         ).toFixed(1)
       : "0.0";
+
+  // Get the most recent review (last item in the array)
+  const mostRecentReview = reviews.length > 0 
+    ? reviews[reviews.length - 1] 
+    : null;
 
   return (
     <div className="mt-20 space-y-16">
@@ -169,7 +179,19 @@ const FindJobsDetails = () => {
         profileImage={userInfo?.profileImage}
         isVerified={userInfo?.verified}
       />
-      <About experience={userInfo?.exprience || 0} bio={userInfo?.bio || ""} />
+      <About 
+        experience={userInfo?.exprience || 0} 
+        bio={userInfo?.bio || ""} 
+        
+      />
+      <Booking />
+      <ReviewSection 
+        reviews={reviews}
+        averageRating={parseFloat(averageRating)}
+        totalReviews={reviews.length}
+        mostRecentReview={mostRecentReview}
+      />
+      <ServiceDetails />
     </div>
   );
 };
