@@ -179,7 +179,13 @@ const FindJobsDetails = () => {
         isVerified={userInfo?.verified}
       />
       <About experience={userInfo?.exprience || 0} bio={userInfo?.bio || ""} />
-      <Booking />
+
+      <Booking
+        days={serviceData.data.days || []}
+        hourlyRate={serviceData.data.hourRate}
+        providerName={`${userInfo?.firstName || ""} ${userInfo?.lastName || ""}`}
+      />
+
       <ReviewSection
         reviews={reviews}
         averageRating={parseFloat(averageRating)}
