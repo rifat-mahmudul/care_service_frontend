@@ -27,7 +27,7 @@ const Banner = ({ title, description, banner }: BannerProps) => {
         {/* Left Content Side */}
         <div className="z-10 space-y-6 max-w-xl">
           <h1 className="text-5xl md:text-6xl font-serif font-bold text-primary leading-tight">
-            {title} Jobs
+            {title}
           </h1>
           <p className="text-[#333333] text-lg leading-relaxed">
             {description ||

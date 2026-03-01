@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DollarSign, ListFilter, MapPin, Smile, Star } from "lucide-react";
-import React from "react";
+import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import FindCareReviewCarousel from "../../all-find-care/_components/find-care-review-carousel";
 import { useSearchParams } from "next/navigation";
@@ -77,36 +77,6 @@ interface ApiResponse {
   data: ServiceBaseUser[];
 }
 
-const stats = [
-  {
-    icon: <Smile className="w-6 h-6 text-slate-900" />,
-    text: (
-      <span>
-        <span className="font-semibold">161,089</span> babysitters are listed on
-        This platform
-      </span>
-    ),
-  },
-  {
-    icon: <DollarSign className="w-6 h-6 text-slate-900" />,
-    text: (
-      <span>
-        The average post rate is{" "}
-        <span className="font-semibold">$19.57/hr</span> as of November 2025
-      </span>
-    ),
-  },
-  {
-    icon: <Star className="w-6 h-6 text-slate-900 fill-slate-900" />,
-    text: (
-      <span>
-        The average star rating for rated babysitters is{" "}
-        <span className="font-semibold">4.7</span>
-      </span>
-    ),
-  },
-];
-
 const AllFindJobs = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -114,17 +84,91 @@ const AllFindJobs = () => {
   console.log("id: ", id);
 
   const { data, isLoading } = useQuery<ApiResponse>({
-    queryKey: ["all-find-care"],
+    queryKey: ["all-find-care", id],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/service/service-base-user/699489273ab231272513e4dc?role=find job`,
+        `${process.env.NEXT_PUBLIC_API_URL}/service/service-base-user/${id}?role=find job`,
       );
       const data = await res.json();
       return data;
     },
+    enabled: !!id,
   });
 
   const caregivers = data?.data || [];
+
+  // Calculate dynamic stats
+  const dynamicStats = useMemo(() => {
+    const totalCaregivers = caregivers.length;
+
+    // Calculate average hourly rate
+    const totalHourRate = caregivers.reduce(
+      (sum, caregiver) => sum + (caregiver.hourRate || 0),
+      0,
+    );
+    const averageHourRate =
+      totalCaregivers > 0
+        ? (totalHourRate / totalCaregivers).toFixed(2)
+        : "0.00";
+
+    // Calculate average rating
+    const caregiversWithRatings = caregivers.filter(
+      (c) => c.averageRating && c.averageRating > 0,
+    );
+    const totalRating = caregiversWithRatings.reduce(
+      (sum, caregiver) => sum + (caregiver.averageRating || 0),
+      0,
+    );
+    const averageRating =
+      caregiversWithRatings.length > 0
+        ? (totalRating / caregiversWithRatings.length).toFixed(1)
+        : "0.0";
+
+    return [
+      {
+        icon: <Smile className="w-6 h-6 text-slate-900" />,
+        text: (
+          <span>
+            <span className="font-semibold">
+              {totalCaregivers.toLocaleString()}
+            </span>{" "}
+            {data?.data[0]?.category?.name?.toLowerCase() || "caregivers"} are
+            listed on This platform
+          </span>
+        ),
+      },
+      {
+        icon: <DollarSign className="w-6 h-6 text-slate-900" />,
+        text: (
+          <span>
+            The average post rate is{" "}
+            <span className="font-semibold">${averageHourRate}/hr</span> as of{" "}
+            {new Date().toLocaleString("default", {
+              month: "long",
+              year: "numeric",
+            })}
+          </span>
+        ),
+      },
+      {
+        icon: <Star className="w-6 h-6 text-slate-900 fill-slate-900" />,
+        text: (
+          <span>
+            The average star rating for rated{" "}
+            {data?.data[0]?.category?.name?.toLowerCase() || "caregivers"} is{" "}
+            <span className="font-semibold">{averageRating}</span>
+            {caregiversWithRatings.length > 0 &&
+              caregivers.length > caregiversWithRatings.length && (
+                <span className="text-sm text-gray-500 block">
+                  (based on {caregiversWithRatings.length}{" "}
+                  {caregiversWithRatings.length === 1 ? "rating" : "ratings"})
+                </span>
+              )}
+          </span>
+        ),
+      },
+    ];
+  }, [caregivers, data]);
 
   const categoryData = caregivers[0]?.category;
 
@@ -167,7 +211,7 @@ const AllFindJobs = () => {
         <div className="space-y-8 flex-1">
           <div>
             <h1 className="text-3xl font-semibold">
-              {categoryData?.name} jobs available in your area:
+              {categoryData?.name} available in your area:
             </h1>
 
             <div className="flex items-center gap-3 mt-5">
@@ -208,23 +252,29 @@ const AllFindJobs = () => {
             </>
           ) : (
             <div className="space-y-8">
-              {caregivers.map((caregiver) => (
-                <ProfileCard
-                  key={caregiver._id}
-                  image={
-                    caregiver.user?.profileImage || "/placeholder-image.jpg"
-                  }
-                  title={
-                    `${caregiver.user?.firstName || ""} ${caregiver.user?.lastName || ""}`.trim() ||
-                    "Caregiver"
-                  }
-                  tags={generateTags(caregiver)}
-                  bio={caregiver.user?.bio || "No bio available"}
-                  hourRate={caregiver.hourRate}
-                  location={caregiver.location}
-                  userId={caregiver.user?._id}
-                />
-              ))}
+              {caregivers.length > 0 ? (
+                caregivers.map((caregiver) => (
+                  <ProfileCard
+                    key={caregiver._id}
+                    image={
+                      caregiver.user?.profileImage || "/placeholder-image.jpg"
+                    }
+                    title={
+                      `${caregiver.user?.firstName || ""} ${caregiver.user?.lastName || ""}`.trim() ||
+                      "Caregiver"
+                    }
+                    tags={generateTags(caregiver)}
+                    bio={caregiver.user?.bio || "No bio available"}
+                    hourRate={caregiver.hourRate}
+                    location={caregiver.location}
+                    userId={caregiver.user?._id}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-10 text-gray-500">
+                  No caregivers found in your area
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -232,20 +282,38 @@ const AllFindJobs = () => {
         {/* all states here */}
         <div className="lg:w-[25%]">
           <div className="flex flex-col gap-6 sticky top-24 z-30">
-            {stats.map((stat, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-4 text-slate-700 leading-tight"
-              >
-                {/* Circular Icon Container */}
-                <div className="flex items-center justify-center w-14 h-14 rounded-full bg-blue-100 shrink-0">
-                  {stat.icon}
-                </div>
+            {isLoading ? (
+              // Show skeleton for stats while loading
+              <>
+                {[1, 2, 3].map((index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-4 animate-pulse"
+                  >
+                    <div className="w-14 h-14 rounded-full bg-gray-200 shrink-0"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              dynamicStats.map((stat, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-4 text-slate-700 leading-tight"
+                >
+                  {/* Circular Icon Container */}
+                  <div className="flex items-center justify-center w-14 h-14 rounded-full bg-blue-100 shrink-0">
+                    {stat.icon}
+                  </div>
 
-                {/* Text Content */}
-                <p>{stat.text}</p>
-              </div>
-            ))}
+                  {/* Text Content */}
+                  <p>{stat.text}</p>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

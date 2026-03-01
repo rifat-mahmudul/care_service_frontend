@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import FindCareReviewCarousel from "../../all-find-care/_components/find-care-review-carousel";
 import { useSearchParams } from "next/navigation";
 import { ProfileCardSkeleton } from "@/components/shared/find-job-care/profile-card-skeleton";
+import { BannerSkeleton } from "@/components/shared/find-job-care/banner-skeleton";
 
 // Types for the API response
 interface User {
@@ -42,6 +43,14 @@ interface Day {
   _id: string;
 }
 
+interface Category {
+  _id: string;
+  name: string;
+  description: string;
+  banner: string[];
+  logo: string;
+}
+
 interface ServiceBaseUser {
   _id: string;
   zip: string;
@@ -52,6 +61,9 @@ interface ServiceBaseUser {
   status: string;
   createdAt: string;
   user: User;
+  category?: Category;
+  totalRatings?: number;
+  averageRating?: number;
 }
 
 interface ApiResponse {
@@ -99,59 +111,62 @@ const AllFindCare = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  console.log("id: ", id);
-
   const { data, isLoading } = useQuery<ApiResponse>({
-    queryKey: ["all-find-care"],
+    queryKey: ["all-find-care", id],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/service/service-base-user/699489273ab231272513e4dc?role=find care`,
+        `${process.env.NEXT_PUBLIC_API_URL}/service/service-base-user/${id}?role=find job`,
       );
       const data = await res.json();
       return data;
     },
+    enabled: !!id,
   });
 
   const caregivers = data?.data || [];
 
-  // Generate tags from user data
+  const categoryData = caregivers[0]?.category;
+
   const generateTags = (caregiver: ServiceBaseUser) => {
     const tags = [];
 
-    // Add availability based on days
     if (caregiver.days && caregiver.days.length > 0) {
       tags.push(`${caregiver.days.length} days availability`);
     }
 
-    // Add hourly rate
-    if (caregiver.hourRate) {
-      tags.push(`$${caregiver.hourRate}/hr`);
-    }
-
-    // Add location (first part of location)
-    if (caregiver.location) {
-      const locationParts = caregiver.location.split(",");
-      tags.push(locationParts[0]?.trim() || "Location available");
-    }
-
-    // Add preferences/skills as tags (limited to 2-3)
     if (caregiver.user?.perferences && caregiver.user.perferences.length > 0) {
       tags.push(...caregiver.user.perferences.slice(0, 2));
     }
 
-    return tags.slice(0, 4); // Limit to 4 tags max
+    if (
+      caregiver.user?.professionalSkill &&
+      caregiver.user.professionalSkill.length > 0
+    ) {
+      tags.push(...caregiver.user.professionalSkill.slice(0, 1));
+    }
+
+    return tags.slice(0, 3);
   };
 
   return (
     <div className="space-y-16">
-      <Banner />
+      {/* Show Banner Skeleton while loading, otherwise show dynamic Banner */}
+      {isLoading ? (
+        <BannerSkeleton />
+      ) : (
+        <Banner
+          title={categoryData?.name}
+          description={categoryData?.description}
+          banner={categoryData?.banner}
+        />
+      )}
 
       <div className="container flex lg:flex-row flex-col-reverse gap-10">
         {/* all card here */}
         <div className="space-y-8 flex-1">
           <div>
             <h1 className="text-3xl font-semibold">
-              Babysitters available in your area:
+              {categoryData?.name} available in your area:
             </h1>
 
             <div className="flex items-center gap-3 mt-5">
