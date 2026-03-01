@@ -267,7 +267,7 @@ const AllFindCare = () => {
                     bio={caregiver.user?.bio || "No bio available"}
                     hourRate={caregiver.hourRate}
                     location={caregiver.location}
-                    userId={caregiver.user?._id}
+                    id={caregiver?._id}
                   />
                 ))
               ) : (

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import About from "@/app/(website)/all-find-care/[id]/_components/about";
-import Booking from "@/app/(website)/all-find-care/[id]/_components/booking";
 import { ProfileHero } from "@/app/(website)/all-find-care/[id]/_components/profile-hero";
 import ReviewSection from "@/app/(website)/all-find-care/[id]/_components/review-section";
 import { ServiceDetails } from "@/app/(website)/all-find-care/[id]/_components/service-details";
@@ -112,11 +111,11 @@ interface ServiceData {
   };
 }
 
-const FindJobsDetails = () => {
+const FindCareDetails = () => {
   const { id } = useParams();
 
   const { data: serviceData, isLoading } = useQuery<ServiceData>({
-    queryKey: ["find-job-details", id],
+    queryKey: ["find-care-details", id],
     queryFn: async () => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/service/${id}`,
@@ -179,7 +178,6 @@ const FindJobsDetails = () => {
         isVerified={userInfo?.verified}
       />
       <About experience={userInfo?.exprience || 0} bio={userInfo?.bio || ""} />
-      <Booking />
       <ReviewSection
         reviews={reviews}
         averageRating={parseFloat(averageRating)}
@@ -200,4 +198,4 @@ const FindJobsDetails = () => {
   );
 };
 
-export default FindJobsDetails;
+export default FindCareDetails;
