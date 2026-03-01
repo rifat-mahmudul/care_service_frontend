@@ -77,7 +77,7 @@ interface ApiResponse {
   data: ServiceBaseUser[];
 }
 
-const AllFindCare = () => {
+const AllFindJobs = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
@@ -87,7 +87,7 @@ const AllFindCare = () => {
     queryKey: ["all-find-care", id],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/service/service-base-user/${id}?role=find care`,
+        `${process.env.NEXT_PUBLIC_API_URL}/service/service-base-user/${id}?role=find job`,
       );
       const data = await res.json();
       return data;
@@ -323,4 +323,4 @@ const AllFindCare = () => {
   );
 };
 
-export default AllFindCare;
+export default AllFindJobs;

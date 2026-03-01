@@ -1,8 +1,46 @@
 import Image from "next/image";
 import React from "react";
+import Link from "next/link";
+import { MapPin } from "lucide-react";
+import { usePathname } from "next/navigation";
 
-const ProfileCard = () => {
-  const tags = ["Part time", "$18 - $25/hr", "starts Jan 23", "Warwick, RI"];
+interface ProfileCardType {
+  image: string;
+  title: string;
+  tags: string[];
+  bio: string;
+  hourRate?: number;
+  location?: string;
+  id?: string;
+}
+
+const ProfileCard = ({
+  image,
+  title,
+  tags = [],
+  bio,
+  hourRate,
+  location,
+  id,
+}: ProfileCardType) => {
+  const pathName = usePathname();
+
+  const truncateBio = (text: string, maxLength: number = 150) => {
+    if (text?.length <= maxLength) return text;
+    return text?.substr(0, maxLength).lastIndexOf(" ") > 0
+      ? text?.substr(0, text.substr(0, maxLength).lastIndexOf(" ")) + "..."
+      : text?.substr(0, maxLength) + "...";
+  };
+
+  const displayBio = truncateBio(bio);
+
+  const formatLocation = (locationString?: string) => {
+    if (!locationString) return null;
+    const parts = locationString.split(",");
+    return parts.slice(0, 3).join(",").trim();
+  };
+
+  const formattedLocation = formatLocation(location);
 
   return (
     <div>
@@ -11,23 +49,38 @@ const ProfileCard = () => {
         <div className="flex flex-col md:flex-row gap-6">
           {/* Profile Image */}
           <div className="flex-shrink-0">
-            <Image
-              src="/when-you.jpg"
-              alt="Caregiver Profile"
-              width={1000}
-              height={1000}
-              className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover shadow-sm"
-            />
+            {image ? (
+              <Image
+                src={image}
+                alt={`${title}'s profile`}
+                width={1000}
+                height={1000}
+                className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover shadow-sm"
+              />
+            ) : (
+              <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400 text-4xl">👤</span>
+              </div>
+            )}
           </div>
 
           {/* Title and Tags */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 flex-1">
             <h2 className="text-2xl md:text-3xl font-semibold text-[#001D3D] leading-tight">
-              Caregiver For 4-month Old (January Start)
+              {title}
             </h2>
 
             {/* Tags/Pills Container */}
             <div className="flex flex-wrap gap-2 md:gap-3">
+              {/* Show location tag if available */}
+              {formattedLocation && (
+                <span className="bg-[#E9E9E9] text-[#333333] px-4 py-1.5 rounded-full text-sm font-medium inline-flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-red-500" />
+                  {formattedLocation}
+                </span>
+              )}
+
+              {/* Show other tags */}
               {tags.map((tag, index) => (
                 <span
                   key={index}
@@ -36,6 +89,13 @@ const ProfileCard = () => {
                   {tag}
                 </span>
               ))}
+
+              {/* Show hourly rate if available and not already in tags */}
+              {hourRate && !tags.some((tag) => tag.includes("$/hr")) && (
+                <span className="bg-[#E9E9E9] text-[#333333] px-4 py-1.5 rounded-full text-sm font-medium">
+                  ${hourRate}/hr
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -43,21 +103,34 @@ const ProfileCard = () => {
         {/* Bottom Section: Description and Button */}
         <div className="space-y-4">
           <p className="text-[#4A4A4A] text-base md:text-lg leading-relaxed max-w-[80%]">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum. We also...
-            <button className="text-[#003566] font-bold underline ml-1 hover:text-[#001D3D] transition-colors">
-              read more
-            </button>
+            {displayBio}
+            {bio?.length > 150 && (
+              <Link
+                href={
+                  pathName === "/all-find-jobs"
+                    ? `/all-find-jobs/${id}`
+                    : `/all-find-care/${id}`
+                }
+                className="text-[#003566] font-bold underline ml-1 hover:text-[#001D3D] transition-colors"
+              >
+                read more
+              </Link>
+            )}
           </p>
 
           {/* See Profile Button - Absolute positioned on desktop for precise alignment */}
           <div className="md:absolute md:bottom-8 md:right-8 flex justify-end">
-            <button className="bg-[#003566] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#001D3D] transition-all shadow-md active:scale-95">
-              See Profile
-            </button>
+            <Link
+              href={
+                pathName === "/all-find-jobs"
+                  ? `/all-find-jobs/${id}`
+                  : `/all-find-care/${id}`
+              }
+            >
+              <button className="bg-[#003566] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#001D3D] transition-all shadow-md active:scale-95">
+                See Profile
+              </button>
+            </Link>
           </div>
         </div>
       </div>
