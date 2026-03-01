@@ -184,6 +184,7 @@ const FindJobsDetails = () => {
         days={serviceData.data.days || []}
         hourlyRate={serviceData.data.hourRate}
         providerName={`${userInfo?.firstName || ""} ${userInfo?.lastName || ""}`}
+        serviceId={id as string}
       />
 
       <ReviewSection
