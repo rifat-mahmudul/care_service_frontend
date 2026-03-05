@@ -1,6 +1,9 @@
-import React from "react";
+// components/ReviewSection.tsx
+import React, { useState } from "react";
 import { Star } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
+import ReviewPopup from "./review-pop-up";
 
 interface ReviewRating {
   _id: string;
@@ -23,14 +26,17 @@ interface ReviewSectionProps {
   averageRating: number;
   totalReviews: number;
   mostRecentReview: ReviewRating | null;
+  jobUserId: string; // Add this prop
 }
 
 const ReviewSection = ({ 
   averageRating, 
   totalReviews,
-  mostRecentReview 
+  mostRecentReview,
+  jobUserId // Get the user ID being reviewed
 }: ReviewSectionProps) => {
-  
+  const [isReviewPopupOpen, setIsReviewPopupOpen] = useState(false);
+
   // Helper to render stars
   const StarRating = ({
     rating,
@@ -67,6 +73,26 @@ const ReviewSection = ({
     return `${firstName} ${lastName}`;
   };
 
+  // Get satisfaction text based on rating
+  const getSatisfactionText = (rating: number) => {
+    if (rating >= 4) return 'Extremely satisfied';
+    if (rating >= 3) return 'Satisfied';
+    if (rating >= 2) return 'Average experience';
+    return 'Poor experience';
+  };
+
+  const handleWriteReview = () => {
+    // Check if user is logged in (you can implement this based on your auth system)
+    const isLoggedIn = true; // Replace with actual auth check
+    
+    if (!isLoggedIn) {
+      toast.error("Please log in to write a review");
+      return;
+    }
+    
+    setIsReviewPopupOpen(true);
+  };
+
   if (totalReviews === 0) {
     return (
       <div className="container text-[#1a2b3b]">
@@ -80,10 +106,19 @@ const ReviewSection = ({
             <p className="text-gray-500 mt-2 text-sm">No reviews yet</p>
           </div>
 
-          <button className="bg-[#003366] hover:bg-[#002244] text-white px-8 py-3 rounded-full font-medium transition-all shadow-sm">
+          <button
+            onClick={handleWriteReview}
+            className="bg-[#003366] hover:bg-[#002244] text-white px-8 py-3 rounded-full font-medium transition-all shadow-sm"
+          >
             Write a Review
           </button>
         </div>
+
+        <ReviewPopup
+          isOpen={isReviewPopupOpen}
+          onClose={() => setIsReviewPopupOpen(false)}
+          jobUserId={jobUserId}
+        />
       </div>
     );
   }
@@ -103,7 +138,10 @@ const ReviewSection = ({
           </p>
         </div>
 
-        <button className="bg-[#003366] hover:bg-[#002244] text-white px-8 py-3 rounded-full font-medium transition-all shadow-sm">
+        <button
+          onClick={handleWriteReview}
+          className="bg-[#003366] hover:bg-[#002244] text-white px-8 py-3 rounded-full font-medium transition-all shadow-sm"
+        >
           Write a Review
         </button>
       </div>
@@ -133,9 +171,7 @@ const ReviewSection = ({
           <div className="flex items-center gap-3 mb-4">
             <StarRating rating={mostRecentReview.ratting} size={22} />
             <span className="font-semibold text-lg text-[#1a2b3b]">
-              {mostRecentReview.ratting >= 4 ? 'Extremely satisfied' : 
-               mostRecentReview.ratting >= 3 ? 'Satisfied' : 
-               'Average experience'}
+              {getSatisfactionText(mostRecentReview.ratting)}
             </span>
           </div>
 
@@ -154,6 +190,13 @@ const ReviewSection = ({
           See All {totalReviews} Reviews
         </a>
       )}
+
+      {/* Review Popup */}
+      <ReviewPopup
+        isOpen={isReviewPopupOpen}
+        onClose={() => setIsReviewPopupOpen(false)}
+        jobUserId={jobUserId}
+      />
     </div>
   );
 };
