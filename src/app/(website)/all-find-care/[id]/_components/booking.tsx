@@ -67,7 +67,7 @@ const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTRhMDU0NDNhY2M0OWZhNjE2YjI1NSIsInJvbGUiOiJmaW5kIGNhcmUiLCJlbWFpbCI6InJpZmF0MkBnbWFpbC5jb20iLCJmaXJzdE5hbWUiOiJSaWZhdCIsImxhc3ROYW1lIjoiTWFobXVkdWwiLCJnZW5kZXIiOiJtYWxlIiwic3Vic2NyaXB0aW9uIjpmYWxzZSwiaWF0IjoxNzcyMzk2NjQ4LCJleHAiOjE3NzMwMDE0NDh9.Cnt5kB60F_ZIfP4MCmBpO5gKio8CPHBZpbRH4on30Mo";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTI5ZDIzYzYzN2VmOGQ5OTkwZTU3NCIsInJvbGUiOiJmaW5kIGNhcmUiLCJlbWFpbCI6ImZpbmRjYXJlQGdtYWlsLmNvbSIsImZpcnN0TmFtZSI6InNhdXJhdiIsImxhc3ROYW1lIjoic2Fya2FyIiwic3Vic2NyaXB0aW9uIjp0cnVlLCJpYXQiOjE3NzI3MzAwODIsImV4cCI6MTc3MzMzNDg4Mn0.x06UDfpAbvSzJBUP9Cx8vl_mRMujyRBeeGVDyYEo1cU";
 
   const bookingServiceId = serviceId || (params?.id as string);
 
@@ -94,7 +94,6 @@ const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
     },
     onSuccess: (data) => {
       if (data.success && data.data.checkoutUrl) {
-        // Redirect to Stripe checkout URL
         window.location.href = data.data.checkoutUrl;
       } else {
         setError("No checkout URL received");
@@ -108,18 +107,13 @@ const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
 
   // Get available days for the selected date
   const getAvailableDayFromDate = (selectedDate: Date): string => {
-    const dayName = format(selectedDate, "EEEE");
-    return dayName;
+    return format(selectedDate, "EEEE");
   };
 
   // Generate time slots based on start and end time
-  const generateTimeSlotsAlternative = (
-    startTime: string,
-    endTime: string,
-  ): string[] => {
+  const generateTimeSlots = (startTime: string, endTime: string): string[] => {
     const slots: string[] = [];
 
-    // Parse time to minutes since midnight
     const timeToMinutes = (timeStr: string): number => {
       const [timePart, modifier] = timeStr.split(" ");
       const [hourStr, minuteStr] = timePart.split(":");
@@ -153,17 +147,13 @@ const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
     return slots;
   };
 
-  // Format time for API (convert from "08:00 AM" to "08:00-05.00" format)
-  const formatTimeForApi = (
-    time: string,
-    daySchedule: ServiceDay | undefined,
-  ): string => {
-    if (!daySchedule) return "";
-
-    // Extract hours from selected time
+  const formatTimeForApi = (time: string): string => {
+    // Input format: "08:00 AM" or "02:30 PM"
     const [timePart, modifier] = time.split(" ");
-    let [hours] = timePart.split(":").map(Number);
+    // eslint-disable-next-line prefer-const
+    let [hours, minutes] = timePart.split(":").map(Number);
 
+    // Convert to 24-hour format (HH:mm)
     if (modifier === "PM" && hours !== 12) {
       hours += 12;
     }
@@ -171,23 +161,18 @@ const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
       hours = 0;
     }
 
-    // Get end time and format it (remove AM/PM and spaces)
-    const endTimeFormatted = daySchedule.endTime.replace(/\s*(AM|PM)\s*/g, "");
-
-    // Format as "HH:00-endTime" (using dot instead of colon as in the example)
-    return `${hours.toString().padStart(2, "0")}:00-${endTimeFormatted}`;
+    // Return in HH:mm format (24-hour)
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
   };
 
   // Update available time slots when date changes
   useEffect(() => {
     if (date && days.length > 0) {
       const selectedDayName = getAvailableDayFromDate(date);
-
-      // Find the day's schedule from the days array
       const daySchedule = days.find((d) => d.day === selectedDayName);
 
       if (daySchedule) {
-        const slots = generateTimeSlotsAlternative(
+        const slots = generateTimeSlots(
           daySchedule.startTime,
           daySchedule.endTime,
         );
@@ -241,7 +226,7 @@ const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
       return;
     }
 
-    const formattedTime = formatTimeForApi(selectedTime, daySchedule);
+    const formattedTime = formatTimeForApi(selectedTime);
     const formattedDate = format(date, "yyyy-MM-dd");
 
     const bookingData: BookingRequest = {
@@ -252,8 +237,6 @@ const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
     };
 
     console.log("Sending booking request:", bookingData);
-
-    // Trigger the mutation
     bookingMutation.mutate(bookingData);
   };
 
