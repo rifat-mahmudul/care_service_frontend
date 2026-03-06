@@ -192,6 +192,7 @@ const FindJobsDetails = () => {
         averageRating={parseFloat(averageRating)}
         totalReviews={reviews.length}
         mostRecentReview={mostRecentReview}
+        jobUserId={id as string}
       />
       <ServiceDetails
         ageGroups={userInfo?.agegroup || []}

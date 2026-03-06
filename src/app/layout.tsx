@@ -2,6 +2,7 @@ import "./globals.css";
 import { Merriweather } from "next/font/google";
 import { cn } from "@/lib/utils";
 import ReactQueryProvider from "@/components/provider/ReactQueryProvider";
+import { Toaster } from "sonner";
 
 const merriWeather = Merriweather({
   subsets: ["latin"],
@@ -18,10 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn("antialiased", merriWeather.className)}>
-        <ReactQueryProvider>  
-        {children}
+        <ReactQueryProvider>
+          {children}
+          <Toaster position="top-right" richColors closeButton theme="light" />
         </ReactQueryProvider>
-        </body>
+      </body>
     </html>
   );
 }
