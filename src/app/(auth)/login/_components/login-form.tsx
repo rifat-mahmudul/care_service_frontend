@@ -157,7 +157,7 @@ const LoginForm = () => {
         <h3 className="text-center mt-5">
           Don’t have an account?{" "}
           <Link href={"/sign-up"}>
-            <span className="font-semibold hover:underline">Sign Up</span>
+            <span className="font-semibold hover:underline text-primary">Sign Up</span>
           </Link>
         </h3>
       </div>
