@@ -115,9 +115,11 @@ const Navbar = () => {
           ))}
 
           <div className="flex items-center space-x-5">
-            <button className="text-sm font-medium hover:text-primary">
-              Log in
-            </button>
+            <Link href={'/login'}>
+              <button className="text-sm font-medium hover:text-primary">
+                Log in
+              </button>
+            </Link>
             <Button className="rounded-3xl">Join Now</Button>
           </div>
         </div>
@@ -169,9 +171,11 @@ const Navbar = () => {
                 </Accordion>
 
                 <div className="flex flex-col space-y-4 pt-4 border-t">
-                  <Button variant="outline" className="w-full justify-center">
-                    Log in
-                  </Button>
+                  <Link href={"/login"}>
+                    <Button variant="outline" className="w-full justify-center">
+                      Log in
+                    </Button>
+                  </Link>
                   <Button className="w-full justify-center rounded-3xl">
                     Join Now
                   </Button>
