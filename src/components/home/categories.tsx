@@ -253,9 +253,8 @@ export default function Categories() {
             </button>
           ))
         )}
-      </div>
 
-      {/* Role Selection Modal */}
+        {/* Role Selection Modal */}
       {selectedCategory && (
         <RoleSelectionModal
           isOpen={!!selectedCategory}
@@ -263,6 +262,9 @@ export default function Categories() {
           categoryName={selectedCategory.name}
         />
       )}
+      </div>
+
+      
     </div>
   );
 }
