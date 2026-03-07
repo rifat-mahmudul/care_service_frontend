@@ -38,7 +38,7 @@ const ForgotPasswordForm = () => {
     mutationKey: ["forgot-password"],
     mutationFn: async (payload: FormType) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/forget-password`,
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`,
         {
           method: "POST",
           headers: {
