@@ -1,35 +1,31 @@
-'use client'
+// src/components/steps/EmailStep.tsx
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface EmailStepProps {
-  onNext: (data: { email: string; ageVerified: boolean }) => void
-  onBack: () => void
+  onNext: (data: { email: string; ageVerified: boolean }) => void;
+  onBack: () => void;
 }
 
 export function EmailStep({ onNext, onBack }: EmailStepProps) {
-  const [email, setEmail] = useState('')
-  const [ageVerified, setAgeVerified] = useState(false)
+  const [email, setEmail] = useState("");
+  const [ageVerified, setAgeVerified] = useState(false);
 
   const handleContinue = () => {
     if (email.trim() && ageVerified) {
-      onNext({ email, ageVerified })
+      onNext({ email, ageVerified });
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      
-      {/* Title */}
       <h1 className="text-3xl text-[#0A0A23] font-bold text-center mb-8">
         What&apos;s your email address?
       </h1>
-
       <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-lg">
         <div className="space-y-6">
-
-          {/* Email Input */}
           <div>
             <input
               type="email"
@@ -40,7 +36,6 @@ export function EmailStep({ onNext, onBack }: EmailStepProps) {
             />
           </div>
 
-          {/* Age Verification */}
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -49,12 +44,14 @@ export function EmailStep({ onNext, onBack }: EmailStepProps) {
               onChange={(e) => setAgeVerified(e.target.checked)}
               className="w-4 h-4 cursor-pointer"
             />
-            <label htmlFor="age" className="text-sm cursor-pointer text-[#4B4B4B]">
+            <label
+              htmlFor="age"
+              className="text-sm cursor-pointer text-[#4B4B4B]"
+            >
               I verify that I am at least 18 years old
             </label>
           </div>
 
-          {/* Buttons */}
           <div className="flex gap-3">
             <Button
               onClick={onBack}
@@ -63,7 +60,6 @@ export function EmailStep({ onNext, onBack }: EmailStepProps) {
             >
               Back
             </Button>
-
             <Button
               onClick={handleContinue}
               disabled={!email || !ageVerified}
@@ -72,9 +68,8 @@ export function EmailStep({ onNext, onBack }: EmailStepProps) {
               Continue
             </Button>
           </div>
-
         </div>
       </div>
     </div>
-  )
+  );
 }

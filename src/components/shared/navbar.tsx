@@ -25,6 +25,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import FindCareCategory from "./nav-component/find-care-category";
 import FindJobCategory from "./nav-component/find-job-category";
+import { signOut } from "next-auth/react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -115,9 +116,16 @@ const Navbar = () => {
           ))}
 
           <div className="flex items-center space-x-5">
-            <Link href={'/login'}>
+            <Link href={"/login"}>
               <button className="text-sm font-medium hover:text-primary">
                 Log in
+              </button>
+              <button
+                onClick={() => {
+                  signOut({ callbackUrl: "/" });
+                }}
+              >
+                log out
               </button>
             </Link>
             <Button className="rounded-3xl">Join Now</Button>
