@@ -1,34 +1,35 @@
-'use client'
+// src/components/steps/LocationStep.tsx
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface LocationStepProps {
-  onNext: (data: { location: string; zipCode: string }) => void
-  onBack: () => void
+  onNext: (data: { location: string; zipCode: string }) => void;
+  onBack: () => void;
+  initialValue?: string;
 }
 
-export function LocationStep({ onNext, onBack }: LocationStepProps) {
-  const [zipCode, setZipCode] = useState('')
+export function LocationStep({
+  onNext,
+  onBack,
+  initialValue = "",
+}: LocationStepProps) {
+  const [zipCode, setZipCode] = useState(initialValue);
 
   const handleContinue = () => {
     if (zipCode.trim()) {
-      onNext({ location: 'Cina PK', zipCode })
+      onNext({ location: "Cina PK", zipCode });
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      
-      {/* Title - same style as TypeStep */}
       <h1 className="text-3xl text-[#0A0A23] font-bold text-center mb-8">
         Where are you looking for care?
       </h1>
-
       <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-lg">
         <div className="space-y-6">
-
-          {/* Input */}
           <div>
             <input
               type="text"
@@ -39,12 +40,8 @@ export function LocationStep({ onNext, onBack }: LocationStepProps) {
             />
           </div>
 
-          {/* Selected location text */}
-          <p className="text-sm text-gray-600 ">
-            Cina PK
-          </p>
+          <p className="text-sm text-gray-600">Cina PK</p>
 
-          {/* Buttons */}
           <div className="flex gap-3">
             <Button
               onClick={onBack}
@@ -53,18 +50,16 @@ export function LocationStep({ onNext, onBack }: LocationStepProps) {
             >
               Back
             </Button>
-
             <Button
               onClick={handleContinue}
-              disabled={!zipCode}
+              disabled={!zipCode.trim()}
               className="flex-1 bg-[#003366] hover:bg-[#003366] text-white py-2 rounded-full font-semibold"
             >
               Continue
             </Button>
           </div>
-
         </div>
       </div>
     </div>
-  )
+  );
 }

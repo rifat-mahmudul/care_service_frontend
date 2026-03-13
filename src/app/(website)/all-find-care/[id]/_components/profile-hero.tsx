@@ -1,6 +1,12 @@
+"use client";
+
 import { CheckCircle2, Star } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
+import { toast } from "sonner"; // অথবা আপনার পছন্দের কোনো টোস্ট লাইব্রেরি
 
 interface ProfileHeroProps {
   name: string;
@@ -21,7 +27,48 @@ export function ProfileHero({
   profileImage,
   isVerified = false,
 }: ProfileHeroProps) {
-  // Get initials for avatar fallback
+  const { id } = useParams();
+  const router = useRouter();
+  const session = useSession();
+  const token = session?.data?.user?.accessToken;
+  const [loading, setLoading] = useState(false);
+
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  // কনভারসেশন তৈরি করার ফাংশন
+  const handleJoinToConnect = async () => {
+    if (!token) {
+      toast.error("Please login first to connect.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // এপিআই কল করে কনভারসেশন শুরু করা
+      const res = await fetch(`${baseUrl}/conversation/${id}`, {
+        method: "POST", // আপনার এপিআই অনুযায়ী মেথড চেক করে নিন (সাধারণত POST হয়)
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        // কনভারসেশন আইডি দিয়ে মেসেজ পেজে পাঠিয়ে দেওয়া
+        router.push(`/messages?id=${result.data._id}`);
+      } else {
+        toast.error(result.message || "Failed to start conversation");
+      }
+    } catch (error) {
+      console.error("Connection Error:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getInitials = (fullName: string) => {
     return fullName
       .split(" ")
@@ -65,8 +112,12 @@ export function ProfileHero({
           </div>
         </div>
 
-        <Button className="bg-primary hover:bg-[#002244] text-white rounded-full font-bold shadow-lg transition-transform active:scale-95">
-          Join To Connect
+        <Button
+          onClick={handleJoinToConnect}
+          disabled={loading}
+          className="bg-primary hover:bg-[#002244] text-white rounded-full font-bold shadow-lg transition-transform active:scale-95 px-8"
+        >
+          {loading ? "Connecting..." : "Join To Connect"}
         </Button>
       </div>
     </div>

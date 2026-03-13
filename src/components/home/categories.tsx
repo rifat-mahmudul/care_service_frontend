@@ -1,131 +1,3 @@
-// import { MoveRight } from "lucide-react";
-// import Image from "next/image";
-// import Link from "next/link";
-// import React from "react";
-
-// const services1 = [
-//   {
-//     img: "/services/Babysitting.png",
-//     level: "Babysitting",
-//     link: "/services/babysitting",
-//   },
-//   {
-//     img: "/services/pet-sitting.png",
-//     level: "Pet sitting",
-//     link: "/services/pet-sitting",
-//   },
-//   {
-//     img: "/services/Drivers.png",
-//     level: "Drivers",
-//     link: "/services/drivers",
-//   },
-
-//   {
-//     img: "/services/tour-guide.png",
-//     level: "Tour Guide",
-//     link: "/services/tour-guide",
-//   },
-//   {
-//     img: "/services/Tutoring.png",
-//     level: "Tutoring",
-//     link: "/services/tutoring",
-//   },
-//   {
-//     img: "/services/Caregiving.png",
-//     level: "Caregiving",
-//     link: "/services/caregiving",
-//   },
-// ];
-
-// const services2 = [
-//   {
-//     img: "/services/home-garden.png",
-//     level: "Home & Garden",
-//     link: "/services/home-garden",
-//   },
-//   {
-//     img: "/services/Construction.png",
-//     level: "Construction",
-//     link: "/services/construction",
-//   },
-//   {
-//     img: "/services/Cleaning.png",
-//     level: "Cleaning",
-//     link: "/services/cleaning",
-//   },
-
-//   {
-//     img: "/services/senior-care.png",
-//     level: "Senior Care",
-//     link: "/services/senior-care",
-//   },
-//   {
-//     img: "/services/Medical.png",
-//     level: "Medical",
-//     link: "/services/medical",
-//   },
-// ];
-
-// const Categories = () => {
-//   return (
-//     <div className="container space-y-10">
-//       <h1 className="text-center text-3xl font-bold">
-//         One membership connects you to your Global Concierge
-//       </h1>
-
-//       <div className="space-y-8">
-//         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8 lg:max-w-[1300px] mx-auto">
-//           {services1.map((item, index) => (
-//             <Link key={index} href={item.link}>
-//               <div className="shadow-[0px_4px_24px_0px_#0000003D] p-4 rounded-lg hover:scale-105 transition-all duration-200">
-//                 <Image
-//                   src={item.img}
-//                   alt="img.png"
-//                   width={1000}
-//                   height={1000}
-//                   className="object-cover h-[150px] w-fit  mx-auto"
-//                 />
-
-//                 <h1 className="flex items-center justify-between gap-2 mt-8">
-//                   <span>{item?.level}</span>
-//                   <span>
-//                     <MoveRight />
-//                   </span>
-//                 </h1>
-//               </div>
-//             </Link>
-//           ))}
-//         </div>
-
-//         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 lg:max-w-[1100px] mx-auto">
-//           {services2.map((item, index) => (
-//             <Link key={index} href={item.link}>
-//               <div className="shadow-[0px_4px_24px_0px_#0000003D] p-4 rounded-lg hover:scale-105 transition-all duration-200">
-//                 <Image
-//                   src={item.img}
-//                   alt="img.png"
-//                   width={1000}
-//                   height={1000}
-//                   className="object-cover h-[150px] w-fit  mx-auto"
-//                 />
-
-//                 <h1 className="flex items-center justify-between mt-8">
-//                   <span>{item?.level}</span>
-//                   <span>
-//                     <MoveRight />
-//                   </span>
-//                 </h1>
-//               </div>
-//             </Link>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Categories;
-
 // src/components/home/categories.tsx
 "use client";
 
@@ -133,12 +5,12 @@ import { MoveRight } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import RoleSelectionModal from "./RoleSelectionModal";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
 
 // ─── Types ────────────────────────────────────────────────────────────────
 interface Category {
-  image: string | StaticImport;
+  image: string;
   _id: string;
   name: string;
   findCareUser: string[];
@@ -194,7 +66,11 @@ const CategorySkeleton = () => (
     </div>
   </div>
 );
+
 export default function Categories() {
+  const { data: session } = useSession();
+  const token = session?.user?.accessToken;
+
   const {
     data: categories = [],
     isLoading,
@@ -206,6 +82,29 @@ export default function Categories() {
   });
 
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
+  // Fetch user profile if logged in
+  const { data: userProfile } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: async () => {
+      if (!token) return null;
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) return null;
+      const json = await response.json();
+      return json.data;
+    },
+    enabled: !!token,
+  });
+
+  // Check if category is disabled (user already has this category)
+  const isCategoryDisabled = (categoryId: string) => {
+    if (!userProfile?.category) return false;
+    return userProfile.category.includes(categoryId);
+  };
 
   return (
     <div className="container mx-auto space-y-10 py-10 px-4 md:px-6 lg:px-8">
@@ -227,44 +126,58 @@ export default function Categories() {
             No categories available at the moment.
           </div>
         ) : (
-          categories.map((cat) => (
-            <button
-              key={cat._id}
-              type="button"
-              onClick={() => setSelectedCategory(cat)}
-              className="group text-left shadow-[0_4px_24px_rgba(0,0,0,0.15)] p-4 rounded-xl hover:scale-[1.04] transition-all duration-200 bg-white border border-gray-100 hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <div className="relative w-full h-[202px] overflow-hidden rounded-lg">
-                <Image
-                  src={cat?.image}
-                  alt={`${cat.name} category`}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105 w-full h-full"
-                  priority={false}
-                />
-              </div>
+          categories.map((cat) => {
+            const disabled = isCategoryDisabled(cat._id);
+            
+            return (
+              <button
+                key={cat._id}
+                type="button"
+                onClick={() => !disabled && setSelectedCategory(cat)}
+                disabled={disabled}
+                className={`group text-left shadow-[0_4px_24px_rgba(0,0,0,0.15)] p-4 rounded-xl transition-all duration-200 bg-white border border-gray-100 ${
+                  disabled 
+                    ? 'opacity-50 cursor-not-allowed hover:scale-100' 
+                    : 'hover:scale-[1.04] hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                }`}
+              >
+                <div className="relative w-full h-[202px] overflow-hidden rounded-lg">
+                  <Image
+                    src={cat?.image}
+                    alt={`${cat.name} category`}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105 w-full h-full"
+                    priority={false}
+                  />
+                </div>
 
-              <div className="mt-5 flex items-center justify-between">
-                <span className="text-lg font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors">
-                  {cat.name}
-                </span>
-                <MoveRight className="w-6 h-6 text-gray-500 group-hover:text-indigo-600 transition-colors" />
-              </div>
-            </button>
-          ))
+                <div className="mt-5 flex items-center justify-between">
+                  <span className={`text-lg font-semibold transition-colors ${
+                    disabled ? 'text-gray-400' : 'text-gray-900 group-hover:text-indigo-700'
+                  }`}>
+                    {cat.name}
+                    {disabled && " (Already Added)"}
+                  </span>
+                  <MoveRight className={`w-6 h-6 transition-colors ${
+                    disabled ? 'text-gray-400' : 'text-gray-500 group-hover:text-indigo-600'
+                  }`} />
+                </div>
+              </button>
+            );
+          })
         )}
 
         {/* Role Selection Modal */}
-      {selectedCategory && (
-        <RoleSelectionModal
-          isOpen={!!selectedCategory}
-          onClose={() => setSelectedCategory(null)}
-          categoryName={selectedCategory.name}
-        />
-      )}
+        {selectedCategory && (
+          <RoleSelectionModal
+            isOpen={!!selectedCategory}
+            onClose={() => setSelectedCategory(null)}
+            categoryName={selectedCategory.name}
+            categoryId={selectedCategory._id}
+            userProfile={userProfile}
+          />
+        )}
       </div>
-
-      
     </div>
   );
 }

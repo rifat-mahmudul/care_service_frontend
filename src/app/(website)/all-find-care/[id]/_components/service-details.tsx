@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { CheckCircle2 } from "lucide-react";
 
 interface ServiceDetailsProps {
@@ -30,14 +30,17 @@ export const ServiceDetails = ({
   categoryDescription = "",
 }: ServiceDetailsProps) => {
   const formatDay = (day: string) => {
-    return day.slice(0, 3); 
+    return day.slice(0, 3);
   };
 
   const formatTime = (time: string) => {
-    return time; 
+    return time;
   };
 
-  const uniqueEducation = [...new Set(education)];
+  // Fix: Array.from ব্যবহার করুন
+  const uniqueEducation = useMemo(() => {
+    return Array.from(new Set(education));
+  }, [education]);
 
   return (
     <div className="container text-[#1a1a1a] pb-16">

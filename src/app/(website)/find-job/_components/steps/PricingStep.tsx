@@ -1,271 +1,255 @@
-'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/components/steps/PricingStep.tsx
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Check } from 'lucide-react'
-import { FindJobDataTypes } from '../find-job-data-type'
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Check, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+type SubscriptionPlan = {
+  _id: string;
+  type: "monthly" | "yearly";
+  title: string;
+  price: number;
+  description: string;
+  content: string;
+};
 
 interface PricingStepProps {
-  data: FindJobDataTypes
-  onNext: (data: Partial<FindJobDataTypes>) => void
-  onBack: () => void
+  data: any;
+  onBack: () => void;
+  onSubmit: (data: { plan: string }) => Promise<any>;
+  token?: string;
 }
 
-export function PricingStep({ data, onNext, onBack }: PricingStepProps) {
-  const [selectedPlan, setSelectedPlan] = useState<'premium' | 'safety'>(
-    data.subscriptionId === '6984423244bb34ec77e8e437'
-      ? 'premium'
-      : 'safety'
-  )
+async function fetchSubscriptions() {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/subscription`,
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to fetch subscriptions: ${response.status}`);
+  }
+  const json = await response.json();
+  return json.data as SubscriptionPlan[];
+}
 
-  // Map plan → subscriptionId
-  const getSubscriptionId = (plan: 'premium' | 'safety') => {
-    if (plan === 'premium') return '6984423244bb34ec77e8e437'
-    return 'SAFETY_PLAN_ID'
+export function PricingStep({ data, onBack, onSubmit }: PricingStepProps) {
+  const router = useRouter();
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(
+    data.subscriptionId || null,
+  );
+
+  const {
+    data: plans = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["subscriptions"],
+    queryFn: fetchSubscriptions,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // TanStack Query mutation
+  const mutation = useMutation({
+    mutationFn: onSubmit,
+    onSuccess: (result) => {
+      console.log("Mutation successful:", result);
+
+      // Redirect to checkout URL if provided
+      if (result?.data?.checkoutUrl) {
+        window.location.href = result.data.checkoutUrl;
+      } else {
+        // If no checkout URL, redirect to success page
+        const categoryName = data.categoryName || "";
+        router.push(
+          `/payment-success?category=${encodeURIComponent(categoryName)}`,
+        );
+      }
+    },
+    onError: (error) => {
+      console.error("Mutation error:", error);
+    },
+  });
+
+  const handleSelectPlan = (planId: string) => {
+    setSelectedPlanId(planId);
+  };
+
+  const handleContinue = async () => {
+    if (!selectedPlanId) return;
+
+    mutation.mutate({ plan: selectedPlanId });
+  };
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="text-center bg-white rounded-lg p-8 max-w-md shadow-lg">
+          <h2 className="text-xl font-bold text-red-600 mb-4">
+            Error Loading Plans
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Failed to load subscription plans. Please try again later.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Button
+              onClick={onBack}
+              variant="outline"
+              className="px-6 py-2 rounded-full font-semibold"
+            >
+              Go Back
+            </Button>
+            <Button
+              onClick={() => refetch()}
+              className="bg-[#003366] hover:bg-[#003366]/90 text-white px-6 py-2 rounded-full"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        <h1 className="text-3xl font-bold text-center mb-12">
+      <div className="max-w-6xl mx-auto w-full">
+        <h1 className="text-3xl text-[#0A0A23] font-bold text-center mb-10">
           Almost done! Choose your plan.
         </h1>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
-          
-          {/* Premium Plan */}
-          <div
-            onClick={() => setSelectedPlan('premium')}
-            className={`relative p-6 rounded-lg border-2 cursor-pointer transition ${
-              selectedPlan === 'premium'
-                ? 'border-purple-500 bg-white shadow-lg'
-                : 'border-gray-300 bg-white'
-            }`}
-          >
-            {selectedPlan === 'premium' && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                  Most Popular
-                </span>
-              </div>
-            )}
-
-            <h3 className="text-xl font-bold mb-2">Premium</h3>
-            <p className="text-gray-600 text-sm mb-4">
-              Includes safety screening
-            </p>
-
-            <div className="mb-6">
-              <span className="text-3xl font-bold">$9</span>
-              <span className="text-gray-600">/month</span>
-            </div>
-
-            <div className="space-y-3 mb-6">
-              {[
-                'Rank higher in search results',
-                'Premium badge on profile',
-                'Priority job alerts',
-                'Find and apply for jobs',
-              ].map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-3">
-                  <Check size={18} className="text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">{feature}</span>
+        <div className="grid md:grid-cols-2 gap-6 mb-10 max-w-[700px] mx-auto">
+          {isLoading
+            ? Array.from({ length: 2 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="p-6 rounded-lg border-2 border-gray-200 bg-white animate-pulse"
+                >
+                  <div className="h-8 w-4/5 bg-gray-300 rounded mb-2" />
+                  <div className="h-4 w-full bg-gray-200 rounded mb-4" />
+                  <div className="h-10 w-1/3 bg-gray-300 rounded mb-6" />
+                  <div className="space-y-4 mb-6">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                      <div key={idx} className="flex items-center gap-3">
+                        <div className="w-5 h-5 bg-gray-300 rounded-full" />
+                        <div className="h-4 bg-gray-200 rounded w-4/5" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-12 bg-gray-300 rounded-full" />
                 </div>
-              ))}
-            </div>
+              ))
+            : plans.map((plan) => {
+                const isSelected = selectedPlanId === plan._id;
+                const isYearly = plan.type === "yearly";
 
-            <Button className="w-full bg-orange-400 hover:bg-orange-500 text-white py-2 rounded font-semibold">
-              Select Plan
-            </Button>
-          </div>
+                return (
+                  <div
+                    key={plan._id}
+                    onClick={() =>
+                      !mutation.isPending && handleSelectPlan(plan._id)
+                    }
+                    className={`relative p-6 rounded-[12px] border-2 border-[#B6B6B6] cursor-pointer shadow-md transition-all bg-white ${
+                      isSelected
+                        ? "border-[#2B61EB] shadow-xl scale-[1.02]"
+                        : "border-gray-300 hover:border-gray-400 hover:shadow-md"
+                    } ${mutation.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {isSelected && isYearly && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                        <span className="bg-[#003366] text-white px-4 py-1.5 rounded-full text-sm font-semibold">
+                          Most Popular
+                        </span>
+                      </div>
+                    )}
 
-          {/* Safety Plan */}
-          <div
-            onClick={() => setSelectedPlan('safety')}
-            className={`p-6 rounded-lg border-2 cursor-pointer transition ${
-              selectedPlan === 'safety'
-                ? 'border-purple-500 bg-white shadow-lg'
-                : 'border-gray-300 bg-white'
-            }`}
-          >
-            <h3 className="text-xl font-bold mb-2">Safety Screening Only</h3>
-            <p className="text-gray-600 text-sm mb-4">
-              Basic membership access
-            </p>
+                    <h3 className="text-xl font-bold mb-2">{plan.title}</h3>
+                    <p className="text-gray-600 text-sm mb-4">
+                      {plan.description}
+                    </p>
 
-            <div className="mb-6">
-              <span className="text-3xl font-bold">$23.99</span>
-              <span className="text-gray-600">/year</span>
-            </div>
+                    <div className="mb-10">
+                      <span className="text-3xl font-bold">
+                        ${plan.price.toFixed(2)}
+                      </span>
+                      <span className="text-gray-600 ml-1">
+                        {isYearly ? "/year" : "/month"}
+                      </span>
+                    </div>
 
-            <div className="space-y-3 mb-6">
-              {[
-                'Basic membership',
-                'Find and apply for jobs',
-              ].map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-3">
-                  <Check size={18} className="text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm">{feature}</span>
-                </div>
-              ))}
-            </div>
+                    <div className="space-y-4 mb-10 min-h-[120px]">
+                      {plan.content.split(",").map((feature, idx) => (
+                        <div key={idx} className="flex items-start gap-3">
+                          <Check
+                            size={18}
+                            className="text-green-600 flex-shrink-0 mt-0.5"
+                          />
+                          <span className="text-base text-[#374151]">
+                            {feature.trim()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
 
-            <Button className="w-full bg-orange-400 hover:bg-orange-500 text-white py-2 rounded font-semibold">
-              Select Plan
-            </Button>
-          </div>
+                    <Button
+                      type="button"
+                      disabled={mutation.isPending}
+                      className={`w-full py-6 text-base font-semibold rounded-[8px] transition-colors ${
+                        isSelected
+                          ? "bg-[#003366] text-white hover:bg-[#003366]/90"
+                          : "bg-[#E1AD96] text-white hover:bg-[#E1AD96]/90"
+                      } ${mutation.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!mutation.isPending) {
+                          handleSelectPlan(plan._id);
+                        }
+                      }}
+                    >
+                      {isSelected ? "Selected" : "Select Plan"}
+                    </Button>
+                  </div>
+                );
+              })}
         </div>
 
-        {/* Navigation */}
-        <div className="flex gap-3">
-          <Button
-            onClick={onBack}
-            variant="outline"
-            className="flex-1 py-2 rounded-full font-semibold"
-          >
-            Back
-          </Button>
+        {selectedPlanId && (
+          <div className="flex justify-center gap-4">
+            <Button
+              onClick={onBack}
+              disabled={mutation.isPending}
+              variant="outline"
+              className="px-8 py-6 text-lg rounded-full font-semibold border-2 border-[#003366] text-[#003366] hover:bg-[#003366]/10 disabled:opacity-50"
+            >
+              Back
+            </Button>
+            <Button
+              onClick={handleContinue}
+              disabled={mutation.isPending}
+              className="bg-[#003366] hover:bg-[#003366]/90 text-white px-8 py-6 text-lg rounded-full font-semibold min-w-[250px] disabled:opacity-50"
+            >
+              {mutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Continue with Selected Plan"
+              )}
+            </Button>
+          </div>
+        )}
 
-          <Button
-            onClick={() =>
-              onNext({
-                subscriptionId: getSubscriptionId(selectedPlan),
-              })
-            }
-            className="flex-1 bg-blue-900 hover:bg-blue-800 text-white py-2 rounded-full font-semibold"
-          >
-            Continue
-          </Button>
-        </div>
+        {/* Error message if mutation fails */}
+        {mutation.isError && (
+          <p className="text-center text-red-600 mt-4">
+            Something went wrong. Please try again.
+          </p>
+        )}
       </div>
     </div>
-  )
+  );
 }
-
-
-
-
-
-// 'use client'
-
-// import { useState } from 'react'
-// import { Button } from '@/components/ui/button'
-// import { Check } from 'lucide-react'
-
-// interface PricingStepProps {
-//   onNext: (data: { plan: 'premium' | 'safety' }) => void
-//   onBack: () => void
-// }
-
-// export function PricingStep({ onNext, onBack }: PricingStepProps) {
-//   const [selectedPlan, setSelectedPlan] = useState<'premium' | 'safety'>('premium')
-
-//   return (
-//     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-//       <div className="w-full max-w-2xl">
-//         <h1 className="text-3xl font-bold text-center mb-12">
-//           Almost done! Order your safety screening to find jobs.
-//         </h1>
-        
-//         <div className="grid md:grid-cols-2 gap-6 mb-6">
-//           {/* Premium Plan */}
-//           <div
-//             onClick={() => setSelectedPlan('premium')}
-//             className={`relative p-6 rounded-lg border-2 cursor-pointer transition ${
-//               selectedPlan === 'premium'
-//                 ? 'border-purple-500 bg-white shadow-lg'
-//                 : 'border-gray-300 bg-white'
-//             }`}
-//           >
-//             {selectedPlan === 'premium' && (
-//               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-//                 <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-//                   Most Popular
-//                 </span>
-//               </div>
-//             )}
-            
-//             <h3 className="text-xl font-bold mb-2">Premium</h3>
-//             <p className="text-gray-600 text-sm mb-4">Includes safety screening</p>
-            
-//             <div className="mb-6">
-//               <span className="text-3xl font-bold">$9</span>
-//               <span className="text-gray-600">/month</span>
-//             </div>
-
-//             <div className="space-y-3 mb-6">
-//               {[
-//                 'Rank higher in search results',
-//                 'Get a Premium badge on your profile',
-//                 'Be first to learn about new jobs',
-//                 'Find and apply for jobs',
-//               ].map((feature, idx) => (
-//                 <div key={idx} className="flex items-start gap-3">
-//                   <Check size={18} className="text-green-500 flex-shrink-0 mt-0.5" />
-//                   <span className="text-sm">{feature}</span>
-//                 </div>
-//               ))}
-//             </div>
-
-//             <Button className="w-full bg-orange-400 hover:bg-orange-500 text-white py-2 rounded font-semibold">
-//               Get Started
-//             </Button>
-//           </div>
-
-//           {/* Safety Screening Only Plan */}
-//           <div
-//             onClick={() => setSelectedPlan('safety')}
-//             className={`p-6 rounded-lg border-2 cursor-pointer transition ${
-//               selectedPlan === 'safety'
-//                 ? 'border-purple-500 bg-white shadow-lg'
-//                 : 'border-gray-300 bg-white'
-//             }`}
-//           >
-//             <h3 className="text-xl font-bold mb-2">Safety screening only</h3>
-//             <p className="text-gray-600 text-sm mb-4">
-//               Perfect for small teams and side projects
-//             </p>
-            
-//             <div className="mb-6">
-//               <span className="text-3xl font-bold">$23.99</span>
-//               <span className="text-gray-600">/year</span>
-//             </div>
-
-//             <div className="space-y-3 mb-6">
-//               {[
-//                 'GetCare.com Basic membership',
-//                 'Find and apply for jobs',
-//               ].map((feature, idx) => (
-//                 <div key={idx} className="flex items-start gap-3">
-//                   <Check size={18} className="text-green-500 flex-shrink-0 mt-0.5" />
-//                   <span className="text-sm">{feature}</span>
-//                 </div>
-//               ))}
-//             </div>
-
-//             <Button className="w-full bg-orange-400 hover:bg-orange-500 text-white py-2 rounded font-semibold">
-//               Get Started
-//             </Button>
-//           </div>
-//         </div>
-
-//         {/* Navigation */}
-//         <div className="flex gap-3">
-//           <Button
-//             onClick={onBack}
-//             variant="outline"
-//             className="flex-1 py-2 rounded-full font-semibold bg-transparent"
-//           >
-//             Back
-//           </Button>
-//           <Button
-//             onClick={() => onNext({ plan: selectedPlan })}
-//             className="flex-1 bg-blue-900 hover:bg-blue-800 text-white py-2 rounded-full font-semibold"
-//           >
-//             Continue
-//           </Button>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }

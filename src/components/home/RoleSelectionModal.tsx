@@ -1,4 +1,5 @@
-// components/modals/RoleSelectionModal.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/components/modals/RoleSelectionModal.tsx
 "use client";
 
 import { X } from "lucide-react";
@@ -9,48 +10,75 @@ import React, { useEffect } from "react";
 interface RoleSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  categoryName: string; // e.g. "Pet Care", "Child Care"
+  categoryName: string;
+  categoryId: string;
+  userProfile?: any;
 }
 
 export default function RoleSelectionModal({
   isOpen,
   onClose,
   categoryName,
+  categoryId,
+  userProfile,
 }: RoleSelectionModalProps) {
   const router = useRouter();
 
   // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      // Save the current scroll position
       const scrollY = window.scrollY;
-
-      // Prevent scrolling on the body
       document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = "100%";
       document.body.style.overflow = "hidden";
 
-      // Cleanup function to restore scrolling
       return () => {
         document.body.style.position = "";
         document.body.style.top = "";
         document.body.style.width = "";
         document.body.style.overflow = "";
-
-        // Restore scroll position
         window.scrollTo(0, scrollY);
       };
     }
   }, [isOpen]);
 
   const handleFindCare = () => {
-    router.push(`/find-care/1`);
+    // Pass role, category info, and user profile if logged in
+    const searchParams = new URLSearchParams({
+      role: "find care",
+      categoryId,
+      categoryName,
+    });
+
+    if (userProfile) {
+      searchParams.append("userId", userProfile._id);
+      searchParams.append(
+        "hasSubscription",
+        userProfile.isSubscription ? "true" : "false",
+      );
+    }
+
+    router.push(`/find-care/1?${searchParams.toString()}`);
     onClose();
   };
 
   const handleFindJob = () => {
-    router.push(`/find-job/1`);
+    const searchParams = new URLSearchParams({
+      role: "find job",
+      categoryId,
+      categoryName,
+    });
+
+    if (userProfile) {
+      searchParams.append("userId", userProfile._id);
+      searchParams.append(
+        "hasSubscription",
+        userProfile.isSubscription ? "true" : "false",
+      );
+    }
+
+    router.push(`/find-job/1?${searchParams.toString()}`);
     onClose();
   };
 
@@ -65,7 +93,6 @@ export default function RoleSelectionModal({
       }}
     >
       <div className="relative w-full max-w-4xl bg-[#E6EBF0] rounded-2xl shadow-2xl overflow-hidden">
-        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 z-10 text-gray-500 hover:text-gray-800 transition-colors"
