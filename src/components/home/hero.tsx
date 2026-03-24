@@ -8,7 +8,7 @@ const Hero = () => {
     <div
       style={{
         backgroundImage:
-          "linear-gradient(to bottom right, rgba(0, 0, 0, 0.637), rgba(0, 0, 0, 0)), url(/banner.png)",
+          "linear-gradient(to bottom right, rgba(0, 0, 0, 0.788), rgba(0, 0, 0, 0)), url(/banner.png)",
         backgroundSize: "Cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -20,14 +20,22 @@ const Hero = () => {
       <div className="container">
         <div className="text-5xl font-medium space-y-3">
           <h1>
-            <span className="text-primary">Connecting</span> you to{" "}
+            <span className="text-primary">Trusted support,</span>
           </h1>
-          <h1 className="text-wh">safe, caring and vetted</h1>
-          <h1 className="text-primary">local professionals</h1>
+          <h1 className="text-white/70">wherever life takes you</h1>
+        </div>
+
+        <div>
+          <p className="text-white/70 lg:max-w-lg mt-3">
+            Connect with trusted local professionals who make life feel easier,
+            safer, and more supported wherever you are.
+          </p>
         </div>
 
         <div className="mt-8 space-x-4">
-          <Button className="rounded-3xl px-8 h-[45px]">Hire a Professional</Button>
+          <Button className="rounded-3xl px-8 h-[45px]">
+            Hire a Professional
+          </Button>
           <Button className="rounded-3xl px-8 h-[45px]">Offer a Service</Button>
         </div>
 
