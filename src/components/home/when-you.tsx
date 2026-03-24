@@ -10,7 +10,7 @@ const WhenYou = () => {
       <div className="container space-y-10">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">
-            When you can&apos;t be there, Jetset cares!
+            JetSet Cares About You!
           </h1>
 
           <Button className="rounded-3xl h-[40px]">
