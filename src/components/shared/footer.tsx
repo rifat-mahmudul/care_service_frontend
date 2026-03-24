@@ -46,10 +46,10 @@ const Footer = () => {
             </div>
             <div className="space-y-2">
               <p className="text-gray-300 text-sm md:text-base">
-                Empowering Women, Building Trust
+                Built on trust, care, and connection
               </p>
               <p className="text-gray-300 text-sm md:text-base">
-                <span className="font-semibold">Email:</span> info@example.com
+                <span className="font-semibold">Email:</span> admin@jetsetcares.org
               </p>
             </div>
           </div>

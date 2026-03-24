@@ -22,11 +22,11 @@ const Hero = () => {
           <h1>
             <span className="text-primary">Trusted support,</span>
           </h1>
-          <h1 className="text-white/70">wherever life takes you</h1>
+          <h1 className="text-white/80">wherever life takes you</h1>
         </div>
 
         <div>
-          <p className="text-white/70 lg:max-w-lg mt-3">
+          <p className="text-white/75 lg:max-w-lg mt-3">
             Connect with trusted local professionals who make life feel easier,
             safer, and more supported wherever you are.
           </p>

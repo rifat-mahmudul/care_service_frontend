@@ -108,8 +108,8 @@ export default function Categories() {
 
   return (
     <div className="container mx-auto space-y-10 py-10 px-4 md:px-6 lg:px-8">
-      <h1 className="text-center text-3xl md:text-4xl font-bold tracking-tight">
-        One membership connects you to your Global Concierge
+      <h1 className="text-center text-3xl md:text-4xl font-bold tracking-tight lg:max-w-3xl mx-auto opacity-85">
+        One membership gives you access to trusted local support across borders
       </h1>
 
       {error && (

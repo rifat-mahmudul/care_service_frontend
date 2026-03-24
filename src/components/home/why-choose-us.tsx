@@ -12,7 +12,7 @@ const WhyChooseUs = () => {
           <div className="w-full lg:w-2/5 bg-primary text-primary-foreground rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-between">
             <div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] font-bold mb-4 sm:mb-5 md:mb-6 text-pretty">
-                Why Choose Us?
+                A more thoughtful way to find trusted support
               </h2>
               <p className="text-sm sm:text-base leading-relaxed sm:leading-relaxed opacity-95">
                 We created DealClosed to bridge the gap. By connecting
