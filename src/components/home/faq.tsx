@@ -7,25 +7,9 @@ const Faq = () => {
 
   const faqData = [
     {
-      question: "Lorem ipsum dolor sit amet, consectetur adipiscing elit?",
+      question: "What is JetSet Cares?",
       answer:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-    },
-    {
-      question: "Lorem ipsum dolor sit amet, consectetur adipiscing elit?",
-      answer: "Placeholder answer text.",
-    },
-    {
-      question: "Lorem ipsum dolor sit amet, consectetur adipiscing elit?",
-      answer: "Placeholder answer text.",
-    },
-    {
-      question: "Lorem ipsum dolor sit amet, consectetur adipiscing elit?",
-      answer: "Placeholder answer text.",
-    },
-    {
-      question: "Lorem ipsum dolor sit amet, consectetur adipiscing elit?",
-      answer: "Placeholder answer text.",
+        "JetSet Cares is a trusted support platform that connects people with vetted local professionals for care, companionship, and everyday support across borders.",
     },
   ];
 
@@ -41,11 +25,6 @@ const Faq = () => {
           <h2 className="text-[#002B5B] text-4xl font-bold mb-4">
             Frequently Asked Questions
           </h2>
-          <p className="text-[#4A4A4A] text-sm max-w-2xl mx-auto leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi
-          </p>
         </div>
 
         {/* Accordion Container */}
@@ -89,7 +68,7 @@ const Faq = () => {
                     : "max-h-0 opacity-0"
                 }`}
               >
-                <div className="p-4 pt-0 text-[#666666] text-sm leading-relaxed border-t border-[#72B7FB]/30">
+                <div className="px-4 pb-2 pt-2 text-[#666666] text-sm leading-relaxed border-t border-[#72B7FB]/30">
                   {faq.answer}
                 </div>
               </div>

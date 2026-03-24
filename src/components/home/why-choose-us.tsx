@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import Image from "next/image";
 import React from "react";
 import { Button } from "../ui/button";
@@ -15,16 +15,13 @@ const WhyChooseUs = () => {
                 A more thoughtful way to find trusted support
               </h2>
               <p className="text-sm sm:text-base leading-relaxed sm:leading-relaxed opacity-95">
-                We created DealClosed to bridge the gap. By connecting
-                businesses with motivated, freelance sales agents, we offer a
-                win-win solution. Businesses get results without unnecessary
-                overhead, and sales agents gain the flexibility to work how,
-                when, and where they want.
+                JetSet Cares was created for modern global life. We offer a more
+                thoughtful alternative to generic listing platforms by focusing
+                on trust, human connection, and the kind of support people
+                actually need when living life across borders.
               </p>
             </div>
-            <Button
-              className="mt-6 sm:mt-8 w-full sm:w-fit bg-accent text-primary hover:bg-accent/90 rounded-full px-4 sm:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base"
-            >
+            <Button className="mt-6 sm:mt-8 w-full sm:w-fit bg-accent text-primary hover:bg-accent/90 rounded-full px-4 sm:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base">
               Learn More
               <span className="ml-2">→</span>
             </Button>
@@ -65,10 +62,10 @@ const WhyChooseUs = () => {
                 />
               </div>
               <h3 className="text-base sm:text-lg font-bold text-card-foreground mb-1 sm:mb-2">
-                Women-Only Network
+                Trusted Provider Network
               </h3>
               <p className="text-xs sm:text-sm text-muted-foreground leading-tight sm:leading-normal">
-                A supportive community built by women, for women
+                Built on trust, care, and connection
               </p>
             </div>
 
