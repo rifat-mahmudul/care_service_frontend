@@ -8,35 +8,38 @@ const Hero = () => {
     <div
       style={{
         backgroundImage:
-          "linear-gradient(to bottom right, rgba(0, 0, 0, 0.788), rgba(0, 0, 0, 0)), url(/banner.png)",
-        backgroundSize: "Cover",
+          "linear-gradient(to bottom left, rgba(0, 0, 0, 0.459), rgba(0, 0, 0, 0)), url(/banner2.png)",
+        backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
         backgroundAttachment: "fixed",
         backgroundBlendMode: "overlay",
       }}
-      className="min-h-[calc(100vh-100px)] bg-gradient-to-tr from-[black] via-[black] to-[black] flex flex-col justify-center"
+      className="min-h-[calc(100vh-100px)] bg-gradient-to-lr from-[black] via-[black] to-[black] flex flex-col justify-center"
     >
       <div className="container">
         <div className="text-5xl font-medium space-y-3">
           <h1>
-            <span className="text-primary">Trusted support,</span>
+            <span className="text-primary">Trusted childcare</span>
           </h1>
-          <h1 className="text-white/80">wherever life takes you</h1>
+          <h1 className="text-white/80">for families on the move</h1>
         </div>
 
         <div>
           <p className="text-white/75 lg:max-w-lg mt-3">
-            Connect with trusted local professionals who make life feel easier,
-            safer, and more supported wherever you are.
+            JetSet Cares helps traveling families, expat families, and globally
+            mobile parents find trusted childcare in the cities where they live,
+            stay, and explore across Asia.
           </p>
         </div>
 
         <div className="mt-8 space-x-4">
           <Button className="rounded-3xl px-8 h-[45px]">
-            Hire a Professional
+            Find Trusted Childcare
           </Button>
-          <Button className="rounded-3xl px-8 h-[45px]">Offer a Service</Button>
+          <Button className="rounded-3xl px-8 h-[45px]">
+            Join as a Provider
+          </Button>
         </div>
 
         <div className="w-full mt-8 flex items-center">
