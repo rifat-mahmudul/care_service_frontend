@@ -40,7 +40,7 @@ const fetchCategories = async (): Promise<Category[]> => {
     headers: {
       "Content-Type": "application/json",
     },
-    cache: "no-store", 
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -81,18 +81,23 @@ export default function Categories() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null,
+  );
 
   // Fetch user profile if logged in
   const { data: userProfile } = useQuery({
     queryKey: ["userProfile"],
     queryFn: async () => {
       if (!token) return null;
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/user/profile`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
       if (!response.ok) return null;
       const json = await response.json();
       return json.data;
@@ -108,9 +113,18 @@ export default function Categories() {
 
   return (
     <div className="container mx-auto space-y-10 py-10 px-4 md:px-6 lg:px-8">
-      <h1 className="text-center text-3xl md:text-4xl font-bold tracking-tight lg:max-w-3xl mx-auto opacity-85">
-        One membership gives you access to trusted local support across borders
-      </h1>
+      <div>
+        <h1 className="text-center text-3xl md:text-4xl font-bold tracking-tight lg:max-w-3xl mx-auto opacity-85">
+          More than a booking. Real peace of mind.
+        </h1>
+        <p className="lg:max-w-4xl mx-auto text-md opacity-60 text-center mt-2">
+          JetSet Cares was built for families who need trusted childcare in
+          places that are not always fully familiar. We focus on safety,
+          reliability, professionalism, and the kind of confidence parents need
+          when they are traveling, relocating, living abroad, or staying in
+          hotels across Asia
+        </p>
+      </div>
 
       {error && (
         <div className="text-center text-red-600 py-8">
@@ -128,7 +142,7 @@ export default function Categories() {
         ) : (
           categories.map((cat) => {
             const disabled = isCategoryDisabled(cat._id);
-            
+
             return (
               <button
                 key={cat._id}
@@ -136,9 +150,9 @@ export default function Categories() {
                 onClick={() => !disabled && setSelectedCategory(cat)}
                 disabled={disabled}
                 className={`group text-left shadow-[0_4px_24px_rgba(0,0,0,0.15)] p-4 rounded-xl transition-all duration-200 bg-white border border-gray-100 ${
-                  disabled 
-                    ? 'opacity-50 cursor-not-allowed hover:scale-100' 
-                    : 'hover:scale-[1.04] hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                  disabled
+                    ? "opacity-50 cursor-not-allowed hover:scale-100"
+                    : "hover:scale-[1.04] hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 }`}
               >
                 <div className="relative w-full h-[202px] overflow-hidden rounded-lg">
@@ -152,15 +166,23 @@ export default function Categories() {
                 </div>
 
                 <div className="mt-5 flex items-center justify-between">
-                  <span className={`text-lg font-semibold transition-colors ${
-                    disabled ? 'text-gray-400' : 'text-gray-900 group-hover:text-indigo-700'
-                  }`}>
+                  <span
+                    className={`text-lg font-semibold transition-colors ${
+                      disabled
+                        ? "text-gray-400"
+                        : "text-gray-900 group-hover:text-indigo-700"
+                    }`}
+                  >
                     {cat.name}
                     {disabled && " (Already Added)"}
                   </span>
-                  <MoveRight className={`w-6 h-6 transition-colors ${
-                    disabled ? 'text-gray-400' : 'text-gray-500 group-hover:text-indigo-600'
-                  }`} />
+                  <MoveRight
+                    className={`w-6 h-6 transition-colors ${
+                      disabled
+                        ? "text-gray-400"
+                        : "text-gray-500 group-hover:text-indigo-600"
+                    }`}
+                  />
                 </div>
               </button>
             );
