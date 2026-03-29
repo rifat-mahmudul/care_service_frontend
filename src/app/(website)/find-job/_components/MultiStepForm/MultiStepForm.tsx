@@ -223,7 +223,7 @@ export default function MultiStepForm() {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#003366] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your information...</p>
         </div>
       </div>
@@ -363,7 +363,7 @@ export default function MultiStepForm() {
     <div>
       <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
         <div
-          className="h-full bg-[#003366] transition-all duration-300"
+          className="h-full bg-primary transition-all duration-300"
           style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
         />
       </div>
