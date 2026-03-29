@@ -128,7 +128,7 @@ export default function RoleSelectionModal({
                 Start your free search for {categoryName.toLowerCase()} in your
                 area.
               </p>
-              <div className="w-full py-2.5 px-4 bg-[#003366] text-white text-sm md:text-base rounded-full font-medium group-hover:bg-[#003366]/90 transition-colors">
+              <div className="w-full py-2.5 px-4 bg-primary text-white text-sm md:text-base rounded-full font-bold group-hover:bg-primary/90 transition-colors">
                 Find Care →
               </div>
             </button>
@@ -154,7 +154,7 @@ export default function RoleSelectionModal({
                 Create a profile and search for {categoryName.toLowerCase()}{" "}
                 jobs.
               </p>
-              <div className="w-full py-2.5 px-4 bg-[#003366] text-white text-sm md:text-base rounded-full font-medium group-hover:bg-[#003366]/90 transition-colors">
+              <div className="w-full py-2.5 px-4 bg-primary text-white text-sm md:text-base rounded-full font-bold group-hover:bg-primary/90 transition-colors">
                 Find Job →
               </div>
             </button>
