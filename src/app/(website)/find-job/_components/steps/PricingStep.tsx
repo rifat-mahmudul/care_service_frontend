@@ -104,7 +104,7 @@ export function PricingStep({ data, onBack, onSubmit }: PricingStepProps) {
             </Button>
             <Button
               onClick={() => refetch()}
-              className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-full"
+              className="bg-[#003366] hover:bg-[#003366]/90 text-white px-6 py-2 rounded-full"
             >
               Try Again
             </Button>
@@ -160,7 +160,7 @@ export function PricingStep({ data, onBack, onSubmit }: PricingStepProps) {
                   >
                     {isSelected && isYearly && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                        <span className="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-semibold">
+                        <span className="bg-[#003366] text-white px-4 py-1.5 rounded-full text-sm font-semibold">
                           Most Popular
                         </span>
                       </div>
@@ -199,7 +199,7 @@ export function PricingStep({ data, onBack, onSubmit }: PricingStepProps) {
                       disabled={mutation.isPending}
                       className={`w-full py-6 text-base font-semibold rounded-[8px] transition-colors ${
                         isSelected
-                          ? "bg-primary text-white hover:bg-primary/90"
+                          ? "bg-[#003366] text-white hover:bg-[#003366]/90"
                           : "bg-[#E1AD96] text-white hover:bg-[#E1AD96]/90"
                       } ${mutation.isPending ? "opacity-50 cursor-not-allowed" : ""}`}
                       onClick={(e) => {
@@ -222,14 +222,14 @@ export function PricingStep({ data, onBack, onSubmit }: PricingStepProps) {
               onClick={onBack}
               disabled={mutation.isPending}
               variant="outline"
-              className="px-8 py-6 text-lg rounded-full font-semibold border-2 border-primary text-primary hover:bg-primary/10 disabled:opacity-50"
+              className="px-8 py-6 text-lg rounded-full font-semibold border-2 border-[#003366] text-[#003366] hover:bg-[#003366]/10 disabled:opacity-50"
             >
               Back
             </Button>
             <Button
               onClick={handleContinue}
               disabled={mutation.isPending}
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-6 text-lg rounded-full font-semibold min-w-[250px] disabled:opacity-50"
+              className="bg-[#003366] hover:bg-[#003366]/90 text-white px-8 py-6 text-lg rounded-full font-semibold min-w-[250px] disabled:opacity-50"
             >
               {mutation.isPending ? (
                 <>

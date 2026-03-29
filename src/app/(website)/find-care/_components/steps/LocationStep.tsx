@@ -53,7 +53,7 @@ export function LocationStep({
             <Button
               onClick={handleContinue}
               disabled={!zipCode.trim()}
-              className="flex-1 bg-primary hover:bg-primary text-white py-2 rounded-full font-semibold"
+              className="flex-1 bg-[#003366] hover:bg-[#003366] text-white py-2 rounded-full font-semibold"
             >
               Continue
             </Button>

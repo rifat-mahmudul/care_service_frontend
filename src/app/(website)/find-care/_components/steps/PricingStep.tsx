@@ -79,7 +79,7 @@ export function PricingStep({
           Failed to load subscription plans. Please try again later.
           <Button
             onClick={onBack}
-            className="mt-4 bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-full"
+            className="mt-4 bg-[#003366] hover:bg-[#003366]/90 text-white px-6 py-2 rounded-full"
           >
             Go Back
           </Button>
@@ -132,7 +132,7 @@ export function PricingStep({
                   >
                     {isSelected && isYearly && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <span className="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-semibold">
+                        <span className="bg-[#003366] text-white px-4 py-1.5 rounded-full text-sm font-semibold">
                           Most Popular
                         </span>
                       </div>
@@ -172,7 +172,7 @@ export function PricingStep({
                       disabled={isSubmitting}
                       className={`w-full py-6 text-base font-semibold rounded-[8px] transition-colors ${
                         isSelected
-                          ? "bg-primary text-white hover:bg-primary/90"
+                          ? "bg-[#003366] text-white hover:bg-[#003366]/90"
                           : "bg-[#E1AD96] text-white hover:bg-[#E1AD96]/90"
                       } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
                       onClick={(e) => {
@@ -195,14 +195,14 @@ export function PricingStep({
               onClick={onBack}
               disabled={isSubmitting}
               variant="outline"
-              className="px-8 py-6 text-lg rounded-full font-semibold border-2 border-primary text-primary hover:bg-primary/10"
+              className="px-8 py-6 text-lg rounded-full font-semibold border-2 border-[#003366] text-[#003366] hover:bg-[#003366]/10"
             >
               Back
             </Button>
             <Button
               onClick={handleContinue}
               disabled={isSubmitting}
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-6 text-lg rounded-full font-semibold min-w-[250px]"
+              className="bg-[#003366] hover:bg-[#003366]/90 text-white px-8 py-6 text-lg rounded-full font-semibold min-w-[250px]"
             >
               {isSubmitting ? (
                 <>

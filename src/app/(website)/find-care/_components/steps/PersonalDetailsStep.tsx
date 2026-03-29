@@ -130,7 +130,7 @@ export function PersonalDetailsStep({
             <Button
               onClick={handleSubmit}
               disabled={!firstName || !lastName || !gender || !termsAccepted}
-              className="flex-1 bg-primary hover:bg-primary text-white py-2 rounded-full font-semibold disabled:opacity-50"
+              className="flex-1 bg-[#003366] hover:bg-[#003366] text-white py-2 rounded-full font-semibold disabled:opacity-50"
             >
               {isLoggedIn ? "Continue" : "Sign Up"}
             </Button>

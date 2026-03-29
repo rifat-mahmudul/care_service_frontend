@@ -122,8 +122,8 @@ export function ScheduleStep({
                   onClick={() => toggleDay(d.day)}
                   className={`px-4 py-2 rounded-full border font-semibold text-sm transition ${
                     d.selected
-                      ? "bg-primary text-white border-primary"
-                      : "bg-white text-primary border-primary"
+                      ? "bg-[#003366] text-white border-[#003366]"
+                      : "bg-white text-[#003366] border-[#003366]"
                   }`}
                 >
                   {d.day}
@@ -152,7 +152,7 @@ export function ScheduleStep({
                     value={d.time}
                     onChange={(e) => updateTime(d.day, e.target.value)}
                     placeholder="09:00 AM - 05:00 PM"
-                    className="w-full px-4 py-2 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-primary"
+                    className="w-full px-4 py-2 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-[#003366]"
                   />
                 </div>
               ))}
@@ -169,7 +169,7 @@ export function ScheduleStep({
             <Button
               onClick={handleContinue}
               disabled={!schedule.some((d) => d.selected)}
-              className="flex-1 bg-primary hover:bg-primary text-white py-2 rounded-full font-semibold"
+              className="flex-1 bg-[#003366] hover:bg-[#003366] text-white py-2 rounded-full font-semibold"
             >
               Continue
             </Button>
