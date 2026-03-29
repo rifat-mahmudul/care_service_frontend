@@ -152,7 +152,7 @@ export default function Categories() {
                 className={`group text-left shadow-[0_4px_24px_rgba(0,0,0,0.15)] p-4 rounded-xl transition-all duration-200 bg-white border border-gray-100 ${
                   disabled
                     ? "opacity-50 cursor-not-allowed hover:scale-100"
-                    : "hover:scale-[1.04] hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    : "hover:scale-[1.04] hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                 }`}
               >
                 <div className="relative w-full h-[202px] overflow-hidden rounded-lg">
@@ -170,7 +170,7 @@ export default function Categories() {
                     className={`text-lg font-semibold transition-colors ${
                       disabled
                         ? "text-gray-400"
-                        : "text-gray-900 group-hover:text-indigo-700"
+                        : "text-gray-900 group-hover:text-primary"
                     }`}
                   >
                     {cat.name}
@@ -180,7 +180,7 @@ export default function Categories() {
                     className={`w-6 h-6 transition-colors ${
                       disabled
                         ? "text-gray-400"
-                        : "text-gray-500 group-hover:text-indigo-600"
+                        : "text-gray-500 group-hover:text-primary"
                     }`}
                   />
                 </div>
