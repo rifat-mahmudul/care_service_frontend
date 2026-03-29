@@ -6,6 +6,8 @@ import MarqueeSection from "@/components/home/marque-section";
 import OurCommunity from "@/components/home/our-community";
 import WhenYou from "@/components/home/when-you";
 import WhyChooseUs from "@/components/home/why-choose-us";
+// import CitySection from "@/components/home/city-section"; 
+// import AcademySection from "@/components/home/academy-section"; 
 
 export default function Home() {
   return (
@@ -15,6 +17,8 @@ export default function Home() {
       <WhenYou />
       <OurCommunity />
       <WhyChooseUs />
+      {/* <CitySection />
+      <AcademySection /> */}
       <MarqueeSection />
       <Faq />
       <CareSection />
