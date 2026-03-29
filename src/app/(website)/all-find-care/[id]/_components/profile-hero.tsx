@@ -115,7 +115,7 @@ export function ProfileHero({
         <Button
           onClick={handleJoinToConnect}
           disabled={loading}
-          className="bg-primary hover:bg-[#002244] text-white rounded-full font-bold shadow-lg transition-transform active:scale-95 px-8"
+          className="bg-primary hover:bg-primary text-white rounded-full font-bold shadow-lg transition-transform active:scale-95 px-8"
         >
           {loading ? "Connecting..." : "Join To Connect"}
         </Button>

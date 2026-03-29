@@ -108,7 +108,7 @@ const ReviewSection = ({
 
           <button
             onClick={handleWriteReview}
-            className="bg-[#003366] hover:bg-[#002244] text-white px-8 py-3 rounded-full font-medium transition-all shadow-sm"
+            className="bg-primary text-white px-8 py-3 rounded-full font-medium transition-all shadow-sm"
           >
             Write a Review
           </button>
@@ -140,7 +140,7 @@ const ReviewSection = ({
 
         <button
           onClick={handleWriteReview}
-          className="bg-[#003366] hover:bg-[#002244] text-white px-8 py-3 rounded-full font-medium transition-all shadow-sm"
+          className="bg-primary hover:bg-primary text-white px-8 py-3 rounded-full font-medium transition-all shadow-sm"
         >
           Write a Review
         </button>

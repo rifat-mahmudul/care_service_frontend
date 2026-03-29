@@ -352,7 +352,7 @@ const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
           {/* Right: Action Button */}
           <div className="flex-1 flex justify-center w-full">
             <Button
-              className="bg-[#003366] hover:bg-[#002244] text-white px-16 py-7 rounded-full text-lg font-medium transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-white px-16 py-7 rounded-full text-lg font-medium transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={
                 !date ||
                 !isDateAvailable(date) ||

@@ -69,7 +69,6 @@ const Navbar = () => {
     };
   }, [isHomePage]);
 
-  // Fetch user profile when authenticated
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (token) {
@@ -106,11 +105,18 @@ const Navbar = () => {
     },
   ];
 
+  // Dynamic Classes
   const navbarClasses = `w-full fixed z-50 top-0 transition-all duration-300 ${
-    scrolled ? "bg-white shadow-md" : "bg-transparent"
+    scrolled ? "bg-white shadow-md py-3" : "bg-transparent py-5"
   }`;
 
-  // Get user initials for avatar fallback
+  // কন্ডিশনাল টেক্সট কালার (হোমপেজে টপে থাকলে সাদা, স্ক্রল করলে ডার্ক)
+  const textColorClasses = isHomePage
+    ? scrolled
+      ? "text-slate-900"
+      : "text-white"
+    : "text-slate-900";
+
   const getUserInitials = () => {
     if (userData?.firstName && userData?.lastName) {
       return `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase();
@@ -120,15 +126,15 @@ const Navbar = () => {
 
   return (
     <nav className={navbarClasses}>
-      <div className="container flex items-center justify-between py-4">
+      <div className="container flex items-center justify-between">
         {/* Logo */}
         <Link href="/">
           <div className="flex items-center">
             <Image
               src="/logo.png"
               alt="Logo"
-              width={1000}
-              height={1000}
+              width={100}
+              height={100}
               className="h-[50px] w-[50px] object-cover sm:h-[55px] sm:w-[55px]"
               priority
             />
@@ -136,7 +142,9 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center gap-5 lg:flex">
+        <div
+          className={`hidden items-center gap-8 lg:flex ${textColorClasses}`}
+        >
           {navItems.map((item) => (
             <DropdownMenu
               key={item.title}
@@ -145,7 +153,7 @@ const Navbar = () => {
                 setOpenDropdown(open ? item.title : null);
               }}
             >
-              <DropdownMenuTrigger className="flex items-center gap-1 focus-visible:ring-0 focus-visible:ring-offset-0">
+              <DropdownMenuTrigger className="flex items-center gap-1 font-medium transition-colors hover:opacity-80 focus:outline-none">
                 {item.title}
                 {openDropdown === item.title ? (
                   <ChevronUp className="h-4 w-4" />
@@ -153,7 +161,7 @@ const Navbar = () => {
                   <ChevronDown className="h-4 w-4" />
                 )}
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
+              <DropdownMenuContent align="start" className="mt-2">
                 {item.content}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -161,10 +169,9 @@ const Navbar = () => {
 
           <div className="flex items-center space-x-5">
             {session ? (
-              // User is logged in - show avatar dropdown
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 focus-visible:ring-0 focus-visible:ring-offset-0">
+                  <button className="flex items-center gap-2 focus:outline-none">
                     <Avatar className="h-10 w-10 border-2 border-primary/20">
                       <AvatarImage
                         src={userData?.profileImage || ""}
@@ -174,7 +181,7 @@ const Navbar = () => {
                         {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className={`h-4 w-4 ${textColorClasses}`} />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -184,27 +191,19 @@ const Navbar = () => {
                         ? `${userData.firstName} ${userData.lastName || ""}`
                         : session.user?.email}
                     </p>
-                    <p className="text-xs text-muted-foreground capitalize">
+                    <p className="text-sm text-muted-foreground capitalize">
                       {userData?.role || "User"}
                     </p>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link
-                      href="/profile"
-                      className="cursor-pointer flex items-center"
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
+                    <Link href="/profile" className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" /> Profile
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link
-                      href="/settings"
-                      className="cursor-pointer flex items-center"
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
+                    <Link href="/settings" className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" /> Settings
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -212,43 +211,41 @@ const Navbar = () => {
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="cursor-pointer text-red-600 focus:text-red-600"
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
+                    <LogOut className="mr-2 h-4 w-4" /> Log out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              // User is not logged in - show login/join buttons
               <>
                 <Link href="/login">
                   <Button
                     variant="ghost"
-                    className="text-sm font-medium hover:text-primary"
+                    className={`text-sm font-medium hover:bg-white/10 ${textColorClasses}`}
                   >
                     Log in
                   </Button>
                 </Link>
                 <Link href="/signup">
-                  <Button className="rounded-3xl">Join Now</Button>
+                  <Button className="rounded-3xl px-6">Join Now</Button>
                 </Link>
               </>
             )}
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation Toggle */}
         <div className="flex items-center lg:hidden">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 p-0 focus-visible:ring-0"
+                className={`h-10 w-10 p-0 ${textColorClasses} hover:bg-transparent`}
               >
                 {isOpen ? (
-                  <X className="h-6 w-6" />
+                  <X className="h-7 w-7" />
                 ) : (
-                  <Menu className="h-6 w-6" />
+                  <Menu className="h-7 w-7" />
                 )}
               </Button>
             </SheetTrigger>
@@ -269,31 +266,23 @@ const Navbar = () => {
               </SheetHeader>
 
               <div className="mt-8 flex flex-col space-y-6">
-                {/* User info for mobile (if logged in) */}
+                {/* Mobile Menu Content (Same as before) */}
                 {session && (
                   <div className="flex items-center gap-3 pb-4 border-b">
                     <Avatar className="h-12 w-12">
-                      <AvatarImage
-                        src={userData?.profileImage || ""}
-                        alt={userData?.firstName || "User"}
-                      />
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {getUserInitials()}
-                      </AvatarFallback>
+                      <AvatarImage src={userData?.profileImage} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-medium">
-                        {userData?.firstName
-                          ? `${userData.firstName} ${userData.lastName || ""}`
-                          : session.user?.email}
+                        {userData?.firstName || "User"}
                       </p>
-                      <p className="text-sm text-muted-foreground capitalize">
-                        {userData?.role || "User"}
+                      <p className="text-sm text-muted-foreground">
+                        {userData?.role}
                       </p>
                     </div>
                   </div>
                 )}
-
                 <Accordion type="single" collapsible className="w-full">
                   {navItems.map((item) => (
                     <AccordionItem key={item.title} value={item.title}>
@@ -306,58 +295,22 @@ const Navbar = () => {
                     </AccordionItem>
                   ))}
                 </Accordion>
-
                 <div className="flex flex-col space-y-4 pt-4 border-t">
-                  {session ? (
-                    // Mobile menu when logged in
-                    <>
-                      <Link href="/profile" onClick={() => setIsOpen(false)}>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <User className="mr-2 h-4 w-4" />
-                          Profile
-                        </Button>
-                      </Link>
-                      <Link href="/settings" onClick={() => setIsOpen(false)}>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <Settings className="mr-2 h-4 w-4" />
-                          Settings
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="destructive"
-                        className="w-full justify-start"
-                        onClick={() => {
-                          signOut({ callbackUrl: "/" });
-                          setIsOpen(false);
-                        }}
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log out
-                      </Button>
-                    </>
-                  ) : (
-                    // Mobile menu when logged out
+                  {!session ? (
                     <>
                       <Link href="/login" onClick={() => setIsOpen(false)}>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-center"
-                        >
+                        <Button variant="outline" className="w-full">
                           Log in
                         </Button>
                       </Link>
                       <Link href="/signup" onClick={() => setIsOpen(false)}>
-                        <Button className="w-full justify-center rounded-3xl">
-                          Join Now
-                        </Button>
+                        <Button className="w-full rounded-3xl">Join Now</Button>
                       </Link>
                     </>
+                  ) : (
+                    <Button variant="destructive" onClick={() => signOut()}>
+                      Log out
+                    </Button>
                   )}
                 </div>
               </div>
