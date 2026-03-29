@@ -9,6 +9,7 @@ import {
   User,
   LogOut,
   Settings,
+  Info,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -32,18 +33,29 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import FindCareCategory from "./nav-component/find-care-category";
 import FindJobCategory from "./nav-component/find-job-category";
 import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [userData, setUserData] = useState<any>(null);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // Modal state
+
   const pathname = usePathname();
+  const router = useRouter();
   const isHomePage = pathname === "/";
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
@@ -69,7 +81,6 @@ const Navbar = () => {
     };
   }, [isHomePage]);
 
-  // Fetch user profile when authenticated
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (token) {
@@ -107,10 +118,15 @@ const Navbar = () => {
   ];
 
   const navbarClasses = `w-full fixed z-50 top-0 transition-all duration-300 ${
-    scrolled ? "bg-white shadow-md" : "bg-transparent"
+    scrolled ? "bg-white shadow-md py-3" : "bg-transparent py-5"
   }`;
 
-  // Get user initials for avatar fallback
+  const textColorClasses = isHomePage
+    ? scrolled
+      ? "text-slate-900"
+      : "text-white"
+    : "text-slate-900";
+
   const getUserInitials = () => {
     if (userData?.firstName && userData?.lastName) {
       return `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase();
@@ -119,170 +135,69 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={navbarClasses}>
-      <div className="container flex items-center justify-between py-4">
-        {/* Logo */}
-        <Link href="/">
-          <div className="flex items-center">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={1000}
-              height={1000}
-              className="h-[50px] w-[50px] object-cover sm:h-[55px] sm:w-[55px]"
-              priority
-            />
-          </div>
-        </Link>
+    <>
+      <nav className={navbarClasses}>
+        <div className="container flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/">
+            <div className="flex items-center">
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={100}
+                height={100}
+                className="h-[50px] w-[50px] object-cover sm:h-[55px] sm:w-[55px]"
+                priority
+              />
+            </div>
+          </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden items-center gap-5 lg:flex">
-          {navItems.map((item) => (
-            <DropdownMenu
-              key={item.title}
-              modal={false}
-              onOpenChange={(open) => {
-                setOpenDropdown(open ? item.title : null);
-              }}
-            >
-              <DropdownMenuTrigger className="flex items-center gap-1 focus-visible:ring-0 focus-visible:ring-offset-0">
-                {item.title}
-                {openDropdown === item.title ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                {item.content}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ))}
-
-          <div className="flex items-center space-x-5">
-            {session ? (
-              // User is logged in - show avatar dropdown
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 focus-visible:ring-0 focus-visible:ring-offset-0">
-                    <Avatar className="h-10 w-10 border-2 border-primary/20">
-                      <AvatarImage
-                        src={userData?.profileImage || ""}
-                        alt={userData?.firstName || "User"}
-                      />
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {getUserInitials()}
-                      </AvatarFallback>
-                    </Avatar>
+          {/* Desktop Navigation */}
+          <div
+            className={`hidden items-center gap-8 lg:flex ${textColorClasses}`}
+          >
+            {navItems.map((item) => (
+              <DropdownMenu
+                key={item.title}
+                modal={false}
+                onOpenChange={(open) => {
+                  setOpenDropdown(open ? item.title : null);
+                }}
+              >
+                <DropdownMenuTrigger className="flex items-center gap-1 font-medium transition-colors hover:opacity-80 focus:outline-none">
+                  {item.title}
+                  {openDropdown === item.title ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
                     <ChevronDown className="h-4 w-4" />
-                  </button>
+                  )}
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">
-                      {userData?.firstName
-                        ? `${userData.firstName} ${userData.lastName || ""}`
-                        : session.user?.email}
-                    </p>
-                    <p className="text-xs text-muted-foreground capitalize">
-                      {userData?.role || "User"}
-                    </p>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/profile"
-                      className="cursor-pointer flex items-center"
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/settings"
-                      className="cursor-pointer flex items-center"
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    className="cursor-pointer text-red-600 focus:text-red-600"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
-                  </DropdownMenuItem>
+                <DropdownMenuContent align="start" className="mt-2">
+                  {item.content}
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              // User is not logged in - show login/join buttons
-              <>
-                <Link href="/login">
-                  <Button
-                    variant="ghost"
-                    className="text-sm font-medium hover:text-primary"
-                  >
-                    Log in
-                  </Button>
-                </Link>
-                <Link href="/signup">
-                  <Button className="rounded-3xl">Join Now</Button>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
+            ))}
 
-        {/* Mobile Navigation */}
-        <div className="flex items-center lg:hidden">
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 p-0 focus-visible:ring-0"
-              >
-                {isOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:max-w-md">
-              <SheetHeader>
-                <SheetTitle className="text-left">
-                  <div className="flex items-center">
-                    <Image
-                      src="/logo.png"
-                      alt="Logo"
-                      width={50}
-                      height={50}
-                      className="mr-3 h-[50px] w-[50px] object-cover"
-                    />
-                    <span>Menu</span>
-                  </div>
-                </SheetTitle>
-              </SheetHeader>
-
-              <div className="mt-8 flex flex-col space-y-6">
-                {/* User info for mobile (if logged in) */}
-                {session && (
-                  <div className="flex items-center gap-3 pb-4 border-b">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage
-                        src={userData?.profileImage || ""}
-                        alt={userData?.firstName || "User"}
-                      />
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {getUserInitials()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">
+            <div className="flex items-center space-x-5">
+              {session ? (
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 focus:outline-none">
+                      <Avatar className="h-10 w-10 border-2 border-primary/20">
+                        <AvatarImage
+                          src={userData?.profileImage || ""}
+                          alt={userData?.firstName || "User"}
+                        />
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <ChevronDown className={`h-4 w-4 ${textColorClasses}`} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="px-2 py-1.5 text-black">
+                      <p className="text-sm font-medium">
                         {userData?.firstName
                           ? `${userData.firstName} ${userData.lastName || ""}`
                           : session.user?.email}
@@ -291,81 +206,171 @@ const Navbar = () => {
                         {userData?.role || "User"}
                       </p>
                     </div>
-                  </div>
-                )}
-
-                <Accordion type="single" collapsible className="w-full">
-                  {navItems.map((item) => (
-                    <AccordionItem key={item.title} value={item.title}>
-                      <AccordionTrigger className="text-lg font-medium">
-                        {item.title}
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="pl-4">{item.content}</div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-
-                <div className="flex flex-col space-y-4 pt-4 border-t">
-                  {session ? (
-                    // Mobile menu when logged in
-                    <>
-                      <Link href="/profile" onClick={() => setIsOpen(false)}>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <User className="mr-2 h-4 w-4" />
-                          Profile
-                        </Button>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="cursor-pointer">
+                        <User className="mr-2 h-4 w-4" /> Profile
                       </Link>
-                      <Link href="/settings" onClick={() => setIsOpen(false)}>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <Settings className="mr-2 h-4 w-4" />
-                          Settings
-                        </Button>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings" className="cursor-pointer">
+                        <Settings className="mr-2 h-4 w-4" /> Settings
                       </Link>
-                      <Button
-                        variant="destructive"
-                        className="w-full justify-start"
-                        onClick={() => {
-                          signOut({ callbackUrl: "/" });
-                          setIsOpen(false);
-                        }}
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log out
-                      </Button>
-                    </>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      className="cursor-pointer text-red-600 focus:text-red-600"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" /> Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button
+                      variant="ghost"
+                      className={`text-sm font-medium hover:bg-white/10 ${textColorClasses}`}
+                    >
+                      Log in
+                    </Button>
+                  </Link>
+                  <Button
+                    onClick={() => setIsJoinModalOpen(true)}
+                    className="rounded-3xl px-6"
+                  >
+                    Join Now
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Navigation Toggle */}
+          <div className="flex items-center lg:hidden">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-10 w-10 p-0 ${textColorClasses} hover:bg-transparent`}
+                >
+                  {isOpen ? (
+                    <X className="h-7 w-7" />
                   ) : (
-                    // Mobile menu when logged out
-                    <>
-                      <Link href="/login" onClick={() => setIsOpen(false)}>
+                    <Menu className="h-7 w-7" />
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-full sm:max-w-md">
+                <SheetHeader>
+                  <SheetTitle className="text-left">
+                    <div className="flex items-center">
+                      <Image
+                        src="/logo.png"
+                        alt="Logo"
+                        width={50}
+                        height={50}
+                        className="mr-3 h-[50px] w-[50px] object-cover"
+                      />
+                      <span>Menu</span>
+                    </div>
+                  </SheetTitle>
+                </SheetHeader>
+
+                <div className="mt-8 flex flex-col space-y-6">
+                  {session && (
+                    <div className="flex items-center gap-3 pb-4 border-b">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={userData?.profileImage} />
+                        <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">
+                          {userData?.firstName || "User"}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {userData?.role}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <Accordion type="single" collapsible className="w-full">
+                    {navItems.map((item) => (
+                      <AccordionItem key={item.title} value={item.title}>
+                        <AccordionTrigger className="text-lg font-medium">
+                          {item.title}
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="pl-4">{item.content}</div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                  <div className="flex flex-col space-y-4 pt-4 border-t">
+                    {!session ? (
+                      <>
+                        <Link href="/login" onClick={() => setIsOpen(false)}>
+                          <Button variant="outline" className="w-full">
+                            Log in
+                          </Button>
+                        </Link>
                         <Button
-                          variant="outline"
-                          className="w-full justify-center"
+                          onClick={() => {
+                            setIsOpen(false);
+                            setIsJoinModalOpen(true);
+                          }}
+                          className="w-full rounded-3xl"
                         >
-                          Log in
-                        </Button>
-                      </Link>
-                      <Link href="/signup" onClick={() => setIsOpen(false)}>
-                        <Button className="w-full justify-center rounded-3xl">
                           Join Now
                         </Button>
-                      </Link>
-                    </>
-                  )}
+                      </>
+                    ) : (
+                      <Button variant="destructive" onClick={() => signOut()}>
+                        Log out
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Registration Guidance Modal */}
+      <Dialog open={isJoinModalOpen} onOpenChange={setIsJoinModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader className="flex flex-col items-center justify-center text-center space-y-3">
+            <div className="bg-primary/10 p-3 rounded-full">
+              <Info className="h-8 w-8 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl font-bold">
+              Get Started
+            </DialogTitle>
+            <DialogDescription className="text-base text-gray-600">
+              To create an account, you first need to choose a service category.
+              This helps us personalize your experience.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 text-center text-sm text-muted-foreground border-y border-gray-100 my-2">
+            You will be redirected to our category selection page.
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <Button
+              className="w-full rounded-full h-11 text-white font-bold shadow-lg"
+              onClick={() => {
+                setIsJoinModalOpen(false);
+                router.push("/category");
+              }}
+            >
+              Select Category & Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

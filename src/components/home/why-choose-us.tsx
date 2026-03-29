@@ -21,7 +21,7 @@ const WhyChooseUs = () => {
                 professionalism, and reliability.
               </p>
             </div>
-            <Button className="mt-6 sm:mt-8 w-full sm:w-fit bg-accent text-primary hover:bg-accent/90 rounded-full px-4 sm:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base">
+            <Button className="mt-6 sm:mt-8 w-full sm:w-fit bg-white hover:bg-white text-primary  rounded-full px-4 sm:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base">
               Get Started
               <span className="ml-2">→</span>
             </Button>

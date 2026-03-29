@@ -241,7 +241,7 @@ const ReviewPopup = ({ isOpen, onClose, jobUserId }: ReviewPopupProps) => {
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-[#003366] hover:bg-[#002244] text-white"
+              className="flex-1 bg-primary hover:bg-primary text-white font-bold"
               disabled={submitReview.isPending}
             >
               {submitReview.isPending ? "Submitting..." : "Submit Review"}

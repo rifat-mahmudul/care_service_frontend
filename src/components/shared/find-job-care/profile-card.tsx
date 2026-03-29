@@ -111,7 +111,7 @@ const ProfileCard = ({
                     ? `/all-find-jobs/${id}`
                     : `/all-find-care/${id}`
                 }
-                className="text-[#003566] font-bold underline ml-1 hover:text-[#001D3D] transition-colors"
+                className="text-primary font-bold underline ml-1 hover:text-[#001D3D] transition-colors"
               >
                 read more
               </Link>
@@ -127,7 +127,7 @@ const ProfileCard = ({
                   : `/all-find-care/${id}`
               }
             >
-              <button className="bg-[#003566] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#001D3D] transition-all shadow-md active:scale-95">
+              <button className="bg-primary text-white px-8 py-3 rounded-full font-semibold hover:bg-primary transition-all shadow-md active:scale-95">
                 See Profile
               </button>
             </Link>

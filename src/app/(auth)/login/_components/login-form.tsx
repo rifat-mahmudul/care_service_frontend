@@ -14,10 +14,19 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Info } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -29,6 +38,8 @@ type FormType = z.infer<typeof formSchema>;
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
@@ -41,7 +52,6 @@ const LoginForm = () => {
   const handleSignIn = async (payload: FormType) => {
     try {
       setIsLoading(true);
-
       const res = await signIn("credentials", {
         email: payload.email,
         password: payload.password,
@@ -126,25 +136,20 @@ const LoginForm = () => {
           />
 
           <div className="flex items-center justify-end">
-            <div>
-              <Link href={"/forgot-password"}>
-                <h4 className="underline">Forgot Password?</h4>
-              </Link>
-            </div>
+            <Link href={"/forgot-password"}>
+              <h4 className="underline text-sm">Forgot Password?</h4>
+            </Link>
           </div>
 
           <Button
             disabled={isLoading}
             type="submit"
-            className="h-[45px] w-full  text-white disabled:cursor-not-allowed"
+            className="h-[45px] w-full text-white disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <div className="flex items-center gap-1">
-                <div>
-                  <Spinner />
-                </div>
-
-                <div>Log In</div>
+                <Spinner />
+                <span>Log In</span>
               </div>
             ) : (
               `Log In`
@@ -153,14 +158,48 @@ const LoginForm = () => {
         </form>
       </Form>
 
-      <div>
-        <h3 className="text-center mt-5">
+      {/* Sign Up Section with Modal Trigger */}
+      <div className="text-center mt-5">
+        <h3 className="text-sm">
           Don’t have an account?{" "}
-          <Link href={"/sign-up"}>
-            <span className="font-semibold hover:underline text-primary">Sign Up</span>
-          </Link>
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="font-semibold hover:underline text-primary"
+          >
+            Sign Up
+          </button>
         </h3>
       </div>
+
+      {/* Registration Guidance Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader className="flex flex-col items-center justify-center text-center space-y-3">
+            <div className="bg-primary/10 p-3 rounded-full">
+              <Info className="h-8 w-8 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl font-bold">
+              Registration Process
+            </DialogTitle>
+            <DialogDescription className="text-base text-gray-600">
+              To create an account, you first need to choose a service category.
+              This helps us personalize your experience.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 text-center text-sm text-muted-foreground border-y border-gray-100 my-2">
+            You will be redirected to our category selection page.
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <Button
+              className="w-full rounded-full h-11 text-white font-bold shadow-lg"
+              onClick={() => router.push("/category")}
+            >
+              Select Category & Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
