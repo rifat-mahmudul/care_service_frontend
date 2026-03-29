@@ -33,7 +33,7 @@ const page = async () => {
           <div className="space-y-3">
             <Link
               href="/login"
-              className="w-full bg-[#003366] hover:bg-[#003366]/90 text-white py-3 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
+              className="w-full bg-primary hover:bg-primary/90 text-white py-3 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
             >
               <LogIn className="w-5 h-5" />
               Go to Login
