@@ -3,6 +3,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
@@ -23,6 +24,8 @@ export default function RoleSelectionModal({
   userProfile,
 }: RoleSelectionModalProps) {
   const router = useRouter();
+  const session = useSession();
+  const role = session?.data?.user?.role;
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -110,7 +113,8 @@ export default function RoleSelectionModal({
             {/* Card 1 - Looking for caregiver */}
             <button
               onClick={handleFindCare}
-              className="group flex-1 bg-white p-5 md:p-6 rounded-xl transition-all duration-200 hover:shadow-lg"
+              disabled={role === "find job"}
+              className="group flex-1 bg-white p-5 md:p-6 rounded-xl transition-all duration-200 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40"
             >
               <div className="mb-4 w-16 h-16 md:w-20 md:h-20 mx-auto">
                 <Image
@@ -136,7 +140,8 @@ export default function RoleSelectionModal({
             {/* Card 2 - Looking for job */}
             <button
               onClick={handleFindJob}
-              className="group flex-1 bg-white p-5 md:p-6 rounded-xl transition-all duration-200 hover:shadow-lg"
+              disabled={role === "find care"}
+              className="group flex-1 bg-white p-5 md:p-6 rounded-xl transition-all duration-200 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40"
             >
               <div className="mb-4 w-16 h-16 md:w-20 md:h-20 mx-auto">
                 <Image
