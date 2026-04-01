@@ -59,6 +59,7 @@ const Navbar = () => {
   const isHomePage = pathname === "/";
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
+  const role = session?.user?.role;
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
@@ -106,16 +107,43 @@ const Navbar = () => {
     fetchUserProfile();
   }, [token]);
 
-  const navItems = [
-    {
-      title: "Find Care",
-      content: <FindCareCategory />,
-    },
-    {
-      title: "Find Jobs",
-      content: <FindJobCategory />,
-    },
-  ];
+  // Conditional nav items based on role
+  const getNavItems = () => {
+    // If user is logged in and has a role
+    if (session && role) {
+      if (role === "find care") {
+        // Show only Find Jobs for care seekers
+        return [
+          {
+            title: "Find Jobs",
+            content: <FindJobCategory />,
+          },
+        ];
+      } else if (role === "find job") {
+        // Show only Find Care for job seekers
+        return [
+          {
+            title: "Find Care",
+            content: <FindCareCategory />,
+          },
+        ];
+      }
+    }
+
+    // Default: Show both for non-logged in users or other roles
+    return [
+      {
+        title: "Find Care",
+        content: <FindCareCategory />,
+      },
+      {
+        title: "Find Jobs",
+        content: <FindJobCategory />,
+      },
+    ];
+  };
+
+  const navItems = getNavItems();
 
   const navbarClasses = `w-full fixed z-50 top-0 transition-all duration-300 ${
     scrolled ? "bg-white shadow-md py-3" : "bg-transparent py-5"
