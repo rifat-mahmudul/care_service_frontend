@@ -47,7 +47,7 @@ const ProviderSection = () => {
         </div>
 
         <Button className="rounded-full px-8 h-12 bg-[#40E0D0] hover:bg-[#2CB0A0] text-black">
-          Join as a Provider
+          Apply to Become a Partner
         </Button>
       </div>
     </section>

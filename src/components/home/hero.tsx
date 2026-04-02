@@ -26,7 +26,7 @@ const Hero = () => {
                 Find Trusted Childcare
               </Button>
               <Button className="rounded-full px-8 h-12 bg-transparent border-2 border-white hover:bg-white/10 text-white">
-                Join as a Provider
+                Apply to Become a Partner
               </Button>
             </div>
 
