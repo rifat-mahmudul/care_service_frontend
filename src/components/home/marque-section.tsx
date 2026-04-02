@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Marquee from 'react-fast-marquee';
-import Image from 'next/image';
+import Marquee from "react-fast-marquee";
+import Image from "next/image";
 
 interface Service {
   id: string;
@@ -12,106 +12,92 @@ interface Service {
 }
 
 const topRowServices: Service[] = [
-  { 
-    id: '1', 
-    name: 'Urgent cleaning help', 
-    textColor: '#8B6F47',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Cleaning Service'
+  {
+    id: "1",
+    name: "Infant Care",
+    textColor: "#8B6F47",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "Infant Care",
   },
-  { 
-    id: '2', 
-    name: 'Full daycares', 
-    textColor: '#0066CC',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Daycare Service'
+  {
+    id: "2",
+    name: "Toddler Care",
+    textColor: "#0066CC",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "Toddler Care",
   },
-  { 
-    id: '3', 
-    name: 'Classes & Campsites', 
-    textColor: '#333333',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Classes & Camps'
+  {
+    id: "3",
+    name: "School Age Care",
+    textColor: "#333333",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "School Age Care",
   },
-  { 
-    id: '4', 
-    name: 'Infant & Newborn Care', 
-    textColor: '#17A2B8',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Infant Care'
+  {
+    id: "4",
+    name: "Date Night",
+    textColor: "#17A2B8",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "Date Night",
   },
-  { 
-    id: '5', 
-    name: 'Private Tutoring', 
-    textColor: '#8B6F47',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Tutoring Service'
+  {
+    id: "5",
+    name: "Weekend Care",
+    textColor: "#8B6F47",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "Weekend Care",
   },
-  { 
-    id: '6', 
-    name: 'Pet Care Services', 
-    textColor: '#0066CC',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Pet Care'
+  {
+    id: "6",
+    name: "Hotel Babysitting",
+    textColor: "#0066CC",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "Hotel Babysitting",
   },
 ];
 
 const bottomRowServices: Service[] = [
-  { 
-    id: '7', 
-    name: 'Instructors', 
-    textColor: '#17A2B8',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Instructors'
+  {
+    id: "7",
+    name: "Travel Support",
+    textColor: "#17A2B8",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "Travel Support",
   },
-  { 
-    id: '8', 
-    name: 'Elder Companions', 
-    textColor: '#17A2B8',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Elder Care'
+  {
+    id: "8",
+    name: "LGBTQ+ Affirming",
+    textColor: "#17A2B8",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "LGBTQ+ Affirming",
   },
-  { 
-    id: '9', 
-    name: 'Care for Adults', 
-    textColor: '#0066CC',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Adult Care'
+  {
+    id: "9",
+    name: "Multilingual",
+    textColor: "#0066CC",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "Multilingual",
   },
-  { 
-    id: '10', 
-    name: 'Memory Care', 
-    textColor: '#17A2B8',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Memory Care'
+  {
+    id: "10",
+    name: "Homework Help",
+    textColor: "#17A2B8",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "Homework Help",
   },
-  { 
-    id: '11', 
-    name: 'Toddler Caregiver', 
-    textColor: '#8B6F47',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Toddler Care'
+  {
+    id: "11",
+    name: "Special Needs Support",
+    textColor: "#8B6F47",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "Special Needs Support",
   },
-  { 
-    id: '12', 
-    name: 'Home Nursing', 
-    textColor: '#0066CC',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Home Nursing'
-  },
-  { 
-    id: '13', 
-    name: 'Therapy Services', 
-    textColor: '#17A2B8',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Therapy'
-  },
-  { 
-    id: '14', 
-    name: 'Meal Preparation', 
-    textColor: '#8B6F47',
-    imageUrl: '/marque/urgent.jpg',
-    alt: 'Meal Preparation'
+  {
+    id: "12",
+    name: "Newborn Support",
+    textColor: "#0066CC",
+    imageUrl: "/marque/urgent.jpg",
+    alt: "Newborn Support",
   },
 ];
 
@@ -124,11 +110,11 @@ function ServiceCard({ name, textColor, imageUrl, alt }: Service) {
           alt={alt}
           fill
           sizes="(max-width: 1000px) 40px, (max-width: 1000px) 48px, 56px"
-          className="object-cover h-[40px] w-[48px]"
+          className="object-cover"
         />
       </div>
-      <span 
-        style={{ color: textColor }} 
+      <span
+        style={{ color: textColor }}
         className="text-xs sm:text-sm md:text-base font-medium whitespace-nowrap"
       >
         {name}
@@ -142,13 +128,13 @@ export default function MarqueeSection() {
     <div className="w-full space-y-3 sm:space-y-4 md:space-y-6 overflow-hidden">
       {/* Top Row - LTR (Left to Right) */}
       <div className="relative">
-        <Marquee 
-          pauseOnHover={true} 
-          speed={40} 
+        <Marquee
+          pauseOnHover={true}
+          speed={40}
           gradient={true}
           gradientColor="#ffffff"
           gradientWidth={80}
-          direction="left" // Changed to left for LTR
+          direction="left"
         >
           {topRowServices.map((service) => (
             <ServiceCard key={service.id} {...service} />
@@ -160,13 +146,13 @@ export default function MarqueeSection() {
 
       {/* Bottom Row - RTL (Right to Left) */}
       <div className="relative">
-        <Marquee 
-          pauseOnHover={true} 
-          speed={40} 
+        <Marquee
+          pauseOnHover={true}
+          speed={40}
           gradient={true}
           gradientColor="#ffffff"
           gradientWidth={80}
-          direction="right" // Changed to right for RTL
+          direction="right"
         >
           {bottomRowServices.map((service) => (
             <ServiceCard key={service.id} {...service} />
