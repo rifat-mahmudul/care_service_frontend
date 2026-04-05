@@ -64,7 +64,7 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-[#053535] text-white transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0",
+          "fixed inset-y-0 left-0 z-50 w-64 bg-[#003366] text-white transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -89,7 +89,7 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     className={cn(
                       "flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 group",
                       pathname === item.href
-                        ? "bg-[#00D1C1] text-[#053535] font-semibold"
+                        ? "bg-[#00D1C1] text-black font-semibold"
                         : "hover:bg-white/10 text-gray-300",
                     )}
                   >
@@ -117,10 +117,10 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header (Mobile Toggle) */}
         <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-gray-200 lg:hidden">
-          <h2 className="text-[#053535] font-bold">JetSet Cares</h2>
+          <h2 className="text-black font-bold">JetSet Cares</h2>
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="p-2 text-[#053535]"
+            className="p-2 text-black"
           >
             <Menu size={24} />
           </button>

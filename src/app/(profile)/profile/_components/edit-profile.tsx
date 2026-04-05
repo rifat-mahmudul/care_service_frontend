@@ -173,7 +173,7 @@ const EditProfilePage = () => {
       ) : (
         <>
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-[#053535]">Edit Profile</h1>
+            <h1 className="text-2xl font-bold text-black">Edit Profile</h1>
             <p className="text-gray-500">Update your personal information and expertise.</p>
           </div>
 
@@ -185,7 +185,7 @@ const EditProfilePage = () => {
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[#053535]">First Name *</FormLabel>
+                  <FormLabel className="text-black">First Name *</FormLabel>
                   <FormControl>
                     <Input {...field} className="focus-visible:ring-[#00D1C1]" />
                   </FormControl>
@@ -198,7 +198,7 @@ const EditProfilePage = () => {
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[#053535]">Last Name</FormLabel>
+                  <FormLabel className="text-black">Last Name</FormLabel>
                   <FormControl>
                     <Input {...field} className="focus-visible:ring-[#00D1C1]" />
                   </FormControl>
@@ -274,7 +274,7 @@ const EditProfilePage = () => {
           {/* Only Show these fields if role is "find job" */}
           {session?.user?.role === "find job" && (
             <div className="space-y-6 pt-4 border-t border-gray-100">
-              <h3 className="font-semibold text-[#053535] text-lg">Professional Details</h3>
+              <h3 className="font-semibold text-black text-lg">Professional Details</h3>
               
               {/* Experience Level */}
               <FormField
@@ -298,7 +298,7 @@ const EditProfilePage = () => {
 
               {/* Multi-Item: Professional Skills */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#053535]">Professional Skills</Label>
+                <Label className="text-sm font-medium text-black">Professional Skills</Label>
                 <div className="flex gap-2">
                   <Input 
                     value={currentSkillTag} 
@@ -321,7 +321,7 @@ const EditProfilePage = () => {
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {form.watch("professionalSkill")?.map((skill: string, index: number) => (
-                    <span key={index} className="bg-[#053535] text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                    <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
                       {skill}
                       <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("professionalSkill", skill)} />
                     </span>
@@ -331,7 +331,7 @@ const EditProfilePage = () => {
 
               {/* Languages */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#053535]">Languages</Label>
+                <Label className="text-sm font-medium text-black">Languages</Label>
                 <div className="flex gap-2">
                   <Input 
                     value={currentLanguageTag} 
@@ -354,7 +354,7 @@ const EditProfilePage = () => {
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {form.watch("language")?.map((lang: string, index: number) => (
-                    <span key={index} className="bg-[#053535] text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                    <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
                       {lang}
                       <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("language", lang)} />
                     </span>
@@ -364,7 +364,7 @@ const EditProfilePage = () => {
 
               {/* Education */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#053535]">Education</Label>
+                <Label className="text-sm font-medium text-black">Education</Label>
                 <div className="flex gap-2">
                   <Input 
                     value={currentEducationTag} 
@@ -387,7 +387,7 @@ const EditProfilePage = () => {
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {form.watch("education")?.map((edu: string, index: number) => (
-                    <span key={index} className="bg-[#053535] text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                    <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
                       {edu}
                       <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("education", edu)} />
                     </span>
@@ -397,7 +397,7 @@ const EditProfilePage = () => {
 
               {/* Age Group */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#053535]">Age Group Preference</Label>
+                <Label className="text-sm font-medium text-black">Age Group Preference</Label>
                 <div className="flex gap-2">
                   <Input 
                     value={currentAgeGroupTag} 
@@ -420,7 +420,7 @@ const EditProfilePage = () => {
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {form.watch("agegroup")?.map((age: string, index: number) => (
-                    <span key={index} className="bg-[#053535] text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                    <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
                       {age}
                       <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("agegroup", age)} />
                     </span>
@@ -430,7 +430,7 @@ const EditProfilePage = () => {
 
               {/* Can Help With */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#053535]">Can Help With</Label>
+                <Label className="text-sm font-medium text-black">Can Help With</Label>
                 <div className="flex gap-2">
                   <Input 
                     value={currentCanHelpWithTag} 
@@ -453,7 +453,7 @@ const EditProfilePage = () => {
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {form.watch("canHelpWith")?.map((subject: string, index: number) => (
-                    <span key={index} className="bg-[#053535] text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                    <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
                       {subject}
                       <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("canHelpWith", subject)} />
                     </span>
@@ -463,7 +463,7 @@ const EditProfilePage = () => {
 
               {/* Preferences */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#053535]">Preferences</Label>
+                <Label className="text-sm font-medium text-black">Preferences</Label>
                 <div className="flex gap-2">
                   <Input 
                     value={currentPreferenceTag} 
@@ -486,7 +486,7 @@ const EditProfilePage = () => {
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {form.watch("perferences")?.map((pref: string, index: number) => (
-                    <span key={index} className="bg-[#053535] text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                    <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
                       {pref}
                       <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("perferences", pref)} />
                     </span>
@@ -500,7 +500,7 @@ const EditProfilePage = () => {
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="bg-[#053535] hover:bg-[#042a2a] text-white px-8 h-12 rounded-lg"
+              className="bg-primary hover:bg-[#042a2a] text-white px-8 h-12 rounded-lg"
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save Changes
