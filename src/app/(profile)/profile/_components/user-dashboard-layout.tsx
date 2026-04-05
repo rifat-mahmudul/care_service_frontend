@@ -3,10 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
 import {
   User,
-  CreditCard,
   Settings,
   Briefcase,
   Menu,
@@ -18,11 +16,8 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const { data: session } = useSession();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const role = session?.user?.role;
 
   const menuItems = [
     {
@@ -30,12 +25,6 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
       icon: User,
       href: "/profile",
       show: true,
-    },
-    {
-      label: "Set Up Stripe",
-      icon: CreditCard,
-      href: "/dashboard/stripe",
-      show: role === "find job",
     },
     {
       label: "My Services",
@@ -140,7 +129,7 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </header>
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 p-4 md:p-8 lg:p-10">
+        <main className="flex-1 p-4 lg:p-6">
           <div className="mx-auto">{children}</div>
         </main>
       </div>
