@@ -19,7 +19,7 @@ export function LocationStep({
 
   const handleContinue = () => {
     if (zipCode.trim()) {
-      onNext({ location: "Cina PK", zipCode });
+      onNext({ location: "", zipCode });
     }
   };
 
@@ -40,7 +40,7 @@ export function LocationStep({
             />
           </div>
 
-          <p className="text-sm text-gray-600">Cina PK</p>
+          <p className="text-sm text-gray-600"></p>
 
           <div className="flex gap-3">
             <Button
