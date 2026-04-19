@@ -259,7 +259,7 @@ const Navbar = () => {
                   <Link href="/login">
                     <Button
                       variant="ghost"
-                      className={`text-sm font-medium hover:bg-white/10 ${textColorClasses}`}
+                      className={`text-sm font-medium hover:bg-white/10 !text-white`}
                     >
                       Log in
                     </Button>
@@ -340,7 +340,10 @@ const Navbar = () => {
                     {!session ? (
                       <>
                         <Link href="/login" onClick={() => setIsOpen(false)}>
-                          <Button variant="outline" className="w-full">
+                          <Button
+                            variant="outline"
+                            className="w-full !text-white"
+                          >
                             Log in
                           </Button>
                         </Link>
