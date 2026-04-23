@@ -1,7 +1,5 @@
 import React from "react";
 import { Facebook, Linkedin, Twitter, Instagram } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 
 const Footer = () => {
   const usefulLinks = [
@@ -24,7 +22,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#003366] text-white pt-16 pb-8 font-sans">
+    <footer className="bg-[#3ee0cf] text-slate-900 pt-16 pb-8 font-sans">
       <div className="container">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
@@ -32,37 +30,40 @@ const Footer = () => {
           <div className="space-y-6">
             <div className="flex items-center gap-2">
               {/* Replace with your actual logo image */}
-              <Link href={`/`}>
-                <div className="w-12 h-12 flex items-center justify-center">
+              {/* <Link href={`/`}>
+                <div className="w-52 h-52">
                   <Image
-                    src="/logo.png"
+                    src="/jetset-logo.webp"
                     alt="Jet Set Care Logo"
                     width={1000}
                     height={1000}
                     className="w-full h-full object-contain"
                   />
                 </div>
-              </Link>
+              </Link> */}
             </div>
             <div className="space-y-2">
-              <p className="text-gray-300 text-sm md:text-base">
+              <p className="text-slate-800 text-sm md:text-base">
                 Built on trust, care, and connection
               </p>
-              <p className="text-gray-300 text-sm md:text-base">
-                <span className="font-semibold">Email:</span> admin@jetsetcares.org
+              <p className="text-slate-800 text-sm md:text-base">
+                <span className="font-semibold">Email:</span>{" "}
+                admin@jetsetcares.org
               </p>
             </div>
           </div>
 
           {/* Column 2: Useful Links */}
           <div>
-            <h4 className="text-lg font-bold mb-6">Useful Links</h4>
+            <h4 className="text-lg font-bold mb-6 text-slate-900">
+              Useful Links
+            </h4>
             <ul className="space-y-4">
               {usefulLinks.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-gray-300 hover:text-white text-sm transition-colors"
+                    className="text-slate-800 hover:text-slate-900 text-sm transition-colors"
                   >
                     {link.name}
                   </a>
@@ -73,13 +74,15 @@ const Footer = () => {
 
           {/* Column 3: Other Links */}
           <div>
-            <h4 className="text-lg font-bold mb-6">Other Links</h4>
+            <h4 className="text-lg font-bold mb-6 text-slate-900">
+              Other Links
+            </h4>
             <ul className="space-y-4">
               {otherLinks.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-gray-300 hover:text-white text-sm transition-colors"
+                    className="text-slate-800 hover:text-slate-900 text-sm transition-colors"
                   >
                     {link.name}
                   </a>
@@ -90,13 +93,13 @@ const Footer = () => {
 
           {/* Column 4: Follow Us */}
           <div>
-            <h4 className="text-lg font-bold mb-6">Follow Us</h4>
+            <h4 className="text-lg font-bold mb-6 text-slate-900">Follow Us</h4>
             <div className="flex gap-4">
               {socialIcons.map((item, index) => (
                 <a
                   key={index}
                   href={item.href}
-                  className="w-10 h-10 rounded-full border border-gray-500 flex items-center justify-center hover:bg-white/10 transition-all"
+                  className="w-10 h-10 rounded-full border border-slate-400 flex items-center justify-center hover:bg-white/20 transition-all text-slate-800"
                 >
                   <item.Icon size={18} strokeWidth={1.5} />
                 </a>
@@ -106,8 +109,8 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-white/20 pt-8 text-center">
-          <p className="text-gray-300 text-sm">
+        <div className="border-t border-slate-400 pt-8 text-center">
+          <p className="text-slate-800 text-sm">
             @ 2025 Jetset cares. All Rights Reserved
           </p>
         </div>
