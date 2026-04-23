@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   User,
   Settings,
@@ -10,14 +11,23 @@ import {
   Menu,
   LogOut,
   ChevronRight,
-  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const menuItems = [
     {
@@ -40,6 +50,12 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
     },
   ];
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await signOut({ callbackUrl: "/" });
+    setIsLoggingOut(false);
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* --- Mobile Sidebar Overlay --- */}
@@ -53,34 +69,13 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {/* --- Sidebar --- */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-[#003366] text-white transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-64 bg-[#00D1C1] text-slate-900 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo Section */}
-          <div className="p-6 relative">
-            <Link href="/" className="block">
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                width={85}
-                height={85}
-                className="mx-auto object-contain"
-                priority
-              />
-            </Link>
-            {/* Mobile Close Button */}
-            <button
-              onClick={() => setIsSidebarOpen(false)}
-              className="absolute top-4 right-4 lg:hidden text-white/70 hover:text-white"
-            >
-              <X size={24} />
-            </button>
-          </div>
-
           {/* Navigation Items */}
-          <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto mt-5">
             {menuItems.map(
               (item) =>
                 item.show && (
@@ -91,8 +86,8 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     className={cn(
                       "flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 group",
                       pathname === item.href
-                        ? "bg-[#00D1C1] text-black font-semibold shadow-md"
-                        : "hover:bg-white/10 text-gray-300 hover:text-white",
+                        ? "bg-white/30 text-slate-900 font-semibold shadow-md backdrop-blur-sm"
+                        : "hover:bg-white/20 text-slate-800 hover:text-slate-900",
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -106,8 +101,11 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </nav>
 
           {/* Logout Section */}
-          <div className="p-4 border-t border-white/10">
-            <button className="flex items-center gap-3 px-4 py-3 w-full text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5">
+          <div className="p-4 border-t border-white/20">
+            <button
+              onClick={() => setIsLogoutDialogOpen(true)}
+              className="flex items-center gap-3 px-4 py-3 w-full text-slate-800 hover:text-red-600 transition-colors rounded-lg hover:bg-white/20"
+            >
               <LogOut size={20} />
               <span className="text-sm font-medium">Logout</span>
             </button>
@@ -133,6 +131,35 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="mx-auto">{children}</div>
         </main>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to logout? You&apos;ll need to login again
+              to access your account.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-3 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setIsLogoutDialogOpen(false)}
+              disabled={isLoggingOut}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+            >
+              {isLoggingOut ? "Logging out..." : "Logout"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
