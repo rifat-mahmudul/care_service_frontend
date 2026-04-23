@@ -259,7 +259,7 @@ const Navbar = () => {
                   <Link href="/login">
                     <Button
                       variant="ghost"
-                      className={`text-sm font-medium hover:bg-white/10 !text-white`}
+                      className={`text-sm font-medium hover:bg-white/10 ${textColorClasses}`}
                     >
                       Log in
                     </Button>

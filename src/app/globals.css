@@ -245,7 +245,7 @@
 }
 
 /* Custom Scrollbar */
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
@@ -262,7 +262,7 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--jetset-turquoise));
-}
+} */
 
 /* Animation Classes */
 @keyframes fadeInUp {
