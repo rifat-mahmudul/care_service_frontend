@@ -170,11 +170,11 @@ const Navbar = () => {
           <Link href="/">
             <div className="flex items-center">
               <Image
-                src="/logo.png"
+                src="/jetset-logo.webp"
                 alt="Logo"
                 width={100}
-                height={100}
-                className="h-[50px] w-[50px] object-cover sm:h-[55px] sm:w-[55px]"
+                height={500}
+                className="h-[50px] w-[50px] object-cover sm:h-[80px] sm:w-[80px]"
                 priority
               />
             </div>
