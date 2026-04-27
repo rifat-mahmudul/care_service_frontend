@@ -2,7 +2,6 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { BookOpen, Award, Globe } from "lucide-react";
-import Image from "next/image";
 
 const AcademySection = () => {
   return (
@@ -38,29 +37,26 @@ const AcademySection = () => {
             </Button>
           </div>
 
-          {/* ডান পাশে সোরার ইমেজ এবং ব্যাজেস */}
+          {/* ডান পাশে ভিডিও এবং ব্যাজেস */}
           <div className="relative flex justify-center lg:justify-end">
-            {/* মেইন কন্টেইনার - ডেস্কটপে সাইজ বাড়ানো হয়েছে (max-w-[550px]) */}
             <div className="relative w-full max-w-[400px] md:max-w-[550px] aspect-square flex justify-center items-center">
-              {/* রাউন্ডেড ইমেজ কন্টেইনার */}
-              <div className="relative w-[90%] h-[90%] rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl border-4 border-white bg-white/50 backdrop-blur-sm">
-                <Image
-                  src="/sora-cat.jpg"
-                  alt="Sora the Cat - JetSet Academy Mascot"
-                  fill
-                  className="object-cover"
-                  priority
+              {/* ভিডিও কন্টেইনার - পুরো ভিডিও দেখানোর জন্য object-contain ব্যবহার করা হয়েছে */}
+              <div className="relative w-[90%] h-[90%] rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl border-4 border-white bg-black/20">
+                <video
+                  src="/cat_video.mp4"
+                  className="w-full h-full object-contain"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
                 />
               </div>
 
-              {/* ব্যাজেস - দুই কর্নারে নিখুঁত অ্যালাইনমেন্ট */}
-
-              {/* উপরে-ডানে: Award Badge */}
+              {/* ব্যাজেস - দুই কর্নারে */}
               <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6 bg-white rounded-2xl p-4 md:p-5 shadow-[0_10px_25px_rgba(0,0,0,0.1)] border border-gray-100 z-20 animate-bounce-slow">
                 <Award className="w-10 h-10 md:w-14 md:h-14 text-[#F59E0B]" />
               </div>
 
-              {/* নিচে-বামে: Globe Badge */}
               <div className="absolute -bottom-4 -left-4 md:-bottom-6 md:-left-6 bg-white rounded-2xl p-4 md:p-5 shadow-[0_10px_25px_rgba(0,0,0,0.1)] border border-gray-100 z-20">
                 <Globe className="w-10 h-10 md:w-14 md:h-14 text-[#40E0D0]" />
               </div>
