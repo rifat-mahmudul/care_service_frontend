@@ -1,13 +1,30 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 
 const Hero = () => {
+  const [backgroundImage, setBackgroundImage] = useState("/banner.jpeg");
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setBackgroundImage("/mobile-banner.webp");
+      } else {
+        setBackgroundImage("/banner.jpeg");
+      }
+    };
+
+    handleResize(); // Set initial value
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div
       className="min-h-[calc(100vh)] flex items-center pt-20 pb-20 lg:pb-0 lg:pt-0 relative"
       style={{
-        backgroundImage: "url('/banner.jpeg')",
-        backgroundSize: "100% auto",
+        backgroundImage: `url('${backgroundImage}')`,
+        backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
         backgroundColor: "#0a2b3e0",
