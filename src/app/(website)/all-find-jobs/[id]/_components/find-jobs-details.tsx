@@ -6,8 +6,18 @@ import { ProfileHero } from "@/app/(website)/all-find-care/[id]/_components/prof
 import ReviewSection from "@/app/(website)/all-find-care/[id]/_components/review-section";
 import { ServiceDetails } from "@/app/(website)/all-find-care/[id]/_components/service-details";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
-import React from "react";
+import { useSession } from "next-auth/react";
+import { useParams, useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 // Review rating interface
 interface ReviewRating {
@@ -114,12 +124,31 @@ interface ServiceData {
 
 const FindJobsDetails = () => {
   const { id } = useParams();
+  const router = useRouter();
+  const session = useSession();
+  const token = session?.data?.user?.accessToken;
+  const isAuthenticated = session?.status === "authenticated";
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+
+  useEffect(() => {
+    if (
+      session?.status === "loading" ||
+      session?.status === "unauthenticated"
+    ) {
+      setShowLoginDialog(true);
+    }
+  }, [session?.status]);
 
   const { data: serviceData, isLoading } = useQuery<ServiceData>({
     queryKey: ["find-job-details", id],
     queryFn: async () => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/service/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
       if (!res.ok) {
         throw new Error("Failed to fetch service details");
@@ -127,7 +156,49 @@ const FindJobsDetails = () => {
       const data = await res.json();
       return data;
     },
+    enabled: !!id && !!token && isAuthenticated,
   });
+
+  const handleLogin = () => {
+    setShowLoginDialog(false);
+    router.push("/login");
+  };
+
+  // Show login dialog for unauthenticated users
+  if (!isAuthenticated && session?.status !== "loading") {
+    return (
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center">
+              Authentication Required
+            </DialogTitle>
+            <DialogDescription className="text-center pt-4">
+              Please log in to view job details and book services.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowLoginDialog(false);
+                router.back();
+              }}
+              className="w-full sm:w-auto"
+            >
+              Go Back
+            </Button>
+            <Button
+              onClick={handleLogin}
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+            >
+              Login
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   if (isLoading) {
     return (
