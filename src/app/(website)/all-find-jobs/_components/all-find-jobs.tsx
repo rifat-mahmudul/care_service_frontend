@@ -249,10 +249,7 @@ const AllFindJobs = () => {
             >
               Go Back
             </Button>
-            <Button
-              onClick={handleLogin}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
-            >
+            <Button onClick={handleLogin} className="w-full sm:w-auto">
               Login
             </Button>
           </DialogFooter>
