@@ -258,8 +258,7 @@ const Navbar = () => {
                 <>
                   <Link href="/login">
                     <Button
-                      variant="ghost"
-                      className={`text-sm font-medium hover:bg-white/10 ${textColorClasses}`}
+                      className={`text-sm bg-inherit hover:bg-inherit font-medium !hover:text-white ${textColorClasses}`}
                     >
                       Log in
                     </Button>
@@ -342,7 +341,7 @@ const Navbar = () => {
                         <Link href="/login" onClick={() => setIsOpen(false)}>
                           <Button
                             variant="outline"
-                            className="w-full !text-white"
+                            className="w-full !text-white !hover:text-white"
                           >
                             Log in
                           </Button>
