@@ -1,7 +1,7 @@
 // src/components/home/categories.tsx
 "use client";
 
-import { MoveRight } from "lucide-react";
+import { MoveRight, CheckCircle, Lock } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -111,6 +111,9 @@ export default function Categories() {
     return userProfile.category.includes(categoryId);
   };
 
+  // Get user's categories
+  const userCategories = userProfile?.category || [];
+
   return (
     <div className="container mx-auto space-y-10 py-10 px-4 md:px-6 lg:px-8">
       <div>
@@ -149,40 +152,66 @@ export default function Categories() {
                 type="button"
                 onClick={() => !disabled && setSelectedCategory(cat)}
                 disabled={disabled}
-                className={`group text-left shadow-[0_4px_24px_rgba(0,0,0,0.15)] p-4 rounded-xl transition-all duration-200 bg-white border border-gray-100 ${
+                className={`group text-left shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-xl transition-all duration-200 bg-white border relative overflow-hidden ${
                   disabled
-                    ? "opacity-50 cursor-not-allowed hover:scale-100"
-                    : "hover:scale-[1.04] hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                    ? "opacity-70 cursor-not-allowed hover:scale-100 border-gray-200"
+                    : "hover:scale-[1.04] hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary border-gray-100"
                 }`}
               >
-                <div className="relative w-full h-[202px] overflow-hidden rounded-lg">
+                {/* Disabled Overlay Badge */}
+                {disabled && (
+                  <div className="absolute top-3 right-3 z-10 bg-gray-900/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-lg">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    Already Added
+                  </div>
+                )}
+
+                {/* Image Container */}
+                <div className="relative w-full h-[202px] overflow-hidden rounded-t-xl">
                   <Image
                     src={cat?.image}
                     alt={`${cat.name} category`}
                     fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105 w-full h-full"
+                    className={`object-cover transition-transform duration-300 ${
+                      !disabled && "group-hover:scale-105"
+                    } w-full h-full ${disabled && "opacity-60"}`}
                     priority={false}
                   />
+                  {/* Dark Overlay for disabled */}
+                  {disabled && <div className="absolute inset-0 bg-black/40" />}
                 </div>
 
-                <div className="mt-5 flex items-center justify-between">
-                  <span
-                    className={`text-lg font-semibold transition-colors truncate ${
-                      disabled
-                        ? "text-gray-400"
-                        : "text-gray-900 group-hover:text-primary"
-                    }`}
-                  >
-                    {cat.name}
-                    {disabled && " (Already Added)"}
-                  </span>
-                  <MoveRight
-                    className={`w-6 h-6 transition-colors ${
-                      disabled
-                        ? "text-gray-400"
-                        : "text-gray-500 group-hover:text-primary"
-                    }`}
-                  />
+                {/* Content */}
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <span
+                        className={`text-lg font-semibold transition-colors block ${
+                          disabled
+                            ? "text-gray-500"
+                            : "text-gray-900 group-hover:text-primary"
+                        }`}
+                      >
+                        {cat.name}
+                      </span>
+                      {disabled && (
+                        <span className="text-xs text-gray-400 mt-1 block">
+                          Service already added to your profile
+                        </span>
+                      )}
+                    </div>
+                    {disabled ? (
+                      <Lock className="w-5 h-5 text-gray-400" />
+                    ) : (
+                      <MoveRight
+                        className={`w-5 h-5 transition-colors ${
+                          disabled
+                            ? "text-gray-400"
+                            : "text-gray-500 group-hover:text-primary group-hover:translate-x-1 transition-transform"
+                        }`}
+                      />
+                    )}
+                  </div>
                 </div>
               </button>
             );
@@ -200,6 +229,33 @@ export default function Categories() {
           />
         )}
       </div>
+
+      {/* Show user's added categories summary if logged in and has categories */}
+      {userProfile && userCategories.length > 0 && (
+        <div className="mt-10 pt-6 border-t border-gray-200">
+          <div className="bg-gradient-to-r from-primary/5 to-transparent rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <h3 className="font-semibold text-gray-900">
+                Your Added Services
+              </h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {categories
+                .filter((cat) => userCategories.includes(cat._id))
+                .map((cat) => (
+                  <span
+                    key={cat._id}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-sm"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    {cat.name}
+                  </span>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
