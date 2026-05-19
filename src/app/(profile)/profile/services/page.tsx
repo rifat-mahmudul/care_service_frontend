@@ -1,10 +1,10 @@
 import React from "react";
-import Services from "./_components/services";
+import MyServices from "./_components/my-services";
 
 const page = () => {
   return (
     <div>
-      <Services />
+      <MyServices />
     </div>
   );
 };
