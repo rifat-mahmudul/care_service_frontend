@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useForm, type Control, type SubmitHandler } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useSession } from "next-auth/react";
@@ -14,11 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 
 const profileSchema = z.object({
@@ -27,9 +22,9 @@ const profileSchema = z.object({
   email: z.string().email(),
   phone: z.string().optional(),
   bio: z.string().optional(),
-  zip: z.string().optional(),
+  country: z.string().optional(),
+  city: z.string().optional(),
   experience: z.number().optional(),
-  // Multi-select fields (Only for "find job" role)
   language: z.array(z.string()).default([]),
   agegroup: z.array(z.string()).default([]),
   education: z.array(z.string()).default([]),
@@ -38,8 +33,18 @@ const profileSchema = z.object({
   perferences: z.array(z.string()).default([]),
 });
 
-// Type inference from the schema input to match the zod resolver
 type ProfileFormValues = z.input<typeof profileSchema>;
+
+interface Country {
+  _id: string;
+  countryName: string;
+  cityName: string;
+}
+
+interface Language {
+  _id: string;
+  languageName: string;
+}
 
 const EditProfilePage = () => {
   const { data: session } = useSession();
@@ -47,10 +52,14 @@ const EditProfilePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [isSettingUpStripe, setIsSettingUpStripe] = useState(false);
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [countryValue, setCountryValue] = useState("");
+  const [cityValue, setCityValue] = useState("");
 
-  // Tag input states for multiple values
+  // Tag input states
   const [currentSkillTag, setCurrentSkillTag] = useState("");
-  const [currentLanguageTag, setCurrentLanguageTag] = useState("");
   const [currentEducationTag, setCurrentEducationTag] = useState("");
   const [currentAgeGroupTag, setCurrentAgeGroupTag] = useState("");
   const [currentCanHelpWithTag, setCurrentCanHelpWithTag] = useState("");
@@ -64,7 +73,8 @@ const EditProfilePage = () => {
       email: session?.user?.email || "",
       phone: "",
       bio: "",
-      zip: "",
+      country: "",
+      city: "",
       experience: 0,
       language: [],
       agegroup: [],
@@ -75,7 +85,68 @@ const EditProfilePage = () => {
     },
   });
 
-  const formControl = form.control as unknown as Control<ProfileFormValues>;
+  // Fetch countries
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/country/`,
+        );
+        if (!response.ok) throw new Error("Failed to fetch countries");
+        const json = await response.json();
+        setCountries(json.data);
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+      }
+    };
+    fetchCountries();
+  }, []);
+
+  // Fetch languages
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/language`,
+        );
+        if (!response.ok) throw new Error("Failed to fetch languages");
+        const json = await response.json();
+        setLanguages(json.data);
+      } catch (error) {
+        console.error("Error fetching languages:", error);
+      }
+    };
+    fetchLanguages();
+  }, []);
+
+  // Update cities when country changes
+  const updateCities = (countryName: string) => {
+    if (countryName && countries) {
+      const cities = countries
+        .filter((item) => item.countryName === countryName)
+        .map((item) => item.cityName)
+        .filter((value, index, self) => self.indexOf(value) === index);
+      setAvailableCities(cities);
+    } else {
+      setAvailableCities([]);
+    }
+  };
+
+  // Sync local state with form values
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "country") {
+        setCountryValue(value.country || "");
+        if (value.country) {
+          updateCities(value.country);
+        }
+      }
+      if (name === "city") {
+        setCityValue(value.city || "");
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, countries]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -107,15 +178,23 @@ const EditProfilePage = () => {
           email: data.email || "",
           phone: data.phone || "",
           bio: data.bio || "",
-          zip: data.zip || "",
+          country: data.country || "",
+          city: data.city || "",
           experience: data.exprience || data.experience || 0,
           language: data.language || [],
           agegroup: data.agegroup || [],
           education: data.education || [],
           canHelpWith: data.canHelpWith || [],
           professionalSkill: data.professionalSkill || [],
-          perferences: [],
+          perferences: data.perferences || [],
         });
+
+        setCountryValue(data.country || "");
+        setCityValue(data.city || "");
+
+        if (data.country) {
+          updateCities(data.country);
+        }
       } catch (error) {
         console.error("Error fetching profile:", error);
         toast.error("Failed to load profile data");
@@ -156,7 +235,6 @@ const EditProfilePage = () => {
     }
   };
 
-  // Helper function to handle multi-item fields (Tags)
   const addTag = (
     field: keyof ProfileFormValues,
     value: string,
@@ -198,11 +276,8 @@ const EditProfilePage = () => {
       }
 
       const result = await response.json();
-      toast.success(
-        result.data.message || "Stripe account created successfully!",
-      );
+      toast.success(result.data.message || "Stripe account created successfully!");
 
-      // Navigate to Stripe URL
       if (result.data.url) {
         window.open(result.data.url, "_blank");
       }
@@ -217,6 +292,12 @@ const EditProfilePage = () => {
       setIsSettingUpStripe(false);
     }
   };
+
+  const uniqueCountries = countries
+    ? Array.from(
+        new Map(countries.map((item) => [item.countryName, item])).values(),
+      )
+    : [];
 
   return (
     <div className="mx-auto border shadow-lg p-5 rounded-xl">
@@ -244,7 +325,7 @@ const EditProfilePage = () => {
                 {isSettingUpStripe && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                <CreditCard /> Set Up Stripe
+                <CreditCard className="mr-2" /> Set Up Stripe
               </Button>
             )}
           </div>
@@ -252,461 +333,322 @@ const EditProfilePage = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={formControl}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-black">First Name *</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          className="focus-visible:ring-[#00D1C1]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                <div>
+                  <Label className="text-black">First Name *</Label>
+                  <Input
+                    {...form.register("firstName")}
+                    className="focus-visible:ring-[#00D1C1] mt-2"
+                  />
+                  {form.formState.errors.firstName && (
+                    <p className="text-sm text-red-500 mt-1">{form.formState.errors.firstName.message}</p>
                   )}
-                />
-                <FormField
-                  control={formControl}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-black">Last Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          className="focus-visible:ring-[#00D1C1]"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                </div>
+                <div>
+                  <Label className="text-black">Last Name</Label>
+                  <Input
+                    {...form.register("lastName")}
+                    className="focus-visible:ring-[#00D1C1] mt-2"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={formControl}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input {...field} disabled className="bg-gray-50" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={formControl}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div>
+                  <Label>Email</Label>
+                  <Input
+                    value={form.watch("email")}
+                    disabled
+                    className="bg-gray-50 mt-2"
+                  />
+                </div>
+                <div>
+                  <Label>Phone Number</Label>
+                  <Input
+                    {...form.register("phone")}
+                    className="mt-2"
+                  />
+                </div>
               </div>
 
+              {/* Location Fields - Using native select for better compatibility */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={formControl}
-                  name="zip"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Zip / Location</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g. 1212, Dhaka" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <div>
+                  <Label>Country</Label>
+                  <select
+                    value={countryValue}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setCountryValue(value);
+                      form.setValue("country", value);
+                      form.setValue("city", "");
+                      setCityValue("");
+                      updateCities(value);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00D1C1] mt-2"
+                  >
+                    <option value="">Select country</option>
+                    {uniqueCountries.map((country) => (
+                      <option key={country._id} value={country.countryName}>
+                        {country.countryName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <Label>City</Label>
+                  <select
+                    value={cityValue}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setCityValue(value);
+                      form.setValue("city", value);
+                    }}
+                    disabled={availableCities.length === 0}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00D1C1] mt-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">
+                      {availableCities.length === 0 ? "Select country first" : "Select city"}
+                    </option>
+                    {availableCities.map((city, index) => (
+                      <option key={index} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <Label>Bio</Label>
+                <Textarea
+                  {...form.register("bio")}
+                  className="min-h-[100px] mt-2"
+                  placeholder="Tell us about yourself..."
                 />
               </div>
 
-              <FormField
-                control={formControl}
-                name="bio"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bio</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        className="min-h-[100px]"
-                        placeholder="Tell us about yourself..."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Only Show these fields if role is "find job" */}
+              {/* Professional Details - Only for find job role */}
               {session?.user?.role === "find job" && (
                 <div className="space-y-6 pt-4 border-t border-gray-100">
                   <h3 className="font-semibold text-black text-lg">
                     Professional Details
                   </h3>
 
-                  {/* Experience Level */}
-                  <FormField
-                    control={formControl}
-                    name="experience"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Experience (Years)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value ? parseInt(e.target.value) : 0,
-                              )
-                            }
-                            value={field.value || 0}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div>
+                    <Label>Experience (Years)</Label>
+                    <Input
+                      type="number"
+                      {...form.register("experience", { valueAsNumber: true })}
+                      className="mt-2"
+                    />
+                  </div>
 
-                  {/* Multi-Item: Professional Skills */}
+                  {/* Languages */}
+                  <div>
+                    <Label>Languages</Label>
+                    <select
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value) {
+                          const currentValues = form.getValues("language") || [];
+                          if (!currentValues.includes(value)) {
+                            form.setValue("language", [...currentValues, value]);
+                          }
+                          e.target.value = "";
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00D1C1] mt-2"
+                    >
+                      <option value="">Select languages</option>
+                      {languages.map((lang) => (
+                        <option key={lang._id} value={lang.languageName}>
+                          {lang.languageName}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {form.watch("language")?.map((lang: string, index: number) => (
+                        <span
+                          key={index}
+                          className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                        >
+                          {lang}
+                          <X
+                            size={14}
+                            className="cursor-pointer hover:text-red-400"
+                            onClick={() => {
+                              const newValue = form.getValues("language")?.filter((l: string) => l !== lang);
+                              form.setValue("language", newValue || []);
+                            }}
+                          />
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Professional Skills */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-black">
-                      Professional Skills
-                    </Label>
+                    <Label>Professional Skills</Label>
                     <div className="flex gap-2">
                       <Input
                         value={currentSkillTag}
                         onChange={(e) => setCurrentSkillTag(e.target.value)}
-                        placeholder="Add a skill (e.g., React, Python)..."
+                        placeholder="Add a skill..."
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            addTag(
-                              "professionalSkill",
-                              currentSkillTag,
-                              setCurrentSkillTag,
-                            );
+                            addTag("professionalSkill", currentSkillTag, setCurrentSkillTag);
                           }
                         }}
                       />
                       <Button
                         type="button"
-                        onClick={() =>
-                          addTag(
-                            "professionalSkill",
-                            currentSkillTag,
-                            setCurrentSkillTag,
-                          )
-                        }
+                        onClick={() => addTag("professionalSkill", currentSkillTag, setCurrentSkillTag)}
                         className="bg-[#00D1C1] hover:bg-[#00b8aa]"
                       >
                         <Plus size={18} />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {form
-                        .watch("professionalSkill")
-                        ?.map((skill: string, index: number) => (
-                          <span
-                            key={index}
-                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                          >
-                            {skill}
-                            <X
-                              size={14}
-                              className="cursor-pointer hover:text-red-400"
-                              onClick={() =>
-                                removeTag("professionalSkill", skill)
-                              }
-                            />
-                          </span>
-                        ))}
-                    </div>
-                  </div>
-
-                  {/* Languages */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-black">
-                      Languages
-                    </Label>
-                    <div className="flex gap-2">
-                      <Input
-                        value={currentLanguageTag}
-                        onChange={(e) => setCurrentLanguageTag(e.target.value)}
-                        placeholder="Add a language (e.g., English, Bengali)..."
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            addTag(
-                              "language",
-                              currentLanguageTag,
-                              setCurrentLanguageTag,
-                            );
-                          }
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        onClick={() =>
-                          addTag(
-                            "language",
-                            currentLanguageTag,
-                            setCurrentLanguageTag,
-                          )
-                        }
-                        className="bg-[#00D1C1] hover:bg-[#00b8aa]"
-                      >
-                        <Plus size={18} />
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {form
-                        .watch("language")
-                        ?.map((lang: string, index: number) => (
-                          <span
-                            key={index}
-                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                          >
-                            {lang}
-                            <X
-                              size={14}
-                              className="cursor-pointer hover:text-red-400"
-                              onClick={() => removeTag("language", lang)}
-                            />
-                          </span>
-                        ))}
+                      {form.watch("professionalSkill")?.map((skill: string, index: number) => (
+                        <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                          {skill}
+                          <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("professionalSkill", skill)} />
+                        </span>
+                      ))}
                     </div>
                   </div>
 
                   {/* Education */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-black">
-                      Education
-                    </Label>
+                    <Label>Education</Label>
                     <div className="flex gap-2">
                       <Input
                         value={currentEducationTag}
                         onChange={(e) => setCurrentEducationTag(e.target.value)}
-                        placeholder="Add education (e.g., B.Sc in CSE)..."
+                        placeholder="Add education..."
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            addTag(
-                              "education",
-                              currentEducationTag,
-                              setCurrentEducationTag,
-                            );
+                            addTag("education", currentEducationTag, setCurrentEducationTag);
                           }
                         }}
                       />
                       <Button
                         type="button"
-                        onClick={() =>
-                          addTag(
-                            "education",
-                            currentEducationTag,
-                            setCurrentEducationTag,
-                          )
-                        }
+                        onClick={() => addTag("education", currentEducationTag, setCurrentEducationTag)}
                         className="bg-[#00D1C1] hover:bg-[#00b8aa]"
                       >
                         <Plus size={18} />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {form
-                        .watch("education")
-                        ?.map((edu: string, index: number) => (
-                          <span
-                            key={index}
-                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                          >
-                            {edu}
-                            <X
-                              size={14}
-                              className="cursor-pointer hover:text-red-400"
-                              onClick={() => removeTag("education", edu)}
-                            />
-                          </span>
-                        ))}
+                      {form.watch("education")?.map((edu: string, index: number) => (
+                        <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                          {edu}
+                          <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("education", edu)} />
+                        </span>
+                      ))}
                     </div>
                   </div>
 
                   {/* Age Group */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-black">
-                      Age Group Preference
-                    </Label>
+                    <Label>Age Group Preference</Label>
                     <div className="flex gap-2">
                       <Input
                         value={currentAgeGroupTag}
                         onChange={(e) => setCurrentAgeGroupTag(e.target.value)}
-                        placeholder="Add age group (e.g., 5-10, 11-15)..."
+                        placeholder="Add age group..."
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            addTag(
-                              "agegroup",
-                              currentAgeGroupTag,
-                              setCurrentAgeGroupTag,
-                            );
+                            addTag("agegroup", currentAgeGroupTag, setCurrentAgeGroupTag);
                           }
                         }}
                       />
                       <Button
                         type="button"
-                        onClick={() =>
-                          addTag(
-                            "agegroup",
-                            currentAgeGroupTag,
-                            setCurrentAgeGroupTag,
-                          )
-                        }
+                        onClick={() => addTag("agegroup", currentAgeGroupTag, setCurrentAgeGroupTag)}
                         className="bg-[#00D1C1] hover:bg-[#00b8aa]"
                       >
                         <Plus size={18} />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {form
-                        .watch("agegroup")
-                        ?.map((age: string, index: number) => (
-                          <span
-                            key={index}
-                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                          >
-                            {age}
-                            <X
-                              size={14}
-                              className="cursor-pointer hover:text-red-400"
-                              onClick={() => removeTag("agegroup", age)}
-                            />
-                          </span>
-                        ))}
+                      {form.watch("agegroup")?.map((age: string, index: number) => (
+                        <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                          {age}
+                          <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("agegroup", age)} />
+                        </span>
+                      ))}
                     </div>
                   </div>
 
                   {/* Can Help With */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-black">
-                      Can Help With
-                    </Label>
+                    <Label>Can Help With</Label>
                     <div className="flex gap-2">
                       <Input
                         value={currentCanHelpWithTag}
-                        onChange={(e) =>
-                          setCurrentCanHelpWithTag(e.target.value)
-                        }
-                        placeholder="Add subject (e.g., Mathematics, Physics)..."
+                        onChange={(e) => setCurrentCanHelpWithTag(e.target.value)}
+                        placeholder="Add subject..."
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            addTag(
-                              "canHelpWith",
-                              currentCanHelpWithTag,
-                              setCurrentCanHelpWithTag,
-                            );
+                            addTag("canHelpWith", currentCanHelpWithTag, setCurrentCanHelpWithTag);
                           }
                         }}
                       />
                       <Button
                         type="button"
-                        onClick={() =>
-                          addTag(
-                            "canHelpWith",
-                            currentCanHelpWithTag,
-                            setCurrentCanHelpWithTag,
-                          )
-                        }
+                        onClick={() => addTag("canHelpWith", currentCanHelpWithTag, setCurrentCanHelpWithTag)}
                         className="bg-[#00D1C1] hover:bg-[#00b8aa]"
                       >
                         <Plus size={18} />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {form
-                        .watch("canHelpWith")
-                        ?.map((subject: string, index: number) => (
-                          <span
-                            key={index}
-                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                          >
-                            {subject}
-                            <X
-                              size={14}
-                              className="cursor-pointer hover:text-red-400"
-                              onClick={() => removeTag("canHelpWith", subject)}
-                            />
-                          </span>
-                        ))}
+                      {form.watch("canHelpWith")?.map((subject: string, index: number) => (
+                        <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                          {subject}
+                          <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("canHelpWith", subject)} />
+                        </span>
+                      ))}
                     </div>
                   </div>
 
                   {/* Preferences */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-black">
-                      Preferences
-                    </Label>
+                    <Label>Preferences</Label>
                     <div className="flex gap-2">
                       <Input
                         value={currentPreferenceTag}
-                        onChange={(e) =>
-                          setCurrentPreferenceTag(e.target.value)
-                        }
+                        onChange={(e) => setCurrentPreferenceTag(e.target.value)}
                         placeholder="Add preference..."
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            addTag(
-                              "perferences",
-                              currentPreferenceTag,
-                              setCurrentPreferenceTag,
-                            );
+                            addTag("perferences", currentPreferenceTag, setCurrentPreferenceTag);
                           }
                         }}
                       />
                       <Button
                         type="button"
-                        onClick={() =>
-                          addTag(
-                            "perferences",
-                            currentPreferenceTag,
-                            setCurrentPreferenceTag,
-                          )
-                        }
+                        onClick={() => addTag("perferences", currentPreferenceTag, setCurrentPreferenceTag)}
                         className="bg-[#00D1C1] hover:bg-[#00b8aa]"
                       >
                         <Plus size={18} />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {form
-                        .watch("perferences")
-                        ?.map((pref: string, index: number) => (
-                          <span
-                            key={index}
-                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                          >
-                            {pref}
-                            <X
-                              size={14}
-                              className="cursor-pointer hover:text-red-400"
-                              onClick={() => removeTag("perferences", pref)}
-                            />
-                          </span>
-                        ))}
+                      {form.watch("perferences")?.map((pref: string, index: number) => (
+                        <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                          {pref}
+                          <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("perferences", pref)} />
+                        </span>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -718,9 +660,7 @@ const EditProfilePage = () => {
                   disabled={isLoading}
                   className="bg-primary hover:bg-[#042a2a] text-white px-8 h-12 rounded-lg"
                 >
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save Changes
                 </Button>
               </div>
