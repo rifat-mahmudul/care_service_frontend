@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
@@ -69,13 +70,33 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {/* --- Sidebar --- */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-[#00D1C1] text-slate-900 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-72 bg-[#00D1C1] text-slate-900 transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex flex-col h-full">
+          {/* Logo Section */}
+          <div className="flex justify-center items-center py-8 px-6 border-b border-white/20">
+            <Link
+              href="/"
+              onClick={() => setIsSidebarOpen(false)}
+              className="w-full"
+            >
+              <div className="relative w-full h-24 bg-white rounded-xl p-3 shadow-md flex items-center justify-center">
+                <Image
+                  src="/jetset-logo.webp"
+                  alt="JetSet Cares"
+                  width={220}
+                  height={80}
+                  className="object-contain w-auto h-full"
+                  priority
+                />
+              </div>
+            </Link>
+          </div>
+
           {/* Navigation Items */}
-          <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto mt-5">
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             {menuItems.map(
               (item) =>
                 item.show && (
@@ -117,7 +138,17 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header (Mobile Toggle) */}
         <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-gray-200 lg:hidden sticky top-0 z-30 shadow-sm">
-          <h2 className="text-[#003366] font-bold text-lg">JetSet Cares</h2>
+          <Link href="/">
+            <div className="relative w-40 h-12">
+              <Image
+                src="/jetset-logo.webp"
+                alt="JetSet Cares"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+          </Link>
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
