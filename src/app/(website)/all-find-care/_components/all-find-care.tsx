@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import Banner from "@/components/shared/find-job-care/banner";
 import ProfileCard from "@/components/shared/find-job-care/profile-card";
