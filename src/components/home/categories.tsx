@@ -58,11 +58,13 @@ const fetchCategories = async (): Promise<Category[]> => {
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────
 const CategorySkeleton = () => (
-  <div className="shadow-[0_4px_24px_#0000003D] p-4 rounded-xl bg-white animate-pulse">
-    <div className="h-[150px] w-full bg-gray-200 rounded-lg" />
-    <div className="mt-6 flex items-center justify-between">
-      <div className="h-6 w-32 bg-gray-300 rounded" />
-      <div className="h-6 w-6 bg-gray-300 rounded-full" />
+  <div className="shadow-[0_4px_24px_#0000003D] rounded-xl bg-white animate-pulse overflow-hidden">
+    <div className="relative w-full aspect-[4/3] bg-gray-200" />
+    <div className="p-4">
+      <div className="flex items-center justify-between">
+        <div className="h-6 w-32 bg-gray-300 rounded" />
+        <div className="h-5 w-5 bg-gray-300 rounded-full" />
+      </div>
     </div>
   </div>
 );
@@ -78,7 +80,7 @@ export default function Categories() {
   } = useQuery<Category[], Error>({
     queryKey: ["categories"],
     queryFn: fetchCategories,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
@@ -152,66 +154,65 @@ export default function Categories() {
                 type="button"
                 onClick={() => !disabled && setSelectedCategory(cat)}
                 disabled={disabled}
-                className={`group text-left shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-xl transition-all duration-200 bg-white border relative overflow-hidden ${
+                className={`group text-left shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-xl transition-all duration-200 bg-white border relative overflow-hidden flex flex-col ${
                   disabled
                     ? "opacity-70 cursor-not-allowed hover:scale-100 border-gray-200"
-                    : "hover:scale-[1.04] hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary border-gray-100"
+                    : "hover:scale-[1.02] hover:shadow-xl hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary border-gray-100"
                 }`}
               >
                 {/* Disabled Overlay Badge */}
                 {disabled && (
-                  <div className="absolute top-3 right-3 z-10 bg-gray-900/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-lg">
-                    <CheckCircle className="w-3.5 h-3.5" />
-                    Already Added
+                  <div className="absolute top-3 right-3 z-10 bg-black/80 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-lg">
+                    <CheckCircle className="w-3 h-3" />
+                    Added
                   </div>
                 )}
 
-                {/* Image Container */}
-                <div className="relative w-full h-[202px] overflow-hidden rounded-t-xl">
+                {/* Image Container - Fixed aspect ratio */}
+                <div className="relative w-full aspect-[4/3] bg-gray-100 overflow-hidden">
                   <Image
                     src={cat?.image}
                     alt={`${cat.name} category`}
                     fill
                     className={`object-cover transition-transform duration-300 ${
                       !disabled && "group-hover:scale-105"
-                    } w-full h-full ${disabled && "opacity-60"}`}
+                    }`}
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
                     priority={false}
                   />
                   {/* Dark Overlay for disabled */}
-                  {disabled && <div className="absolute inset-0 bg-black/40" />}
+                  {disabled && <div className="absolute inset-0 bg-black/30" />}
                 </div>
 
-                {/* Content */}
-                <div className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <span
-                        className={`text-lg font-semibold transition-colors block ${
-                          disabled
-                            ? "text-gray-500"
-                            : "text-gray-900 group-hover:text-primary"
-                        }`}
-                      >
-                        {cat.name}
-                      </span>
-                      {disabled && (
-                        <span className="text-xs text-gray-400 mt-1 block">
-                          Service already added to your profile
-                        </span>
-                      )}
-                    </div>
+                {/* Content - Fixed height for consistency */}
+                <div className="p-4 flex-1 flex flex-col justify-between">
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`text-base font-semibold transition-colors line-clamp-1 ${
+                        disabled
+                          ? "text-gray-500"
+                          : "text-gray-900 group-hover:text-primary"
+                      }`}
+                    >
+                      {cat.name}
+                    </span>
                     {disabled ? (
-                      <Lock className="w-5 h-5 text-gray-400" />
+                      <Lock className="w-4 h-4 text-gray-400 flex-shrink-0" />
                     ) : (
                       <MoveRight
-                        className={`w-5 h-5 transition-colors ${
+                        className={`w-4 h-4 transition-all flex-shrink-0 ${
                           disabled
                             ? "text-gray-400"
-                            : "text-gray-500 group-hover:text-primary group-hover:translate-x-1 transition-transform"
+                            : "text-gray-500 group-hover:text-primary group-hover:translate-x-1"
                         }`}
                       />
                     )}
                   </div>
+                  {disabled && (
+                    <span className="text-xs text-gray-400 mt-1 block">
+                      Already in your list
+                    </span>
+                  )}
                 </div>
               </button>
             );
@@ -234,10 +235,10 @@ export default function Categories() {
       {userProfile && userCategories.length > 0 && (
         <div className="mt-10 pt-6 border-t border-gray-200">
           <div className="bg-gradient-to-r from-primary/5 to-transparent rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-3">
               <CheckCircle className="w-5 h-5 text-green-600" />
               <h3 className="font-semibold text-gray-900">
-                Your Added Services
+                Your Added Services ({userCategories.length})
               </h3>
             </div>
             <div className="flex flex-wrap gap-2">
