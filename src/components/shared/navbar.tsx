@@ -115,7 +115,7 @@ const Navbar = () => {
         // Show only Find Jobs for care seekers
         return [
           {
-            title: "Find Jobs",
+            title: "Find Trusted Childcare",
             content: <FindJobCategory />,
           },
         ];
@@ -137,7 +137,7 @@ const Navbar = () => {
         content: <FindCareCategory />,
       },
       {
-        title: "Find Jobs",
+        title: "Find Trusted Childcare",
         content: <FindJobCategory />,
       },
     ];
