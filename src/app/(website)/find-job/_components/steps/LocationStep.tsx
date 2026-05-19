@@ -3,16 +3,61 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 import { FindJobDataTypes } from "../find-job-data-type";
 
+interface Country {
+  _id: string;
+  countryName: string;
+  cityName: string;
+}
+
 interface LocationStepProps {
-  data: FindJobDataTypes; // Changed from Partial to full type
+  data: FindJobDataTypes;
   onNext: (data: Partial<FindJobDataTypes>) => void;
   onBack: () => void;
 }
 
 export function LocationStep({ data, onNext, onBack }: LocationStepProps) {
-  const [location, setLocation] = useState(data.location || "");
+  const [selectedCountry, setSelectedCountry] = useState(data.country || "");
+  const [selectedCity, setSelectedCity] = useState(data.city || "");
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+
+  // Fetch countries data
+  const { data: countriesData, isLoading } = useQuery({
+    queryKey: ["countries"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/country/`,
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch countries");
+      }
+      const json = await response.json();
+      return json.data as Country[];
+    },
+  });
+
+  // Get unique countries
+  const uniqueCountries = countriesData
+    ? Array.from(
+        new Map(countriesData.map((item) => [item.countryName, item])).values(),
+      )
+    : [];
+
+  // Update cities when country changes
+  useEffect(() => {
+    if (selectedCountry && countriesData) {
+      const cities = countriesData
+        .filter((item) => item.countryName === selectedCountry)
+        .map((item) => item.cityName)
+        .filter((value, index, self) => self.indexOf(value) === index);
+      setAvailableCities(cities);
+      setSelectedCity("");
+    } else {
+      setAvailableCities([]);
+    }
+  }, [selectedCountry, countriesData]);
 
   // Restore from localStorage
   useEffect(() => {
@@ -20,9 +65,8 @@ export function LocationStep({ data, onNext, onBack }: LocationStepProps) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (parsed.location) {
-          setLocation(parsed.location);
-        }
+        if (parsed.country) setSelectedCountry(parsed.country);
+        if (parsed.city) setSelectedCity(parsed.city);
       } catch (e) {
         console.error("Error parsing localStorage data:", e);
       }
@@ -30,13 +74,13 @@ export function LocationStep({ data, onNext, onBack }: LocationStepProps) {
   }, []);
 
   const handleContinue = () => {
-    if (!location) return;
+    if (!selectedCountry || !selectedCity) return;
 
     const payload: Partial<FindJobDataTypes> = {
-      location,
+      country: selectedCountry,
+      city: selectedCity,
     };
 
-    // Save merged data
     localStorage.setItem(
       "findJobForm",
       JSON.stringify({ ...data, ...payload }),
@@ -44,6 +88,17 @@ export function LocationStep({ data, onNext, onBack }: LocationStepProps) {
 
     onNext(payload);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading locations...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -55,16 +110,41 @@ export function LocationStep({ data, onNext, onBack }: LocationStepProps) {
         <div className="space-y-6">
           <div>
             <label className="block text-sm font-medium mb-2">
-              Location (Zip / Postal Code)
+              Select Country
             </label>
-            <input
-              type="text"
-              placeholder="23107"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-[#8E8E9A]"
-            />
+            <select
+              value={selectedCountry}
+              onChange={(e) => setSelectedCountry(e.target.value)}
+              className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-primary bg-white"
+            >
+              <option value="">Select a country...</option>
+              {uniqueCountries.map((country) => (
+                <option key={country._id} value={country.countryName}>
+                  {country.countryName}
+                </option>
+              ))}
+            </select>
           </div>
+
+          {selectedCountry && (
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Select City
+              </label>
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-primary bg-white"
+              >
+                <option value="">Select a city...</option>
+                {availableCities.map((city, index) => (
+                  <option key={index} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <p className="text-sm text-gray-600">
             We&apos;ll use this to find jobs near you
@@ -81,7 +161,7 @@ export function LocationStep({ data, onNext, onBack }: LocationStepProps) {
 
             <Button
               onClick={handleContinue}
-              disabled={!location}
+              disabled={!selectedCountry || !selectedCity}
               className="flex-1 bg-primary hover:bg-primary text-white py-2 rounded-full font-semibold"
             >
               Continue

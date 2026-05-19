@@ -6,14 +6,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { LocationStep } from "../steps/LocationStep";
 import { HourlyRateStep } from "../steps/HourlyRateStep";
 import { ScheduleStep } from "../steps/ScheduleStep";
 import { EmailStep } from "../steps/EmailStep";
 import { PersonalDetailsStep } from "../steps/PersonalDetailsStep";
 import { PasswordStep } from "../steps/PasswordStep";
-import { PricingStep } from "../steps/PricingStep";
 import {
   FindJobDataTypes,
   DaySchedule,
@@ -28,10 +27,12 @@ const INITIAL_FORM_DATA: FindJobDataTypes = {
   role: "find job",
   categoryId: "",
   subscriptionId: "",
-  location: "",
+  country: "",
+  city: "",
   gender: "",
   hourRate: 10,
   days: { day: [], time: [] },
+  nidNumber: "",
 };
 
 export default function MultiStepForm() {
@@ -43,8 +44,6 @@ export default function MultiStepForm() {
 
   const role = searchParams.get("role") || "find job";
   const categoryId = searchParams.get("categoryId") || "";
-  const categoryName = searchParams.get("categoryName") || "";
-  const hasSubscription = searchParams.get("hasSubscription") === "true";
   const userId = searchParams.get("userId");
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -53,9 +52,14 @@ export default function MultiStepForm() {
     role,
     categoryId,
   });
+  const queryClient = useQueryClient();
 
   // Fetch user profile if logged in
-  const { data: userProfile, isLoading: profileLoading } = useQuery({
+  const {
+    data: userProfile,
+    isLoading: profileLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["userProfile", userId],
     queryFn: async () => {
       if (!token || !userId) return null;
@@ -93,7 +97,9 @@ export default function MultiStepForm() {
         firstName: userProfile.firstName || prev.firstName,
         lastName: userProfile.lastName || prev.lastName,
         gender: userProfile.gender || prev.gender,
-        location: userProfile.zip || prev.location,
+        country: userProfile.country || prev.country,
+        city: userProfile.city || prev.city,
+        NIDNumber: userProfile.nidNumber || prev.nidNumber,
         subscriptionId: userProfile.subscription || prev.subscriptionId,
       }));
     }
@@ -119,39 +125,34 @@ export default function MultiStepForm() {
     });
   };
 
-  // TanStack Query mutation for form submission
-  const mutation = useMutation({
-    mutationFn: async (data: { plan?: string }) => {
-      const finalData = { ...formData, ...data };
-
-      const apiBody: any = {
-        role: finalData.role,
-        zip: finalData.location,
-        email: finalData.email,
-        firstName: finalData.firstName,
-        lastName: finalData.lastName,
-        gender: finalData.gender,
-        hourRate: finalData.hourRate,
-        categoryId: finalData.categoryId,
+  // For new user registration
+  const registerMutation = useMutation({
+    mutationFn: async (password?: string) => {
+      const apiBody: Record<string, any> = {
+        role: formData.role,
+        country: formData.country,
+        city: formData.city,
+        email: formData.email,
+        password: password || formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        gender: formData.gender,
+        hourRate: formData.hourRate,
+        categoryId: formData.categoryId,
+        NIDNumber: formData.nidNumber,
       };
 
-      if (finalData.subscriptionId || data.plan) {
-        apiBody.subscriptionId = finalData.subscriptionId || data.plan;
+      if (formData.days && formData.days.day.length > 0) {
+        apiBody.days = convertToAPIFormat(formData.days);
       }
 
-      if (finalData.days && finalData.days.day.length > 0) {
-        apiBody.days = convertToAPIFormat(finalData.days);
-      }
-
-      if (finalData.password && !userProfile) {
-        apiBody.password = finalData.password;
-      }
-
+      // Remove undefined/empty fields
       Object.keys(apiBody).forEach((key) => {
+        const value = apiBody[key];
         if (
-          apiBody[key] === undefined ||
-          apiBody[key] === "" ||
-          (Array.isArray(apiBody[key]) && apiBody[key].length === 0)
+          value === undefined ||
+          value === "" ||
+          (Array.isArray(value) && value.length === 0)
         ) {
           delete apiBody[key];
         }
@@ -163,7 +164,6 @@ export default function MultiStepForm() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
           },
           body: JSON.stringify(apiBody),
         },
@@ -177,25 +177,14 @@ export default function MultiStepForm() {
 
       return result;
     },
-    onSuccess: (result) => {
-      console.log("Registration successful:", result);
+    onSuccess: () => {
+      console.log("Registration successful");
       localStorage.removeItem("findJobForm");
-
-      // Prevent multiple redirects
-      if (redirectingRef.current) return;
-      redirectingRef.current = true;
-
-      if (result?.data?.checkoutUrl) {
-        // Use window.location for external URL
-        window.location.href = result.data.checkoutUrl;
-      } else {
-        // Use setTimeout to ensure router.push works
-        setTimeout(() => {
-          router.push(
-            `/payment-success?category=${encodeURIComponent(categoryName)}`,
-          );
-        }, 100);
+      if (!redirectingRef.current) {
+        redirectingRef.current = true;
+        router.push(`/login`);
       }
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
     onError: (error) => {
       console.error("Registration error:", error);
@@ -203,21 +192,127 @@ export default function MultiStepForm() {
     },
   });
 
-  const handleSubmit = async (data: { plan: string }) => {
-    mutation.mutate(data);
+  // For logged-in user profile update
+  const updateProfileMutation = useMutation({
+    mutationFn: async () => {
+      const apiBody: Record<string, any> = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        gender: formData.gender,
+        country: formData.country,
+        city: formData.city,
+        NIDNumber: formData.nidNumber,
+        hourRate: formData.hourRate,
+      };
+
+      // Remove undefined fields
+      Object.keys(apiBody).forEach((key) => {
+        if (apiBody[key] === undefined) {
+          delete apiBody[key];
+        }
+      });
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/user/profile`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(apiBody),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Profile update failed");
+      }
+
+      return result;
+    },
+    onSuccess: async () => {
+      console.log("Profile updated successfully");
+      await refetch();
+      // After profile update, register for service
+      await serviceRegisterMutation.mutateAsync();
+    },
+    onError: (error) => {
+      console.error("Profile update error:", error);
+      redirectingRef.current = false;
+    },
+  });
+
+  // For logged-in user service registration
+  const serviceRegisterMutation = useMutation({
+    mutationFn: async () => {
+      const apiBody: Record<string, any> = {
+        role: formData.role,
+        country: formData.country,
+        city: formData.city,
+        hourRate: formData.hourRate,
+        categoryId: formData.categoryId,
+      };
+
+      if (formData.days && formData.days.day.length > 0) {
+        apiBody.days = convertToAPIFormat(formData.days);
+      }
+
+      // Remove undefined/empty fields
+      Object.keys(apiBody).forEach((key) => {
+        const value = apiBody[key];
+        if (
+          value === undefined ||
+          value === "" ||
+          (Array.isArray(value) && value.length === 0)
+        ) {
+          delete apiBody[key];
+        }
+      });
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/service/register-service`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(apiBody),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Service registration failed");
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      console.log("Service registration successful");
+      localStorage.removeItem("findJobForm");
+      if (!redirectingRef.current) {
+        redirectingRef.current = true;
+        router.push(`/`);
+      }
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    },
+    onError: (error) => {
+      console.error("Service registration error:", error);
+      redirectingRef.current = false;
+    },
+  });
+
+  const handleNewUserSubmit = (password?: string) => {
+    registerMutation.mutate(password);
   };
 
-  // Handle auto-submit for users with existing subscription
-  useEffect(() => {
-    if (
-      userProfile?.subscription &&
-      currentStep === 4 &&
-      !mutation.isPending &&
-      !redirectingRef.current
-    ) {
-      handleSubmit({ plan: userProfile.subscription });
-    }
-  }, [currentStep, userProfile, mutation.isPending]);
+  const handleLoggedInSubmit = () => {
+    updateProfileMutation.mutate();
+  };
 
   if (profileLoading) {
     return (
@@ -301,16 +396,14 @@ export default function MultiStepForm() {
         <PersonalDetailsStep
           key="personal"
           data={formData}
-          onNext={async (data) => {
+          onNext={(data) => {
             setFormData((p) => ({ ...p, ...data }));
 
             if (userProfile) {
-              if (hasSubscription || userProfile.subscription) {
-                handleSubmit({ plan: userProfile.subscription });
-              } else {
-                setCurrentStep(5);
-              }
+              // Logged in user - update profile and register service
+              handleLoggedInSubmit();
             } else {
+              // New user - go to password step
               setCurrentStep(5);
             }
           }}
@@ -327,32 +420,17 @@ export default function MultiStepForm() {
         component: (
           <PasswordStep
             key="password"
-            data={formData}
-            onNext={(data) => {
+            email={formData.email}
+            onSignUp={(data) => {
               setFormData((p) => ({ ...p, ...data }));
-              setCurrentStep(6);
+              handleNewUserSubmit(data.password);
             }}
             onBack={() => setCurrentStep(Math.max(currentStep - 1, 0))}
+            isSubmitting={registerMutation.isPending}
           />
         ),
       });
     }
-
-    if (!hasSubscription && !userProfile?.subscription) {
-      steps.push({
-        title: "Pricing",
-        component: (
-          <PricingStep
-            key="pricing"
-            data={{ ...formData, categoryName }}
-            onBack={() => setCurrentStep(Math.max(currentStep - 1, 0))}
-            onSubmit={handleSubmit}
-            token={token}
-          />
-        ),
-      });
-    }
-
     return steps;
   };
 

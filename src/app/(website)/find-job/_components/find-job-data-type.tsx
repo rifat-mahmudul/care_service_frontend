@@ -7,26 +7,33 @@ export interface ScheduleTypes {
 // For API format
 export interface DaySchedule {
   day: string;
-  startTime?: string;
-  endTime?: string;
+  startTime: string;
+  endTime: string;
   time?: string;
 }
 
 // For internal state with selection
-export interface ScheduleItem extends DaySchedule {
+export interface ScheduleItem {
+  day: string;
   selected: boolean;
+  startTime: string;
+  endTime: string;
+  time: string;
 }
 
 export interface FindJobDataTypes {
   email: string;
-  password: string;
+  password?: string;
   firstName: string;
   lastName: string;
   role: string;
   categoryId: string;
-  subscriptionId: string;
-  location: string;
+  subscriptionId?: string;
+  country: string;
+  city: string;
   gender: string;
   hourRate: number;
   days: ScheduleTypes;
+  nidNumber: string;
+  termsAccepted?: boolean;
 }
