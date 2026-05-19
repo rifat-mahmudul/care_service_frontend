@@ -12,20 +12,18 @@ import { LocationStep } from "../steps/LocationStep";
 import { PersonalDetailsStep } from "../steps/PersonalDetailsStep";
 import { TypeStep } from "../steps/TypeStep";
 import { HelpStep } from "../steps/HelpStep";
-import { PricingStep } from "../steps/PricingStep";
 
 interface FormData {
   type?: string;
   help?: string;
   email: string;
   password?: string;
-  location: string;
-  zipCode: string;
+  country: string;
+  city: string;
   selectedDays: string[];
   timeRange: [number, number];
   applyForAllDays: boolean;
   scheduleVaries: boolean;
-  plan?: string;
   firstName: string;
   lastName: string;
   gender: string;
@@ -34,6 +32,7 @@ interface FormData {
   role: string;
   categoryId: string;
   subscriptionId?: string;
+  nidNumber: string;
 }
 
 const INITIAL_FORM_DATA: FormData = {
@@ -41,13 +40,12 @@ const INITIAL_FORM_DATA: FormData = {
   help: "",
   email: "",
   password: "",
-  location: "",
-  zipCode: "",
+  country: "",
+  city: "",
   selectedDays: [],
   timeRange: [10, 12],
   applyForAllDays: false,
   scheduleVaries: false,
-  plan: "",
   firstName: "",
   lastName: "",
   gender: "",
@@ -55,6 +53,7 @@ const INITIAL_FORM_DATA: FormData = {
   hourlyRate: 0,
   role: "",
   categoryId: "",
+  nidNumber: "",
 };
 
 export function MultiStepForm() {
@@ -65,8 +64,6 @@ export function MultiStepForm() {
 
   const role = searchParams.get("role") || "";
   const categoryId = searchParams.get("categoryId") || "";
-  const categoryName = searchParams.get("categoryName") || "";
-  const hasSubscription = searchParams.get("hasSubscription") === "true";
   const userId = searchParams.get("userId");
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -78,7 +75,11 @@ export function MultiStepForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch user profile if logged in
-  const { data: userProfile, isLoading: profileLoading } = useQuery({
+  const {
+    data: userProfile,
+    isLoading: profileLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["userProfile", userId],
     queryFn: async () => {
       if (!token || !userId) return null;
@@ -106,33 +107,96 @@ export function MultiStepForm() {
         firstName: userProfile.firstName || prev.firstName,
         lastName: userProfile.lastName || prev.lastName,
         gender: userProfile.gender || prev.gender,
-        zipCode: userProfile.zip || prev.zipCode,
-        location: userProfile.location || prev.location,
+        country: userProfile.country || prev.country,
+        city: userProfile.city || prev.city,
         subscriptionId: userProfile.subscription || prev.subscriptionId,
-        plan: userProfile.subscription || prev.plan,
+        nidNumber: userProfile.nidNumber || prev.nidNumber,
       }));
     }
   }, [userProfile]);
 
-  const handleSubmit = useCallback(async (data: { plan?: string } = {}) => {
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
-    const finalData = { ...formData, ...data };
+  // For new user registration
+  const submitRegistration = useCallback(
+    async (password?: string) => {
+      if (isSubmitting) return;
 
-    // Prepare API body
+      setIsSubmitting(true);
+
+      const finalPassword = password || formData.password;
+
+      // Prepare API body
+      const apiBody = {
+        email: formData.email,
+        password: finalPassword,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        role: formData.role,
+        typeOfInterest: formData.type,
+        helpOfInterest: formData.help,
+        categoryId: formData.categoryId,
+        subscriptionId: formData.subscriptionId,
+        country: formData.country,
+        city: formData.city,
+        gender: formData.gender,
+        NIDNumber: formData.nidNumber,
+      };
+
+      // Remove undefined fields
+      Object.keys(apiBody).forEach((key) => {
+        if (apiBody[key as keyof typeof apiBody] === undefined) {
+          delete apiBody[key as keyof typeof apiBody];
+        }
+      });
+
+      console.log("Register API Body:", JSON.stringify(apiBody, null, 2));
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/service/register-service`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token && { Authorization: `Bearer ${token}` }),
+            },
+            body: JSON.stringify(apiBody),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || "Registration failed");
+        }
+
+        console.log("Registration successful:", result);
+        router.push(`/login`);
+      } catch (error) {
+        console.error("Registration error:", error);
+        setIsSubmitting(false);
+        throw error;
+      }
+    },
+    [formData, token, router, isSubmitting],
+  );
+
+  // For logged-in user profile update
+  const updateProfile = useCallback(async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    // Prepare API body for profile update
     const apiBody = {
-      email: finalData.email,
-      password: finalData.password,
-      firstName: finalData.firstName,
-      lastName: finalData.lastName,
-      role: finalData.role,
-      typeOfInterest: finalData.type,
-      helpOfInterest: finalData.help,
-      categoryId: finalData.categoryId,
-      subscriptionId: finalData.plan || finalData.subscriptionId,
-      zip: finalData.zipCode,
-      gender: finalData.gender,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      gender: formData.gender,
+      country: formData.country,
+      city: formData.city,
+      nidNumber: formData.nidNumber,
+      typeOfInterest: formData.type,
+      helpOfInterest: formData.help,
+      categoryId: formData.categoryId,
     };
 
     // Remove undefined fields
@@ -142,14 +206,16 @@ export function MultiStepForm() {
       }
     });
 
+    console.log("Update Profile API Body:", JSON.stringify(apiBody, null, 2));
+
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/service/register-service`,
+        `${process.env.NEXT_PUBLIC_API_URL}/user/profile`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(apiBody),
         },
@@ -158,31 +224,72 @@ export function MultiStepForm() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Registration failed");
+        throw new Error(result.message || "Profile update failed");
       }
 
-      console.log("Registration successful:", result);
+      console.log("Profile update successful:", result);
 
-      // Redirect to checkout URL if provided
-      if (result.data?.checkoutUrl) {
-        window.location.href = result.data.checkoutUrl;
-      } else {
-        // If no checkout URL, redirect to success page
-        router.push(`/payment-success?category=${encodeURIComponent(categoryName)}`);
-      }
+      // Refetch user profile to get updated data
+      await refetch();
+
+      // Redirect to success page or dashboard
+      router.push(`/`);
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Profile update error:", error);
       setIsSubmitting(false);
       throw error;
     }
-  }, [formData, token, router, categoryName, isSubmitting]);
+  }, [formData, token, router, isSubmitting, refetch]);
 
-  // Handle auto-submit for users with existing subscription
-  useEffect(() => {
-    if (userProfile?.subscription && currentStep === 4 && !isSubmitting) {
-      handleSubmit({ plan: userProfile.subscription });
+  // For logged-in user service registration
+  const registerServiceForLoggedInUser = useCallback(async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    // Prepare API body for service registration
+    const apiBody = {
+      typeOfInterest: formData.type,
+      helpOfInterest: formData.help,
+      categoryId: formData.categoryId,
+      country: formData.country,
+      city: formData.city,
+    };
+
+    console.log(
+      "Service Registration API Body:",
+      JSON.stringify(apiBody, null, 2),
+    );
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/service/register-service`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(apiBody),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Service registration failed");
+      }
+
+      console.log("Service registration successful:", result);
+
+      // Redirect to success page or dashboard
+      router.push(`/`);
+    } catch (error) {
+      console.error("Service registration error:", error);
+      setIsSubmitting(false);
+      throw error;
     }
-  }, [currentStep, userProfile, handleSubmit, isSubmitting]);
+  }, [formData, token, router, isSubmitting]);
 
   if (profileLoading) {
     return (
@@ -242,7 +349,8 @@ export function MultiStepForm() {
             setCurrentStep(3);
           }}
           onBack={() => setCurrentStep(Math.max(currentStep - 1, 0))}
-          initialValue={formData.zipCode}
+          initialCountry={formData.country}
+          initialCity={formData.city}
         />
       ),
     });
@@ -272,18 +380,15 @@ export function MultiStepForm() {
           key="personal"
           onNext={(data) => {
             setFormData((p) => ({ ...p, ...data }));
-            
+
             if (userProfile) {
-              // Logged in user
-              if (hasSubscription || userProfile.subscription) {
-                // User has subscription, submit directly
-                handleSubmit({ plan: userProfile.subscription });
-              } else {
-                // User logged in but no subscription, go to pricing
-                setCurrentStep(5);
-              }
+              // Logged in user - update profile and register service
+              // First update profile, then register service
+              updateProfile().then(() => {
+                registerServiceForLoggedInUser();
+              });
             } else {
-              // New user, go to password step
+              // New user - go to password step
               setCurrentStep(5);
             }
           }}
@@ -294,7 +399,7 @@ export function MultiStepForm() {
       ),
     });
 
-    // Step 6: Password (only for new users)
+    // Step 6: Password (only for new users) - with sign up functionality
     if (!userProfile) {
       steps.push({
         title: "Password",
@@ -302,27 +407,13 @@ export function MultiStepForm() {
           <PasswordStep
             key="password"
             email={formData.email}
-            onNext={(data) => {
+            onSignUp={(data) => {
+              console.log("Password received:", data.password);
               setFormData((p) => ({ ...p, ...data }));
-              setCurrentStep(6);
+              submitRegistration(data.password);
             }}
             onBack={() => setCurrentStep(Math.max(currentStep - 1, 0))}
-          />
-        ),
-      });
-    }
-
-    // Step 7: Pricing (only if no subscription)
-    if (!hasSubscription && !userProfile?.subscription) {
-      steps.push({
-        title: "Pricing",
-        component: (
-          <PricingStep
-            key="pricing"
-            formData={formData}
-            onBack={() => setCurrentStep(Math.max(currentStep - 1, 0))}
-            onFinish={handleSubmit}
-            token={token}
+            isSubmitting={isSubmitting}
           />
         ),
       });
@@ -338,7 +429,7 @@ export function MultiStepForm() {
     <div>
       {/* Progress Bar */}
       <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
-        <div 
+        <div
           className="h-full bg-primary transition-all duration-300"
           style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
         />

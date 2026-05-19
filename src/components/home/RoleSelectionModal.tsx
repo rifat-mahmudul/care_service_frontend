@@ -160,7 +160,7 @@ export default function RoleSelectionModal({
                 jobs.
               </p>
               <div className="w-full py-2.5 px-4 bg-primary text-white text-sm md:text-base rounded-full font-bold group-hover:bg-primary/90 transition-colors">
-                Find Job →
+                Find Trusted Childcare →
               </div>
             </button>
           </div>

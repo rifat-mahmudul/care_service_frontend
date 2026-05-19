@@ -7,17 +7,23 @@ import { Eye, EyeOff } from "lucide-react";
 
 interface PasswordStepProps {
   email: string;
-  onNext: (data: { password: string }) => void;
+  onSignUp: (data: { password: string }) => void;
   onBack: () => void;
+  isSubmitting?: boolean;
 }
 
-export function PasswordStep({ onNext, onBack }: PasswordStepProps) {
+export function PasswordStep({
+  email,
+  onSignUp,
+  onBack,
+  isSubmitting = false,
+}: PasswordStepProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSetPassword = () => {
+  const handleSignUp = () => {
     if (password.length >= 6) {
-      onNext({ password });
+      onSignUp({ password });
     }
   };
 
@@ -29,42 +35,66 @@ export function PasswordStep({ onNext, onBack }: PasswordStepProps) {
 
       <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-lg">
         <div className="space-y-6">
-          <div className="relative">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
             <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Write password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-4 pr-12 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-[#8E8E9A]"
+              type="email"
+              value={email}
+              disabled
+              className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full bg-gray-50 text-gray-600"
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600"
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
           </div>
 
-          <p className="text-xs text-gray-500 -mt-2">At least 6 characters</p>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Create a password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-4 pr-12 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-primary"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-800 focus:outline-none"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-500 -mt-2">
+            Password must be at least 6 characters
+          </p>
 
           <div className="flex gap-3">
             <Button
               onClick={onBack}
               variant="outline"
+              disabled={isSubmitting}
               className="flex-1 py-2 rounded-full font-semibold bg-transparent"
             >
               Back
             </Button>
             <Button
-              onClick={handleSetPassword}
-              disabled={password.length < 6}
+              onClick={handleSignUp}
+              disabled={password.length < 6 || isSubmitting}
               className="flex-1 bg-primary hover:bg-primary text-white py-2 rounded-full font-semibold disabled:opacity-50"
             >
-              Set Password
+              {isSubmitting ? "Creating Account..." : "Sign Up"}
             </Button>
           </div>
+
+          <p className="text-xs text-center text-gray-500 mt-4">
+            By signing up, you agree to our Terms of Service and Privacy Policy
+          </p>
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ interface PersonalDetailsStepProps {
     firstName: string;
     lastName: string;
     gender: string;
+    nidNumber: string;
     termsAccepted: boolean;
   }) => void;
   onBack: () => void;
@@ -26,6 +27,7 @@ export function PersonalDetailsStep({
   const [firstName, setFirstName] = useState(initialData?.firstName || "");
   const [lastName, setLastName] = useState(initialData?.lastName || "");
   const [gender, setGender] = useState(initialData?.gender || "");
+  const [nidNumber, setNidNumber] = useState(initialData?.nidNumber || "");
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Update form if initialData changes
@@ -34,27 +36,55 @@ export function PersonalDetailsStep({
       setFirstName(initialData.firstName || "");
       setLastName(initialData.lastName || "");
       setGender(initialData.gender || "");
+      setNidNumber(initialData.nidNumber || "");
     }
   }, [initialData]);
 
   const handleSubmit = () => {
-    if (firstName.trim() && lastName.trim() && gender && termsAccepted) {
-      onNext({ firstName, lastName, gender, termsAccepted });
+    // For logged in users, NID number is optional
+    if (isLoggedIn) {
+      if (firstName.trim() && lastName.trim() && gender && termsAccepted) {
+        onNext({ firstName, lastName, gender, nidNumber, termsAccepted });
+      }
+    } else {
+      // For new users, NID number is required
+      if (
+        firstName.trim() &&
+        lastName.trim() &&
+        gender &&
+        nidNumber.trim() &&
+        termsAccepted
+      ) {
+        onNext({ firstName, lastName, gender, nidNumber, termsAccepted });
+      }
+    }
+  };
+
+  // Determine if submit button should be disabled
+  const isSubmitDisabled = () => {
+    const baseConditions = !firstName || !lastName || !gender || !termsAccepted;
+
+    if (isLoggedIn) {
+      // For logged in users, NID is optional
+      return baseConditions;
+    } else {
+      // For new users, NID is required
+      return baseConditions || !nidNumber;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 mt-10">
       <h1 className="text-3xl text-[#0A0A23] font-bold text-center mb-8">
         Almost done, tell us a few details about yourself
       </h1>
 
       <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-lg">
         <div className="space-y-4">
-          <label className="block text-sm font-medium text-gray-700">
-            First name
-          </label>
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              First name
+            </label>
             <input
               type="text"
               placeholder="First name"
@@ -64,8 +94,8 @@ export function PersonalDetailsStep({
             />
           </div>
 
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Last name
             </label>
             <input
@@ -77,8 +107,8 @@ export function PersonalDetailsStep({
             />
           </div>
 
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Gender
             </label>
             <select
@@ -91,6 +121,28 @@ export function PersonalDetailsStep({
               <option value="female">Female</option>
               <option value="other">Other</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              NID Number{" "}
+              {!isLoggedIn && <span className="text-red-500">*</span>}
+              {isLoggedIn && (
+                <span className="text-gray-400 text-xs ml-1">(Optional)</span>
+              )}
+            </label>
+            <input
+              type="text"
+              placeholder="Enter your NID number"
+              value={nidNumber}
+              onChange={(e) => setNidNumber(e.target.value)}
+              className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-[#8E8E9A]"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {isLoggedIn
+                ? "Your National ID number is optional but recommended for verification purposes"
+                : "Your National ID number will be used for verification purposes"}
+            </p>
           </div>
 
           <p className="text-xs text-gray-600 leading-relaxed">
@@ -129,7 +181,7 @@ export function PersonalDetailsStep({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!firstName || !lastName || !gender || !termsAccepted}
+              disabled={isSubmitDisabled()}
               className="flex-1 bg-primary hover:bg-primary text-white py-2 rounded-full font-semibold disabled:opacity-50"
             >
               {isLoggedIn ? "Continue" : "Sign Up"}

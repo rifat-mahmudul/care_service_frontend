@@ -167,7 +167,7 @@ export default function Categories() {
 
                 <div className="mt-5 flex items-center justify-between">
                   <span
-                    className={`text-lg font-semibold transition-colors ${
+                    className={`text-lg font-semibold transition-colors truncate ${
                       disabled
                         ? "text-gray-400"
                         : "text-gray-900 group-hover:text-primary"
