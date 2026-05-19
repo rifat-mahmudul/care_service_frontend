@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { Heart, Users, Clock, ChevronRight, Shield } from "lucide-react";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 interface Category {
   _id: string;
@@ -32,6 +33,9 @@ interface ApiResponse {
 
 const FindCareCategory = () => {
   const router = useRouter();
+  const { data: session } = useSession();
+  const token = session?.user?.accessToken;
+
   const { data, isLoading, error } = useQuery<ApiResponse>({
     queryKey: ["nav-categories"],
     queryFn: async () => {
@@ -43,16 +47,55 @@ const FindCareCategory = () => {
     },
   });
 
+  // Fetch user profile if logged in
+  const { data: userProfile, isLoading: profileLoading } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: async () => {
+      if (!token) return null;
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/user/profile`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (!response.ok) return null;
+      const json = await response.json();
+      return json.data;
+    },
+    enabled: !!token,
+  });
+
   const handleCategoryClick = (categoryId: string) => {
     router.push(`/all-find-care?id=${categoryId}`);
   };
 
-  // Loading state with professional skeleton
-  if (isLoading) {
+  // Get categories to display based on login status
+  const getDisplayCategories = () => {
+    if (!token || !userProfile) {
+      // Not logged in - show all categories
+      return data?.data || [];
+    }
+
+    // Logged in - show only user's categories
+    const userCategoryIds = userProfile?.category || [];
+    const allCategories = data?.data || [];
+    return allCategories.filter((cat) => userCategoryIds.includes(cat._id));
+  };
+
+  const displayCategories = getDisplayCategories();
+  const allCategories = data?.data || [];
+  const totalCareProviders = displayCategories.reduce(
+    (sum, cat) => sum + (cat.findCareUser?.length || 0),
+    0,
+  );
+
+  // Loading state
+  if (isLoading || (token && profileLoading)) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-sm border border-gray-100 p-6">
-          {/* Header Skeleton */}
           <div className="flex items-center justify-between mb-8">
             <div className="space-y-2">
               <Skeleton className="h-7 w-48" />
@@ -60,8 +103,6 @@ const FindCareCategory = () => {
             </div>
             <Skeleton className="h-10 w-28 rounded-full" />
           </div>
-
-          {/* Grid Skeleton */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="flex items-center gap-3">
@@ -72,21 +113,6 @@ const FindCareCategory = () => {
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Stats Section Skeleton */}
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <div className="flex items-center justify-center gap-8">
-              <div className="text-center space-y-2">
-                <Skeleton className="h-8 w-20 mx-auto" />
-                <Skeleton className="h-3 w-24 mx-auto" />
-              </div>
-              <div className="w-px h-10 bg-gray-200" />
-              <div className="text-center space-y-2">
-                <Skeleton className="h-8 w-20 mx-auto" />
-                <Skeleton className="h-3 w-24 mx-auto" />
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -132,11 +158,45 @@ const FindCareCategory = () => {
     );
   }
 
-  const categories = data?.data || [];
-  const totalCareProviders = categories.reduce(
-    (sum, cat) => sum + (cat.findCareUser?.length || 0),
-    0,
-  );
+  // Logged in but no categories added yet
+  if (token && userProfile && displayCategories.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <Heart className="w-6 h-6 text-primary" />
+                  Your Care Services
+                </h2>
+                <p className="text-gray-500 mt-1">
+                  You haven&apos;t added any care services yet
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 mb-4">
+              <Heart className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No Services Added
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Browse categories and add services to your profile
+            </p>
+            <button
+              onClick={() => router.push("/category")}
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              Browse All Categories
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -147,17 +207,20 @@ const FindCareCategory = () => {
             <div>
               <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                 <Heart className="w-6 h-6 text-primary" />
-                Find Care Services
+                {token && userProfile
+                  ? "Your Care Services"
+                  : "Find Care Services"}
               </h2>
               <p className="text-gray-500 mt-1">
-                Discover trusted care providers across {categories.length}{" "}
-                categories
+                {token && userProfile
+                  ? `You have ${displayCategories.length} active care service${displayCategories.length !== 1 ? "s" : ""}`
+                  : `Discover trusted care providers across ${allCategories.length} categories`}
               </p>
             </div>
             {data?.meta && (
               <div className="flex items-center gap-3">
                 <div className="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm font-medium">
-                  {categories.length} Categories
+                  {displayCategories.length} Categories
                 </div>
                 {data.meta.serviceActivationRequiresPaidMembership && (
                   <div className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1">
@@ -171,10 +234,10 @@ const FindCareCategory = () => {
         </div>
 
         {/* Categories Grid */}
-        {categories.length > 0 ? (
+        {displayCategories.length > 0 ? (
           <div className="p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {categories.map((category, index) => (
+              {displayCategories.map((category, index) => (
                 <motion.button
                   key={category._id}
                   onClick={() => handleCategoryClick(category._id)}
@@ -256,30 +319,18 @@ const FindCareCategory = () => {
               ))}
             </div>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 mb-4">
-              <Heart className="w-10 h-10 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No Categories Available
-            </h3>
-            <p className="text-gray-500">
-              Care categories will appear here once they are added to the
-              system.
-            </p>
-          </div>
-        )}
+        ) : null}
 
-        {/* Stats Footer */}
-        {categories.length > 0 && (
+        {/* Stats Footer - Only show for logged in users with categories */}
+        {displayCategories.length > 0 && (
           <div className="bg-gradient-to-r from-gray-50 to-white border-t border-gray-100 px-6 py-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                   <span className="text-sm text-gray-600">
-                    {categories.length} Active Categories
+                    {displayCategories.length} Active{" "}
+                    {displayCategories.length === 1 ? "Service" : "Services"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -293,13 +344,15 @@ const FindCareCategory = () => {
                   <span className="text-sm text-gray-600">Available 24/7</span>
                 </div>
               </div>
-              <button
-                onClick={() => router.push("/category")}
-                className="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1 transition-colors"
-              >
-                View All Categories
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              {!token && (
+                <button
+                  onClick={() => router.push("/login")}
+                  className="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1 transition-colors"
+                >
+                  Login to access your services
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         )}
