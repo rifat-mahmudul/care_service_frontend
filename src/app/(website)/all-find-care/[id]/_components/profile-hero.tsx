@@ -57,7 +57,7 @@ export function ProfileHero({
 
       if (result.success) {
         // কনভারসেশন আইডি দিয়ে মেসেজ পেজে পাঠিয়ে দেওয়া
-        router.push(`/messages?id=${result.data._id}`);
+        router.push(`/messages/${result.data._id}`);
       } else {
         toast.error(result.message || "Failed to start conversation");
       }

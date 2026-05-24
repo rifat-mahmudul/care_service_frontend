@@ -1,10 +1,14 @@
 import React from "react";
 import MessagingPage from "./_components/MessagingPage";
 
-const page = () => {
+const page = ({
+  searchParams,
+}: {
+  searchParams?: { id?: string };
+}) => {
   return (
     <div className="container mt-32 mb-20">
-      <MessagingPage />
+      <MessagingPage initialConversationId={searchParams?.id} />
     </div>
   );
 };

@@ -8,7 +8,14 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { useSocket } from "@/components/provider/SocketContext";
 
-export default function MessagingPage() {
+const getAvatarUrl = (value?: string | string[]) =>
+  Array.isArray(value) ? value[0] || "/default-avatar.jpg" : value || "/default-avatar.jpg";
+
+interface MessagingPageProps {
+  initialConversationId?: string;
+}
+
+export default function MessagingPage({ initialConversationId }: MessagingPageProps) {
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
   const myId = (session?.user as any)?.id;
@@ -32,13 +39,21 @@ export default function MessagingPage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        if (data.success) setConversations(data.data);
+        if (data.success) {
+          setConversations(data.data);
+          if (initialConversationId) {
+            const initialChat = data.data.find(
+              (chat: any) => String(chat._id) === String(initialConversationId),
+            );
+            if (initialChat) setSelectedChat(initialChat);
+          }
+        }
       } catch (err) {
         console.error("Conversation fetch error", err);
       }
     };
     fetchConversations();
-  }, [token, baseUrl]);
+  }, [token, baseUrl, initialConversationId]);
 
   // ২. সিলেক্টেড চ্যাটের মেসেজ ফেচ করা
   useEffect(() => {
@@ -95,7 +110,9 @@ export default function MessagingPage() {
 
     // ২. আপনার এপিআই রেসপন্স অনুযায়ী রিসিভার আইডি বের করা
     // যেহেতু participants এ একজনই থাকছে, আমরা সরাসরি প্রথমজনকে নিচ্ছি
-    const otherUser = selectedChat.participants[0];
+    const otherUser = selectedChat.participants.find(
+      (p: any) => String(p._id || p) !== String(myId),
+    );
     const receiverId = otherUser?._id;
 
     console.log("Found Receiver ID:", receiverId);
@@ -181,7 +198,7 @@ export default function MessagingPage() {
               >
                 <Avatar className="h-12 w-12 border">
                   <AvatarImage
-                    src={otherUser?.profileImage || "/default-avatar.jpg"}
+                    src={getAvatarUrl(otherUser?.profileImage)}
                   />
                   <AvatarFallback>
                     {otherUser?.firstName?.[0] || "U"}
@@ -212,7 +229,13 @@ export default function MessagingPage() {
           <>
             <div className="p-4 border-b flex items-center gap-3 bg-white">
               <Avatar className="h-10 w-10 border">
-                <AvatarImage src="/default-avatar.jpg" />
+                <AvatarImage
+                  src={getAvatarUrl(
+                    selectedChat.participants.find(
+                      (p: any) => String(p._id || p) !== String(myId),
+                    )?.profileImage,
+                  )}
+                />
               </Avatar>
               <div>
                 <h4 className="font-bold text-[#001F3F]">

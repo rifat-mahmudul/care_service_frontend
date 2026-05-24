@@ -12,6 +12,7 @@ import {
   Menu,
   LogOut,
   ChevronRight,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -41,6 +42,12 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
       label: "My Services",
       icon: Briefcase,
       href: "/profile/services",
+      show: true,
+    },
+    {
+      label: "Messages",
+      icon: MessageSquare,
+      href: "/messages",
       show: true,
     },
     {

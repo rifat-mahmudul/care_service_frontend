@@ -156,7 +156,7 @@ export default function RoleSelectionModal({
                       : "bg-primary group-hover:bg-primary/90"
                   }`}
                 >
-                  Find Care →
+                  Parent →
                 </div>
               </button>
             </div>

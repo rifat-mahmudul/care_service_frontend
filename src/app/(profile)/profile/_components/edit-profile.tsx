@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
@@ -7,7 +8,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { Plus, X, Loader2, CreditCard } from "lucide-react";
+import {
+  CheckCircle2,
+  CreditCard,
+  FileText,
+  ImageIcon,
+  Loader2,
+  Plus,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +38,10 @@ const profileSchema = z.object({
   city: z.string().optional(),
   experience: z.number().optional(),
   language: z.array(z.string()).default([]),
+  languageLavel: z.string().optional(),
+  profileImage: z.string().optional(),
+  galary: z.array(z.string()).default([]),
+  certifications: z.array(z.string()).default([]),
   agegroup: z.array(z.string()).default([]),
   education: z.array(z.string()).default([]),
   canHelpWith: z.array(z.string()).default([]),
@@ -47,6 +62,17 @@ interface Language {
   languageName: string;
 }
 
+const MAX_PROFILE_PHOTOS = 6;
+const LANGUAGE_LEVELS = [
+  { value: "basic", label: "Basic" },
+  { value: "conversational", label: "Conversational" },
+  { value: "fluent", label: "Fluent" },
+  { value: "native", label: "Native" },
+];
+
+const getPrimaryImage = (value?: string | string[]) =>
+  Array.isArray(value) ? value[0] || "" : value || "";
+
 const EditProfilePage = () => {
   const { data: session } = useSession();
   const role = session?.user?.role;
@@ -58,6 +84,12 @@ const EditProfilePage = () => {
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [countryValue, setCountryValue] = useState("");
   const [cityValue, setCityValue] = useState("");
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+  const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([]);
+  const [newPhotoPreviews, setNewPhotoPreviews] = useState<string[]>([]);
+  const [selectedMainPhoto, setSelectedMainPhoto] = useState("");
+  const [existingCertificates, setExistingCertificates] = useState<string[]>([]);
+  const [certificateFiles, setCertificateFiles] = useState<File[]>([]);
 
   // Tag input states
   const [currentSkillTag, setCurrentSkillTag] = useState("");
@@ -78,6 +110,10 @@ const EditProfilePage = () => {
       city: "",
       experience: 0,
       language: [],
+      languageLavel: "",
+      profileImage: "",
+      galary: [],
+      certifications: [],
       agegroup: [],
       education: [],
       canHelpWith: [],
@@ -172,6 +208,10 @@ const EditProfilePage = () => {
 
         const result = await response.json();
         const data = result.data;
+        const primaryImage = getPrimaryImage(data.profileImage);
+        const photos = Array.from(
+          new Set([primaryImage, ...(data.galary || [])].filter(Boolean)),
+        ) as string[];
 
         form.reset({
           firstName: data.firstName || "",
@@ -183,6 +223,10 @@ const EditProfilePage = () => {
           city: data.city || "",
           experience: data.exprience || data.experience || 0,
           language: data.language || [],
+          languageLavel: data.languageLavel || "",
+          profileImage: primaryImage,
+          galary: photos,
+          certifications: data.certifications || [],
           agegroup: data.agegroup || [],
           education: data.education || [],
           canHelpWith: data.canHelpWith || [],
@@ -192,6 +236,9 @@ const EditProfilePage = () => {
 
         setCountryValue(data.country || "");
         setCityValue(data.city || "");
+        setExistingPhotos(photos);
+        setSelectedMainPhoto(primaryImage ? `existing:${primaryImage}` : "");
+        setExistingCertificates(data.certifications || []);
 
         if (data.country) {
           updateCities(data.country);
@@ -210,15 +257,33 @@ const EditProfilePage = () => {
   const onSubmit: SubmitHandler<ProfileFormValues> = async (values) => {
     setIsLoading(true);
     try {
+      const selectedExistingMain = selectedMainPhoto.startsWith("existing:")
+        ? selectedMainPhoto.replace("existing:", "")
+        : "";
+      const payload = {
+        ...values,
+        galary: existingPhotos,
+        certifications: existingCertificates,
+        profileImage: selectedExistingMain,
+        mainPhotoSource: selectedMainPhoto,
+      };
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(payload));
+      newPhotoFiles.forEach((file) => formData.append("profileImage", file));
+      if (role === "find job") {
+        certificateFiles.forEach((file) =>
+          formData.append("certifications", file),
+        );
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/user/profile`,
         {
           method: "PUT",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${session?.user?.accessToken}`,
           },
-          body: JSON.stringify(values),
+          body: formData,
         },
       );
 
@@ -227,6 +292,24 @@ const EditProfilePage = () => {
         throw new Error(errorData.message || "Failed to update profile");
       }
 
+      const result = await response.json();
+      const data = result.data;
+      const primaryImage = getPrimaryImage(data.profileImage);
+      const photos = Array.from(
+        new Set([primaryImage, ...(data.galary || [])].filter(Boolean)),
+      ) as string[];
+      setExistingPhotos(photos);
+      setSelectedMainPhoto(primaryImage ? `existing:${primaryImage}` : "");
+      setExistingCertificates(data.certifications || []);
+      setNewPhotoFiles([]);
+      setNewPhotoPreviews((prev) => {
+        prev.forEach((url) => URL.revokeObjectURL(url));
+        return [];
+      });
+      setCertificateFiles([]);
+      form.setValue("profileImage", primaryImage);
+      form.setValue("galary", photos);
+      form.setValue("certifications", data.certifications || []);
       toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Profile update error:", error);
@@ -255,6 +338,59 @@ const EditProfilePage = () => {
       field,
       currentValues.filter((item: string) => item !== value),
     );
+  };
+
+  const handlePhotoFiles = (files: FileList | null) => {
+    if (!files?.length) return;
+    const remainingSlots =
+      MAX_PROFILE_PHOTOS - existingPhotos.length - newPhotoFiles.length;
+    if (remainingSlots <= 0) {
+      toast.error(`Maximum ${MAX_PROFILE_PHOTOS} profile photos allowed`);
+      return;
+    }
+    const selectedFiles = Array.from(files).slice(0, remainingSlots);
+    const startIndex = newPhotoFiles.length;
+    setNewPhotoFiles((prev) => [...prev, ...selectedFiles]);
+    setNewPhotoPreviews((prev) => [
+      ...prev,
+      ...selectedFiles.map((file) => URL.createObjectURL(file)),
+    ]);
+    if (!selectedMainPhoto && selectedFiles.length > 0) {
+      setSelectedMainPhoto(`new:${startIndex}`);
+    }
+  };
+
+  const removeExistingPhoto = (url: string) => {
+    const nextPhotos = existingPhotos.filter((photo) => photo !== url);
+    setExistingPhotos(nextPhotos);
+    if (selectedMainPhoto === `existing:${url}`) {
+      setSelectedMainPhoto(
+        nextPhotos[0] ? `existing:${nextPhotos[0]}` : newPhotoFiles[0] ? "new:0" : "",
+      );
+    }
+  };
+
+  const removeNewPhoto = (index: number) => {
+    URL.revokeObjectURL(newPhotoPreviews[index]);
+    const nextFiles = newPhotoFiles.filter((_, itemIndex) => itemIndex !== index);
+    const nextPreviews = newPhotoPreviews.filter((_, itemIndex) => itemIndex !== index);
+    setNewPhotoFiles(nextFiles);
+    setNewPhotoPreviews(nextPreviews);
+    if (selectedMainPhoto === `new:${index}`) {
+      setSelectedMainPhoto(
+        existingPhotos[0] ? `existing:${existingPhotos[0]}` : nextFiles[0] ? "new:0" : "",
+      );
+    } else if (selectedMainPhoto.startsWith("new:")) {
+      const selectedIndex = Number(selectedMainPhoto.replace("new:", ""));
+      if (selectedIndex > index) {
+        setSelectedMainPhoto(`new:${selectedIndex - 1}`);
+      }
+    }
+  };
+
+  const handleCertificateFiles = (files: FileList | null) => {
+    if (!files?.length) return;
+    setCertificateFiles((prev) => [...prev, ...Array.from(files)]);
   };
 
   const handleStripeSetup = async () => {
@@ -429,23 +565,106 @@ const EditProfilePage = () => {
                 />
               </div>
 
-              {/* Professional Details - Only for find job role */}
-              {session?.user?.role === "find job" && (
-                <div className="space-y-6 pt-4 border-t border-gray-100">
-                  <h3 className="font-semibold text-black text-lg">
-                    Professional Details
-                  </h3>
-
+              <div className="space-y-4 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between gap-4">
                   <div>
-                    <Label>Experience (Years)</Label>
-                    <Input
-                      type="number"
-                      {...form.register("experience", { valueAsNumber: true })}
-                      className="mt-2"
-                    />
+                    <h3 className="font-semibold text-black text-lg">
+                      Profile Pictures
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Upload up to {MAX_PROFILE_PHOTOS} photos and choose one as
+                      the main image.
+                    </p>
                   </div>
+                  <Label className="inline-flex items-center gap-2 bg-[#00D1C1] hover:bg-[#00b8aa] text-white px-4 h-10 rounded-md cursor-pointer text-sm font-medium">
+                    <Upload className="h-4 w-4" />
+                    Upload
+                    <Input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(event) => {
+                        handlePhotoFiles(event.target.files);
+                        event.target.value = "";
+                      }}
+                      className="hidden"
+                    />
+                  </Label>
+                </div>
 
-                  {/* Languages */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                  {existingPhotos.map((photo) => (
+                    <div
+                      key={photo}
+                      className="relative aspect-square rounded-lg overflow-hidden border bg-gray-50"
+                    >
+                      <img
+                        src={photo}
+                        alt="Profile"
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMainPhoto(`existing:${photo}`)}
+                        className="absolute left-2 top-2 rounded-full bg-white/90 p-1 text-primary shadow"
+                        aria-label="Set main profile photo"
+                      >
+                        {selectedMainPhoto === `existing:${photo}` ? (
+                          <CheckCircle2 className="h-5 w-5 fill-primary text-white" />
+                        ) : (
+                          <ImageIcon className="h-5 w-5" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeExistingPhoto(photo)}
+                        className="absolute right-2 top-2 rounded-full bg-white/90 p-1 text-red-600 shadow"
+                        aria-label="Remove profile photo"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {newPhotoPreviews.map((preview, index) => (
+                    <div
+                      key={preview}
+                      className="relative aspect-square rounded-lg overflow-hidden border bg-gray-50"
+                    >
+                      <img
+                        src={preview}
+                        alt="New profile"
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMainPhoto(`new:${index}`)}
+                        className="absolute left-2 top-2 rounded-full bg-white/90 p-1 text-primary shadow"
+                        aria-label="Set main profile photo"
+                      >
+                        {selectedMainPhoto === `new:${index}` ? (
+                          <CheckCircle2 className="h-5 w-5 fill-primary text-white" />
+                        ) : (
+                          <ImageIcon className="h-5 w-5" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeNewPhoto(index)}
+                        className="absolute right-2 top-2 rounded-full bg-white/90 p-1 text-red-600 shadow"
+                        aria-label="Remove profile photo"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-gray-100">
+                <h3 className="font-semibold text-black text-lg">
+                  Languages
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label>Languages</Label>
                     <select
@@ -478,14 +697,44 @@ const EditProfilePage = () => {
                           <X
                             size={14}
                             className="cursor-pointer hover:text-red-400"
-                            onClick={() => {
-                              const newValue = form.getValues("language")?.filter((l: string) => l !== lang);
-                              form.setValue("language", newValue || []);
-                            }}
+                            onClick={() => removeTag("language", lang)}
                           />
                         </span>
                       ))}
                     </div>
+                  </div>
+
+                  <div>
+                    <Label>Language Level</Label>
+                    <select
+                      {...form.register("languageLavel")}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00D1C1] mt-2"
+                    >
+                      <option value="">Select level</option>
+                      {LANGUAGE_LEVELS.map((level) => (
+                        <option key={level.value} value={level.value}>
+                          {level.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Professional Details - Only for find job role */}
+              {session?.user?.role === "find job" && (
+                <div className="space-y-6 pt-4 border-t border-gray-100">
+                  <h3 className="font-semibold text-black text-lg">
+                    Professional Details
+                  </h3>
+
+                  <div>
+                    <Label>Experience (Years)</Label>
+                    <Input
+                      type="number"
+                      {...form.register("experience", { valueAsNumber: true })}
+                      className="mt-2"
+                    />
                   </div>
 
                   {/* Professional Skills */}
@@ -649,6 +898,85 @@ const EditProfilePage = () => {
                           {pref}
                           <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("perferences", pref)} />
                         </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <Label>Certificates</Label>
+                        <p className="text-sm text-gray-500">
+                          Upload certificate images or PDF files.
+                        </p>
+                      </div>
+                      <Label className="inline-flex items-center gap-2 border border-gray-300 px-4 h-10 rounded-md cursor-pointer text-sm font-medium hover:bg-gray-50">
+                        <Upload className="h-4 w-4" />
+                        Add Files
+                        <Input
+                          type="file"
+                          multiple
+                          accept="image/*,.pdf"
+                          onChange={(event) => {
+                            handleCertificateFiles(event.target.files);
+                            event.target.value = "";
+                          }}
+                          className="hidden"
+                        />
+                      </Label>
+                    </div>
+
+                    <div className="space-y-2">
+                      {existingCertificates.map((certificate) => (
+                        <div
+                          key={certificate}
+                          className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
+                        >
+                          <a
+                            href={certificate}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex min-w-0 items-center gap-2 text-sm text-primary hover:underline"
+                          >
+                            <FileText className="h-4 w-4 shrink-0" />
+                            <span className="truncate">{certificate}</span>
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExistingCertificates((prev) =>
+                                prev.filter((item) => item !== certificate),
+                              )
+                            }
+                            className="text-red-600 hover:text-red-700"
+                            aria-label="Remove certificate"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                      {certificateFiles.map((file, index) => (
+                        <div
+                          key={`${file.name}-${index}`}
+                          className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
+                        >
+                          <div className="flex min-w-0 items-center gap-2 text-sm">
+                            <FileText className="h-4 w-4 shrink-0" />
+                            <span className="truncate">{file.name}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCertificateFiles((prev) =>
+                                prev.filter((_, itemIndex) => itemIndex !== index),
+                              )
+                            }
+                            className="text-red-600 hover:text-red-700"
+                            aria-label="Remove certificate"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       ))}
                     </div>
                   </div>
