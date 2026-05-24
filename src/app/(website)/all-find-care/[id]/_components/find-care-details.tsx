@@ -236,6 +236,7 @@ const FindCareDetails = () => {
   return (
     <div className="mt-20 space-y-16">
       <ProfileHero
+        userId={userInfo?._id}
         name={`${userInfo?.firstName || ""} ${userInfo?.lastName || ""}`}
         location={
           serviceData.data.location ||

@@ -3,12 +3,13 @@
 import { CheckCircle2, Star } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner"; // অথবা আপনার পছন্দের কোনো টোস্ট লাইব্রেরি
 
 interface ProfileHeroProps {
+  userId: string;
   name: string;
   location: string;
   hourlyRate: number;
@@ -19,6 +20,7 @@ interface ProfileHeroProps {
 }
 
 export function ProfileHero({
+  userId,
   name,
   location,
   hourlyRate,
@@ -27,7 +29,6 @@ export function ProfileHero({
   profileImage,
   isVerified = false,
 }: ProfileHeroProps) {
-  const { id } = useParams();
   const router = useRouter();
   const session = useSession();
   const token = session?.data?.user?.accessToken;
@@ -42,10 +43,15 @@ export function ProfileHero({
       return;
     }
 
+    if (!userId) {
+      toast.error("Unable to find this user's profile.");
+      return;
+    }
+
     setLoading(true);
     try {
       // এপিআই কল করে কনভারসেশন শুরু করা
-      const res = await fetch(`${baseUrl}/conversation/${id}`, {
+      const res = await fetch(`${baseUrl}/conversation/${userId}`, {
         method: "POST", // আপনার এপিআই অনুযায়ী মেথড চেক করে নিন (সাধারণত POST হয়)
         headers: {
           Authorization: `Bearer ${token}`,
@@ -57,7 +63,7 @@ export function ProfileHero({
 
       if (result.success) {
         // কনভারসেশন আইডি দিয়ে মেসেজ পেজে পাঠিয়ে দেওয়া
-        router.push(`/messages/${result.data._id}`);
+        router.push(`/profile/messages/${result.data._id}`);
       } else {
         toast.error(result.message || "Failed to start conversation");
       }

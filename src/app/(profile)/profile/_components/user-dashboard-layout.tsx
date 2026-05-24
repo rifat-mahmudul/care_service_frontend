@@ -47,7 +47,7 @@ const UserDashboardLayout = ({ children }: { children: React.ReactNode }) => {
     {
       label: "Messages",
       icon: MessageSquare,
-      href: "/messages",
+      href: "/profile/messages",
       show: true,
     },
     {
