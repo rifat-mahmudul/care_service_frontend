@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -24,6 +24,11 @@ const ProfileCard = ({
   id,
 }: ProfileCardType) => {
   const pathName = usePathname();
+  const [imageSrc, setImageSrc] = useState(image || "/placeholder.png");
+
+  React.useEffect(() => {
+    setImageSrc(image || "/placeholder.png");
+  }, [image]);
 
   const truncateBio = (text: string, maxLength: number = 150) => {
     if (text?.length <= maxLength) return text;
@@ -49,19 +54,14 @@ const ProfileCard = ({
         <div className="flex flex-col md:flex-row gap-6">
           {/* Profile Image */}
           <div className="flex-shrink-0">
-            {image ? (
-              <Image
-                src={image}
-                alt={`${title}'s profile`}
-                width={1000}
-                height={1000}
-                className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover shadow-sm"
-              />
-            ) : (
-              <div className="w-24 h-24 md:w-28 md:h-28 rounded-xl bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-400 text-4xl">👤</span>
-              </div>
-            )}
+            <Image
+              src={imageSrc}
+              alt={`${title}'s profile`}
+              width={1000}
+              height={1000}
+              onError={() => setImageSrc("/placeholder.png")}
+              className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover shadow-sm"
+            />
           </div>
 
           {/* Title and Tags */}
