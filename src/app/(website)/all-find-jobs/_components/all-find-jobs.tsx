@@ -3,6 +3,7 @@
 import Banner from "@/components/shared/find-job-care/banner";
 import ProfileCard from "@/components/shared/find-job-care/profile-card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -10,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DollarSign, ListFilter, MapPin, Smile, Star } from "lucide-react";
+import { DollarSign, ListFilter, MapPin, Search, Smile, Star } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import FindCareReviewCarousel from "../../all-find-care/_components/find-care-review-carousel";
@@ -95,12 +96,39 @@ const AllFindJobs = () => {
   const token = session?.data?.user?.accessToken;
   const isAuthenticated = session?.status === "authenticated";
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [availableFilter, setAvailableFilter] = useState("all");
+  const [minHourRate, setMinHourRate] = useState("");
+  const [maxHourRate, setMaxHourRate] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
 
-  const { data, isLoading } = useQuery<ApiResponse>({
-    queryKey: ["all-find-care", id],
+  const { data, isLoading, refetch } = useQuery<ApiResponse>({
+    queryKey: [
+      "all-find-jobs",
+      id,
+      searchTerm,
+      locationFilter,
+      availableFilter,
+      minHourRate,
+      maxHourRate,
+      sortOrder,
+    ],
     queryFn: async () => {
+      const params = new URLSearchParams({
+        role: "find job",
+        limit: "100",
+        sortBy: "createdAt",
+        sortOrder,
+      });
+      if (searchTerm.trim()) params.set("searchTerm", searchTerm.trim());
+      if (locationFilter !== "all") params.set("location", locationFilter);
+      if (availableFilter !== "all") params.set("available", availableFilter);
+      if (minHourRate.trim()) params.set("minHourRate", minHourRate.trim());
+      if (maxHourRate.trim()) params.set("maxHourRate", maxHourRate.trim());
+
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/service/service-base-user/${id}?role=find job`,
+        `${process.env.NEXT_PUBLIC_API_URL}/service/service-base-user/${id}?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -108,6 +136,9 @@ const AllFindJobs = () => {
         },
       );
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || "Failed to fetch jobs");
+      }
       return data;
     },
     enabled: !!id && !!token && isAuthenticated,
@@ -123,6 +154,19 @@ const AllFindJobs = () => {
   }, [session?.status]);
 
   const caregivers = data?.data || [];
+  const locationOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          caregivers
+            .map((caregiver) => caregiver.location || caregiver.user?.location)
+            .filter(Boolean),
+        ),
+      ),
+    [caregivers],
+  );
+  const getProfileImage = (value?: string | string[]) =>
+    Array.isArray(value) ? value[0] || "/placeholder.png" : value || "/placeholder.png";
 
   // Calculate dynamic stats
   const dynamicStats = useMemo(() => {
@@ -260,7 +304,7 @@ const AllFindJobs = () => {
   }
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-16 mb-20">
       {/* Show Banner Skeleton while loading, otherwise show dynamic Banner */}
       {isLoading ? (
         <BannerSkeleton />
@@ -280,27 +324,78 @@ const AllFindJobs = () => {
               {categoryData?.name} available in your area:
             </h1>
 
-            <div className="flex items-center gap-3 mt-5">
+            <div className="flex flex-wrap items-center gap-3 mt-5">
+              <div className="relative w-full max-w-[260px]">
+                <Search className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" />
+                <Input
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Search by name, email, location"
+                  className="h-11 rounded-full border-blue-500 bg-blue-50/50 pl-9"
+                />
+              </div>
               {/* City Select Component */}
-              <Select>
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
                 <SelectTrigger className="w-[180px] rounded-full border-blue-500 bg-blue-50/50 h-11 px-4 hover:bg-blue-100/50 transition-colors focus:ring-1 focus:ring-blue-400">
                   <div className="flex items-center gap-2 w-full">
                     <MapPin className="w-4 h-4 text-red-500 fill-red-500/10 shrink-0" />
                     <div className="flex-1 text-left">
-                      <SelectValue placeholder="City" />
+                      <SelectValue placeholder="Location" />
                     </div>
                   </div>
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
-                  <SelectItem value="new-york">New York</SelectItem>
-                  <SelectItem value="london">London</SelectItem>
-                  <SelectItem value="tokyo">Tokyo</SelectItem>
+                  <SelectItem value="all">All locations</SelectItem>
+                  {locationOptions.map((location) => (
+                    <SelectItem key={location} value={location}>
+                      {location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={availableFilter} onValueChange={setAvailableFilter}>
+                <SelectTrigger className="w-[150px] rounded-full border-blue-500 bg-blue-50/50 h-11 px-4 hover:bg-blue-100/50 transition-colors focus:ring-1 focus:ring-blue-400">
+                  <SelectValue placeholder="Available" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="all">Any day</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This week</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Input
+                value={minHourRate}
+                onChange={(event) => setMinHourRate(event.target.value)}
+                type="number"
+                min="0"
+                placeholder="Min $"
+                className="h-11 w-[100px] rounded-full border-blue-500 bg-blue-50/50"
+              />
+              <Input
+                value={maxHourRate}
+                onChange={(event) => setMaxHourRate(event.target.value)}
+                type="number"
+                min="0"
+                placeholder="Max $"
+                className="h-11 w-[100px] rounded-full border-blue-500 bg-blue-50/50"
+              />
+
+              <Select value={sortOrder} onValueChange={setSortOrder}>
+                <SelectTrigger className="w-[140px] rounded-full border-blue-500 bg-blue-50/50 h-11 px-4 hover:bg-blue-100/50 transition-colors focus:ring-1 focus:ring-blue-400">
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="desc">Newest</SelectItem>
+                  <SelectItem value="asc">Oldest</SelectItem>
                 </SelectContent>
               </Select>
 
               {/* Filter All Button */}
               <Button
                 variant="outline"
+                onClick={() => refetch()}
                 className="rounded-full border-blue-500 bg-blue-50/50 h-11 px-6 hover:bg-blue-100/50 transition-colors flex items-center gap-2 border"
               >
                 <ListFilter className="w-4 h-4 text-slate-700" />
@@ -322,9 +417,7 @@ const AllFindJobs = () => {
                 caregivers.map((caregiver) => (
                   <ProfileCard
                     key={caregiver._id}
-                    image={
-                      caregiver.user?.profileImage || "/placeholder-image.jpg"
-                    }
+                    image={getProfileImage(caregiver.user?.profileImage)}
                     title={
                       `${caregiver.user?.firstName || ""} ${caregiver.user?.lastName || ""}`.trim() ||
                       "Caregiver"
@@ -384,7 +477,10 @@ const AllFindJobs = () => {
         </div>
       </div>
 
-      <FindCareReviewCarousel />
+      <FindCareReviewCarousel
+        categoryId={id}
+        categoryName={categoryData?.name}
+      />
     </div>
   );
 };

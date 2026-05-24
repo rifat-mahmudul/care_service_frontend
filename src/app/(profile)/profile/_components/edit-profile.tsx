@@ -73,6 +73,16 @@ const LANGUAGE_LEVELS = [
 const getPrimaryImage = (value?: string | string[]) =>
   Array.isArray(value) ? value[0] || "" : value || "";
 
+const isImageSource = (value: string) =>
+  /\.(png|jpe?g|gif|webp|svg|bmp|avif)(\?.*)?$/i.test(value);
+
+const isPdfSource = (value: string) => /\.pdf(\?.*)?$/i.test(value);
+
+const formatFileSize = (size: number) => {
+  if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 const EditProfilePage = () => {
   const { data: session } = useSession();
   const role = session?.user?.role;
@@ -90,6 +100,9 @@ const EditProfilePage = () => {
   const [selectedMainPhoto, setSelectedMainPhoto] = useState("");
   const [existingCertificates, setExistingCertificates] = useState<string[]>([]);
   const [certificateFiles, setCertificateFiles] = useState<File[]>([]);
+  const [certificatePreviews, setCertificatePreviews] = useState<string[]>([]);
+  const photoPreviewRef = React.useRef<string[]>([]);
+  const certificatePreviewRef = React.useRef<string[]>([]);
 
   // Tag input states
   const [currentSkillTag, setCurrentSkillTag] = useState("");
@@ -307,6 +320,10 @@ const EditProfilePage = () => {
         return [];
       });
       setCertificateFiles([]);
+      setCertificatePreviews((prev) => {
+        prev.forEach((url) => URL.revokeObjectURL(url));
+        return [];
+      });
       form.setValue("profileImage", primaryImage);
       form.setValue("galary", photos);
       form.setValue("certifications", data.certifications || []);
@@ -350,23 +367,39 @@ const EditProfilePage = () => {
     }
     const selectedFiles = Array.from(files).slice(0, remainingSlots);
     const startIndex = newPhotoFiles.length;
+    const previews = selectedFiles.map((file) => URL.createObjectURL(file));
     setNewPhotoFiles((prev) => [...prev, ...selectedFiles]);
-    setNewPhotoPreviews((prev) => [
-      ...prev,
-      ...selectedFiles.map((file) => URL.createObjectURL(file)),
-    ]);
+    setNewPhotoPreviews((prev) => [...prev, ...previews]);
     if (!selectedMainPhoto && selectedFiles.length > 0) {
-      setSelectedMainPhoto(`new:${startIndex}`);
+      selectMainPhoto(`new:${startIndex}`, previews[0] || "");
     }
+  };
+
+  const selectMainPhoto = (source: string, previewUrl = "") => {
+    setSelectedMainPhoto(source);
+    form.setValue(
+      "profileImage",
+      source.startsWith("existing:") ? source.replace("existing:", "") : previewUrl,
+      { shouldDirty: true },
+    );
   };
 
   const removeExistingPhoto = (url: string) => {
     const nextPhotos = existingPhotos.filter((photo) => photo !== url);
     setExistingPhotos(nextPhotos);
     if (selectedMainPhoto === `existing:${url}`) {
-      setSelectedMainPhoto(
-        nextPhotos[0] ? `existing:${nextPhotos[0]}` : newPhotoFiles[0] ? "new:0" : "",
-      );
+      const fallbackSource = nextPhotos[0]
+        ? `existing:${nextPhotos[0]}`
+        : newPhotoFiles[0]
+          ? "new:0"
+          : "";
+      const fallbackPreview = fallbackSource === "new:0" ? newPhotoPreviews[0] : "";
+      if (fallbackSource) {
+        selectMainPhoto(fallbackSource, fallbackPreview);
+      } else {
+        setSelectedMainPhoto("");
+        form.setValue("profileImage", "", { shouldDirty: true });
+      }
     }
   };
 
@@ -377,21 +410,60 @@ const EditProfilePage = () => {
     setNewPhotoFiles(nextFiles);
     setNewPhotoPreviews(nextPreviews);
     if (selectedMainPhoto === `new:${index}`) {
-      setSelectedMainPhoto(
-        existingPhotos[0] ? `existing:${existingPhotos[0]}` : nextFiles[0] ? "new:0" : "",
-      );
+      const fallbackSource = existingPhotos[0]
+        ? `existing:${existingPhotos[0]}`
+        : nextFiles[0]
+          ? "new:0"
+          : "";
+      const fallbackPreview = fallbackSource === "new:0" ? nextPreviews[0] : "";
+      if (fallbackSource) {
+        selectMainPhoto(fallbackSource, fallbackPreview);
+      } else {
+        setSelectedMainPhoto("");
+        form.setValue("profileImage", "", { shouldDirty: true });
+      }
     } else if (selectedMainPhoto.startsWith("new:")) {
       const selectedIndex = Number(selectedMainPhoto.replace("new:", ""));
       if (selectedIndex > index) {
-        setSelectedMainPhoto(`new:${selectedIndex - 1}`);
+        selectMainPhoto(`new:${selectedIndex - 1}`, nextPreviews[selectedIndex - 1] || "");
       }
     }
   };
 
   const handleCertificateFiles = (files: FileList | null) => {
     if (!files?.length) return;
-    setCertificateFiles((prev) => [...prev, ...Array.from(files)]);
+    const selectedFiles = Array.from(files);
+    setCertificateFiles((prev) => [...prev, ...selectedFiles]);
+    setCertificatePreviews((prev) => [
+      ...prev,
+      ...selectedFiles.map((file) => URL.createObjectURL(file)),
+    ]);
   };
+
+  const removeCertificateFile = (index: number) => {
+    URL.revokeObjectURL(certificatePreviews[index]);
+    setCertificateFiles((prev) =>
+      prev.filter((_, itemIndex) => itemIndex !== index),
+    );
+    setCertificatePreviews((prev) =>
+      prev.filter((_, itemIndex) => itemIndex !== index),
+    );
+  };
+
+  useEffect(() => {
+    photoPreviewRef.current = newPhotoPreviews;
+  }, [newPhotoPreviews]);
+
+  useEffect(() => {
+    certificatePreviewRef.current = certificatePreviews;
+  }, [certificatePreviews]);
+
+  useEffect(() => {
+    return () => {
+      photoPreviewRef.current.forEach((url) => URL.revokeObjectURL(url));
+      certificatePreviewRef.current.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   const handleStripeSetup = async () => {
     setIsSettingUpStripe(true);
@@ -435,6 +507,12 @@ const EditProfilePage = () => {
         new Map(countries.map((item) => [item.countryName, item])).values(),
       )
     : [];
+  const selectedMainPhotoUrl = selectedMainPhoto.startsWith("existing:")
+    ? selectedMainPhoto.replace("existing:", "")
+    : selectedMainPhoto.startsWith("new:")
+      ? newPhotoPreviews[Number(selectedMainPhoto.replace("new:", ""))]
+      : existingPhotos[0] || newPhotoPreviews[0] || "";
+  const totalProfilePhotos = existingPhotos.length + newPhotoFiles.length;
 
   return (
     <div className="mx-auto border shadow-lg p-5 rounded-xl">
@@ -576,7 +654,7 @@ const EditProfilePage = () => {
                       the main image.
                     </p>
                   </div>
-                  <Label className="inline-flex items-center gap-2 bg-[#00D1C1] hover:bg-[#00b8aa] text-white px-4 h-10 rounded-md cursor-pointer text-sm font-medium">
+                  <Label className="inline-flex items-center gap-2 bg-[#00D1C1] hover:bg-[#00b8aa] text-white px-4 h-10 rounded-md cursor-pointer text-sm font-medium shadow-sm">
                     <Upload className="h-4 w-4" />
                     Upload
                     <Input
@@ -592,71 +670,144 @@ const EditProfilePage = () => {
                   </Label>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {existingPhotos.map((photo) => (
-                    <div
-                      key={photo}
-                      className="relative aspect-square rounded-lg overflow-hidden border bg-gray-50"
-                    >
-                      <img
-                        src={photo}
-                        alt="Profile"
-                        className="h-full w-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setSelectedMainPhoto(`existing:${photo}`)}
-                        className="absolute left-2 top-2 rounded-full bg-white/90 p-1 text-primary shadow"
-                        aria-label="Set main profile photo"
-                      >
-                        {selectedMainPhoto === `existing:${photo}` ? (
-                          <CheckCircle2 className="h-5 w-5 fill-primary text-white" />
-                        ) : (
-                          <ImageIcon className="h-5 w-5" />
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => removeExistingPhoto(photo)}
-                        className="absolute right-2 top-2 rounded-full bg-white/90 p-1 text-red-600 shadow"
-                        aria-label="Remove profile photo"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
+                  <div className="rounded-xl border border-gray-200 bg-gradient-to-b from-white to-gray-50 p-4">
+                    <div className="relative aspect-square overflow-hidden rounded-xl border bg-gray-100 shadow-sm">
+                      {selectedMainPhotoUrl ? (
+                        <img
+                          src={selectedMainPhotoUrl}
+                          alt="Selected profile"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-gray-400">
+                          <ImageIcon className="h-10 w-10" />
+                          <span className="text-sm font-medium">No photo selected</span>
+                        </div>
+                      )}
+                      {selectedMainPhotoUrl && (
+                        <div className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-primary shadow">
+                          Main Photo
+                        </div>
+                      )}
                     </div>
-                  ))}
-                  {newPhotoPreviews.map((preview, index) => (
-                    <div
-                      key={preview}
-                      className="relative aspect-square rounded-lg overflow-hidden border bg-gray-50"
-                    >
-                      <img
-                        src={preview}
-                        alt="New profile"
-                        className="h-full w-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setSelectedMainPhoto(`new:${index}`)}
-                        className="absolute left-2 top-2 rounded-full bg-white/90 p-1 text-primary shadow"
-                        aria-label="Set main profile photo"
-                      >
-                        {selectedMainPhoto === `new:${index}` ? (
-                          <CheckCircle2 className="h-5 w-5 fill-primary text-white" />
-                        ) : (
-                          <ImageIcon className="h-5 w-5" />
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => removeNewPhoto(index)}
-                        className="absolute right-2 top-2 rounded-full bg-white/90 p-1 text-red-600 shadow"
-                        aria-label="Remove profile photo"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                    <div className="mt-3 flex items-center justify-between text-sm">
+                      <span className="font-medium text-gray-700">
+                        {totalProfilePhotos}/{MAX_PROFILE_PHOTOS} uploaded
+                      </span>
+                      <span className="text-gray-500">Click a photo to set main</span>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="rounded-xl border border-dashed border-gray-300 bg-white p-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                      {existingPhotos.map((photo) => (
+                        <div
+                          key={photo}
+                          className={`group relative aspect-square rounded-lg overflow-hidden border bg-gray-50 transition-all ${
+                            selectedMainPhoto === `existing:${photo}`
+                              ? "ring-2 ring-[#00D1C1] ring-offset-2"
+                              : "hover:border-[#00D1C1]"
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => selectMainPhoto(`existing:${photo}`)}
+                            className="block h-full w-full"
+                            aria-label="Set main profile photo"
+                          >
+                            <img
+                              src={photo}
+                              alt="Profile"
+                              className="h-full w-full object-cover"
+                            />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => selectMainPhoto(`existing:${photo}`)}
+                            className="absolute left-2 top-2 rounded-full bg-white/90 p-1 text-primary shadow"
+                            aria-label="Set main profile photo"
+                          >
+                            {selectedMainPhoto === `existing:${photo}` ? (
+                              <CheckCircle2 className="h-5 w-5 fill-primary text-white" />
+                            ) : (
+                              <ImageIcon className="h-5 w-5" />
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeExistingPhoto(photo)}
+                            className="absolute right-2 top-2 rounded-full bg-white/90 p-1 text-red-600 shadow opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                            aria-label="Remove profile photo"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                      {newPhotoPreviews.map((preview, index) => (
+                        <div
+                          key={preview}
+                          className={`group relative aspect-square rounded-lg overflow-hidden border bg-gray-50 transition-all ${
+                            selectedMainPhoto === `new:${index}`
+                              ? "ring-2 ring-[#00D1C1] ring-offset-2"
+                              : "hover:border-[#00D1C1]"
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => selectMainPhoto(`new:${index}`, preview)}
+                            className="block h-full w-full"
+                            aria-label="Set main profile photo"
+                          >
+                            <img
+                              src={preview}
+                              alt="New profile"
+                              className="h-full w-full object-cover"
+                            />
+                          </button>
+                          <div className="absolute bottom-2 left-2 rounded-full bg-[#00D1C1] px-2 py-0.5 text-[11px] font-semibold text-white shadow">
+                            New
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => selectMainPhoto(`new:${index}`, preview)}
+                            className="absolute left-2 top-2 rounded-full bg-white/90 p-1 text-primary shadow"
+                            aria-label="Set main profile photo"
+                          >
+                            {selectedMainPhoto === `new:${index}` ? (
+                              <CheckCircle2 className="h-5 w-5 fill-primary text-white" />
+                            ) : (
+                              <ImageIcon className="h-5 w-5" />
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeNewPhoto(index)}
+                            className="absolute right-2 top-2 rounded-full bg-white/90 p-1 text-red-600 shadow opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                            aria-label="Remove profile photo"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                      {totalProfilePhotos === 0 && (
+                        <Label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-gray-500 hover:border-[#00D1C1] hover:bg-[#00D1C1]/5">
+                          <Upload className="h-6 w-6" />
+                          <span className="text-sm font-medium">Upload photo</span>
+                          <Input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={(event) => {
+                              handlePhotoFiles(event.target.files);
+                              event.target.value = "";
+                            }}
+                            className="hidden"
+                          />
+                        </Label>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -910,7 +1061,7 @@ const EditProfilePage = () => {
                           Upload certificate images or PDF files.
                         </p>
                       </div>
-                      <Label className="inline-flex items-center gap-2 border border-gray-300 px-4 h-10 rounded-md cursor-pointer text-sm font-medium hover:bg-gray-50">
+                      <Label className="inline-flex items-center gap-2 border border-gray-300 px-4 h-10 rounded-md cursor-pointer text-sm font-medium hover:bg-gray-50 shadow-sm">
                         <Upload className="h-4 w-4" />
                         Add Files
                         <Input
@@ -926,58 +1077,128 @@ const EditProfilePage = () => {
                       </Label>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                       {existingCertificates.map((certificate) => (
                         <div
                           key={certificate}
-                          className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
+                          className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
                         >
-                          <a
-                            href={certificate}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex min-w-0 items-center gap-2 text-sm text-primary hover:underline"
-                          >
-                            <FileText className="h-4 w-4 shrink-0" />
-                            <span className="truncate">{certificate}</span>
-                          </a>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setExistingCertificates((prev) =>
-                                prev.filter((item) => item !== certificate),
-                              )
-                            }
-                            className="text-red-600 hover:text-red-700"
-                            aria-label="Remove certificate"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          <div className="relative aspect-[4/3] bg-gray-50">
+                            {isImageSource(certificate) ? (
+                              <img
+                                src={certificate}
+                                alt="Certificate preview"
+                                className="h-full w-full object-cover"
+                              />
+                            ) : isPdfSource(certificate) ? (
+                              <iframe
+                                src={certificate}
+                                title="Certificate PDF preview"
+                                className="h-full w-full"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-gray-400">
+                                <FileText className="h-10 w-10" />
+                                <span className="text-sm font-medium">Certificate file</span>
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExistingCertificates((prev) =>
+                                  prev.filter((item) => item !== certificate),
+                                )
+                              }
+                              className="absolute right-2 top-2 rounded-full bg-white/95 p-1.5 text-red-600 shadow opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                              aria-label="Remove certificate"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <div className="flex items-center justify-between gap-3 px-3 py-2">
+                            <a
+                              href={certificate}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex min-w-0 items-center gap-2 text-sm text-primary hover:underline"
+                            >
+                              <FileText className="h-4 w-4 shrink-0" />
+                              <span className="truncate">
+                                {certificate.split("/").pop() || "Certificate"}
+                              </span>
+                            </a>
+                            <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
+                              Saved
+                            </span>
+                          </div>
                         </div>
                       ))}
                       {certificateFiles.map((file, index) => (
                         <div
                           key={`${file.name}-${index}`}
-                          className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
+                          className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
                         >
-                          <div className="flex min-w-0 items-center gap-2 text-sm">
-                            <FileText className="h-4 w-4 shrink-0" />
-                            <span className="truncate">{file.name}</span>
+                          <div className="relative aspect-[4/3] bg-gray-50">
+                            {file.type.startsWith("image/") ? (
+                              <img
+                                src={certificatePreviews[index]}
+                                alt={file.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : file.type === "application/pdf" ? (
+                              <iframe
+                                src={certificatePreviews[index]}
+                                title={`${file.name} preview`}
+                                className="h-full w-full"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-gray-400">
+                                <FileText className="h-10 w-10" />
+                                <span className="text-sm font-medium">Preview unavailable</span>
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => removeCertificateFile(index)}
+                              className="absolute right-2 top-2 rounded-full bg-white/95 p-1.5 text-red-600 shadow opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                              aria-label="Remove certificate"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setCertificateFiles((prev) =>
-                                prev.filter((_, itemIndex) => itemIndex !== index),
-                              )
-                            }
-                            className="text-red-600 hover:text-red-700"
-                            aria-label="Remove certificate"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          <div className="flex items-center justify-between gap-3 px-3 py-2">
+                            <div className="flex min-w-0 items-center gap-2 text-sm">
+                              <FileText className="h-4 w-4 shrink-0 text-primary" />
+                              <span className="truncate">{file.name}</span>
+                            </div>
+                            <span className="shrink-0 rounded-full bg-[#00D1C1]/10 px-2 py-0.5 text-[11px] font-medium text-[#008a80]">
+                              {formatFileSize(file.size)}
+                            </span>
+                          </div>
                         </div>
                       ))}
+                      {existingCertificates.length === 0 &&
+                        certificateFiles.length === 0 && (
+                          <Label className="flex min-h-[190px] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-gray-50 text-gray-500 hover:border-[#00D1C1] hover:bg-[#00D1C1]/5">
+                            <FileText className="h-8 w-8" />
+                            <span className="text-sm font-medium">
+                              Upload certificate files
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              Images and PDFs supported
+                            </span>
+                            <Input
+                              type="file"
+                              multiple
+                              accept="image/*,.pdf"
+                              onChange={(event) => {
+                                handleCertificateFiles(event.target.files);
+                                event.target.value = "";
+                              }}
+                              className="hidden"
+                            />
+                          </Label>
+                        )}
                     </div>
                   </div>
                 </div>
