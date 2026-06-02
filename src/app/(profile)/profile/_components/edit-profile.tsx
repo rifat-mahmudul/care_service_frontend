@@ -24,9 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Form,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
@@ -47,6 +45,7 @@ const profileSchema = z.object({
   canHelpWith: z.array(z.string()).default([]),
   professionalSkill: z.array(z.string()).default([]),
   perferences: z.array(z.string()).default([]),
+  neighborhoods: z.string().optional(),
 });
 
 type ProfileFormValues = z.input<typeof profileSchema>;
@@ -98,7 +97,9 @@ const EditProfilePage = () => {
   const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([]);
   const [newPhotoPreviews, setNewPhotoPreviews] = useState<string[]>([]);
   const [selectedMainPhoto, setSelectedMainPhoto] = useState("");
-  const [existingCertificates, setExistingCertificates] = useState<string[]>([]);
+  const [existingCertificates, setExistingCertificates] = useState<string[]>(
+    [],
+  );
   const [certificateFiles, setCertificateFiles] = useState<File[]>([]);
   const [certificatePreviews, setCertificatePreviews] = useState<string[]>([]);
   const photoPreviewRef = React.useRef<string[]>([]);
@@ -132,6 +133,7 @@ const EditProfilePage = () => {
       canHelpWith: [],
       professionalSkill: [],
       perferences: [],
+      neighborhoods: "",
     },
   });
 
@@ -245,6 +247,7 @@ const EditProfilePage = () => {
           canHelpWith: data.canHelpWith || [],
           professionalSkill: data.professionalSkill || [],
           perferences: data.perferences || [],
+          neighborhoods: data.neighborhoods || "",
         });
 
         setCountryValue(data.country || "");
@@ -379,7 +382,9 @@ const EditProfilePage = () => {
     setSelectedMainPhoto(source);
     form.setValue(
       "profileImage",
-      source.startsWith("existing:") ? source.replace("existing:", "") : previewUrl,
+      source.startsWith("existing:")
+        ? source.replace("existing:", "")
+        : previewUrl,
       { shouldDirty: true },
     );
   };
@@ -393,7 +398,8 @@ const EditProfilePage = () => {
         : newPhotoFiles[0]
           ? "new:0"
           : "";
-      const fallbackPreview = fallbackSource === "new:0" ? newPhotoPreviews[0] : "";
+      const fallbackPreview =
+        fallbackSource === "new:0" ? newPhotoPreviews[0] : "";
       if (fallbackSource) {
         selectMainPhoto(fallbackSource, fallbackPreview);
       } else {
@@ -405,8 +411,12 @@ const EditProfilePage = () => {
 
   const removeNewPhoto = (index: number) => {
     URL.revokeObjectURL(newPhotoPreviews[index]);
-    const nextFiles = newPhotoFiles.filter((_, itemIndex) => itemIndex !== index);
-    const nextPreviews = newPhotoPreviews.filter((_, itemIndex) => itemIndex !== index);
+    const nextFiles = newPhotoFiles.filter(
+      (_, itemIndex) => itemIndex !== index,
+    );
+    const nextPreviews = newPhotoPreviews.filter(
+      (_, itemIndex) => itemIndex !== index,
+    );
     setNewPhotoFiles(nextFiles);
     setNewPhotoPreviews(nextPreviews);
     if (selectedMainPhoto === `new:${index}`) {
@@ -425,7 +435,10 @@ const EditProfilePage = () => {
     } else if (selectedMainPhoto.startsWith("new:")) {
       const selectedIndex = Number(selectedMainPhoto.replace("new:", ""));
       if (selectedIndex > index) {
-        selectMainPhoto(`new:${selectedIndex - 1}`, nextPreviews[selectedIndex - 1] || "");
+        selectMainPhoto(
+          `new:${selectedIndex - 1}`,
+          nextPreviews[selectedIndex - 1] || "",
+        );
       }
     }
   };
@@ -485,7 +498,9 @@ const EditProfilePage = () => {
       }
 
       const result = await response.json();
-      toast.success(result.data.message || "Stripe account created successfully!");
+      toast.success(
+        result.data.message || "Stripe account created successfully!",
+      );
 
       if (result.data.url) {
         window.open(result.data.url, "_blank");
@@ -555,7 +570,9 @@ const EditProfilePage = () => {
                     className="focus-visible:ring-[#00D1C1] mt-2"
                   />
                   {form.formState.errors.firstName && (
-                    <p className="text-sm text-red-500 mt-1">{form.formState.errors.firstName.message}</p>
+                    <p className="text-sm text-red-500 mt-1">
+                      {form.formState.errors.firstName.message}
+                    </p>
                   )}
                 </div>
                 <div>
@@ -578,10 +595,7 @@ const EditProfilePage = () => {
                 </div>
                 <div>
                   <Label>Phone Number</Label>
-                  <Input
-                    {...form.register("phone")}
-                    className="mt-2"
-                  />
+                  <Input {...form.register("phone")} className="mt-2" />
                 </div>
               </div>
 
@@ -623,7 +637,9 @@ const EditProfilePage = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00D1C1] mt-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   >
                     <option value="">
-                      {availableCities.length === 0 ? "Select country first" : "Select city"}
+                      {availableCities.length === 0
+                        ? "Select country first"
+                        : "Select city"}
                     </option>
                     {availableCities.map((city, index) => (
                       <option key={index} value={city}>
@@ -632,6 +648,26 @@ const EditProfilePage = () => {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Neighborhoods Field - Active after city is selected */}
+              <div className="mt-4">
+                <Label>Neighborhoods</Label>
+                <Input
+                  {...form.register("neighborhoods")}
+                  placeholder={
+                    cityValue
+                      ? "Enter your neighborhood..."
+                      : "Select a city first to add neighborhood"
+                  }
+                  disabled={!cityValue}
+                  className={`mt-2 focus-visible:ring-[#00D1C1] ${!cityValue ? "bg-gray-50 cursor-not-allowed" : ""}`}
+                />
+                {cityValue && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter your neighborhood, street name, or area in {cityValue}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -682,7 +718,9 @@ const EditProfilePage = () => {
                       ) : (
                         <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-gray-400">
                           <ImageIcon className="h-10 w-10" />
-                          <span className="text-sm font-medium">No photo selected</span>
+                          <span className="text-sm font-medium">
+                            No photo selected
+                          </span>
                         </div>
                       )}
                       {selectedMainPhotoUrl && (
@@ -695,7 +733,9 @@ const EditProfilePage = () => {
                       <span className="font-medium text-gray-700">
                         {totalProfilePhotos}/{MAX_PROFILE_PHOTOS} uploaded
                       </span>
-                      <span className="text-gray-500">Click a photo to set main</span>
+                      <span className="text-gray-500">
+                        Click a photo to set main
+                      </span>
                     </div>
                   </div>
 
@@ -755,7 +795,9 @@ const EditProfilePage = () => {
                         >
                           <button
                             type="button"
-                            onClick={() => selectMainPhoto(`new:${index}`, preview)}
+                            onClick={() =>
+                              selectMainPhoto(`new:${index}`, preview)
+                            }
                             className="block h-full w-full"
                             aria-label="Set main profile photo"
                           >
@@ -770,7 +812,9 @@ const EditProfilePage = () => {
                           </div>
                           <button
                             type="button"
-                            onClick={() => selectMainPhoto(`new:${index}`, preview)}
+                            onClick={() =>
+                              selectMainPhoto(`new:${index}`, preview)
+                            }
                             className="absolute left-2 top-2 rounded-full bg-white/90 p-1 text-primary shadow"
                             aria-label="Set main profile photo"
                           >
@@ -793,7 +837,9 @@ const EditProfilePage = () => {
                       {totalProfilePhotos === 0 && (
                         <Label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-gray-500 hover:border-[#00D1C1] hover:bg-[#00D1C1]/5">
                           <Upload className="h-6 w-6" />
-                          <span className="text-sm font-medium">Upload photo</span>
+                          <span className="text-sm font-medium">
+                            Upload photo
+                          </span>
                           <Input
                             type="file"
                             multiple
@@ -812,9 +858,7 @@ const EditProfilePage = () => {
               </div>
 
               <div className="space-y-4 pt-4 border-t border-gray-100">
-                <h3 className="font-semibold text-black text-lg">
-                  Languages
-                </h3>
+                <h3 className="font-semibold text-black text-lg">Languages</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label>Languages</Label>
@@ -822,9 +866,13 @@ const EditProfilePage = () => {
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value) {
-                          const currentValues = form.getValues("language") || [];
+                          const currentValues =
+                            form.getValues("language") || [];
                           if (!currentValues.includes(value)) {
-                            form.setValue("language", [...currentValues, value]);
+                            form.setValue("language", [
+                              ...currentValues,
+                              value,
+                            ]);
                           }
                           e.target.value = "";
                         }
@@ -839,19 +887,21 @@ const EditProfilePage = () => {
                       ))}
                     </select>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {form.watch("language")?.map((lang: string, index: number) => (
-                        <span
-                          key={index}
-                          className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                        >
-                          {lang}
-                          <X
-                            size={14}
-                            className="cursor-pointer hover:text-red-400"
-                            onClick={() => removeTag("language", lang)}
-                          />
-                        </span>
-                      ))}
+                      {form
+                        .watch("language")
+                        ?.map((lang: string, index: number) => (
+                          <span
+                            key={index}
+                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                          >
+                            {lang}
+                            <X
+                              size={14}
+                              className="cursor-pointer hover:text-red-400"
+                              onClick={() => removeTag("language", lang)}
+                            />
+                          </span>
+                        ))}
                     </div>
                   </div>
 
@@ -899,25 +949,46 @@ const EditProfilePage = () => {
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            addTag("professionalSkill", currentSkillTag, setCurrentSkillTag);
+                            addTag(
+                              "professionalSkill",
+                              currentSkillTag,
+                              setCurrentSkillTag,
+                            );
                           }
                         }}
                       />
                       <Button
                         type="button"
-                        onClick={() => addTag("professionalSkill", currentSkillTag, setCurrentSkillTag)}
+                        onClick={() =>
+                          addTag(
+                            "professionalSkill",
+                            currentSkillTag,
+                            setCurrentSkillTag,
+                          )
+                        }
                         className="bg-[#00D1C1] hover:bg-[#00b8aa]"
                       >
                         <Plus size={18} />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {form.watch("professionalSkill")?.map((skill: string, index: number) => (
-                        <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                          {skill}
-                          <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("professionalSkill", skill)} />
-                        </span>
-                      ))}
+                      {form
+                        .watch("professionalSkill")
+                        ?.map((skill: string, index: number) => (
+                          <span
+                            key={index}
+                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                          >
+                            {skill}
+                            <X
+                              size={14}
+                              className="cursor-pointer hover:text-red-400"
+                              onClick={() =>
+                                removeTag("professionalSkill", skill)
+                              }
+                            />
+                          </span>
+                        ))}
                     </div>
                   </div>
 
@@ -932,25 +1003,44 @@ const EditProfilePage = () => {
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            addTag("education", currentEducationTag, setCurrentEducationTag);
+                            addTag(
+                              "education",
+                              currentEducationTag,
+                              setCurrentEducationTag,
+                            );
                           }
                         }}
                       />
                       <Button
                         type="button"
-                        onClick={() => addTag("education", currentEducationTag, setCurrentEducationTag)}
+                        onClick={() =>
+                          addTag(
+                            "education",
+                            currentEducationTag,
+                            setCurrentEducationTag,
+                          )
+                        }
                         className="bg-[#00D1C1] hover:bg-[#00b8aa]"
                       >
                         <Plus size={18} />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {form.watch("education")?.map((edu: string, index: number) => (
-                        <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                          {edu}
-                          <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("education", edu)} />
-                        </span>
-                      ))}
+                      {form
+                        .watch("education")
+                        ?.map((edu: string, index: number) => (
+                          <span
+                            key={index}
+                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                          >
+                            {edu}
+                            <X
+                              size={14}
+                              className="cursor-pointer hover:text-red-400"
+                              onClick={() => removeTag("education", edu)}
+                            />
+                          </span>
+                        ))}
                     </div>
                   </div>
 
@@ -965,25 +1055,44 @@ const EditProfilePage = () => {
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            addTag("agegroup", currentAgeGroupTag, setCurrentAgeGroupTag);
+                            addTag(
+                              "agegroup",
+                              currentAgeGroupTag,
+                              setCurrentAgeGroupTag,
+                            );
                           }
                         }}
                       />
                       <Button
                         type="button"
-                        onClick={() => addTag("agegroup", currentAgeGroupTag, setCurrentAgeGroupTag)}
+                        onClick={() =>
+                          addTag(
+                            "agegroup",
+                            currentAgeGroupTag,
+                            setCurrentAgeGroupTag,
+                          )
+                        }
                         className="bg-[#00D1C1] hover:bg-[#00b8aa]"
                       >
                         <Plus size={18} />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {form.watch("agegroup")?.map((age: string, index: number) => (
-                        <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                          {age}
-                          <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("agegroup", age)} />
-                        </span>
-                      ))}
+                      {form
+                        .watch("agegroup")
+                        ?.map((age: string, index: number) => (
+                          <span
+                            key={index}
+                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                          >
+                            {age}
+                            <X
+                              size={14}
+                              className="cursor-pointer hover:text-red-400"
+                              onClick={() => removeTag("agegroup", age)}
+                            />
+                          </span>
+                        ))}
                     </div>
                   </div>
 
@@ -993,30 +1102,51 @@ const EditProfilePage = () => {
                     <div className="flex gap-2">
                       <Input
                         value={currentCanHelpWithTag}
-                        onChange={(e) => setCurrentCanHelpWithTag(e.target.value)}
+                        onChange={(e) =>
+                          setCurrentCanHelpWithTag(e.target.value)
+                        }
                         placeholder="Add subject..."
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            addTag("canHelpWith", currentCanHelpWithTag, setCurrentCanHelpWithTag);
+                            addTag(
+                              "canHelpWith",
+                              currentCanHelpWithTag,
+                              setCurrentCanHelpWithTag,
+                            );
                           }
                         }}
                       />
                       <Button
                         type="button"
-                        onClick={() => addTag("canHelpWith", currentCanHelpWithTag, setCurrentCanHelpWithTag)}
+                        onClick={() =>
+                          addTag(
+                            "canHelpWith",
+                            currentCanHelpWithTag,
+                            setCurrentCanHelpWithTag,
+                          )
+                        }
                         className="bg-[#00D1C1] hover:bg-[#00b8aa]"
                       >
                         <Plus size={18} />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {form.watch("canHelpWith")?.map((subject: string, index: number) => (
-                        <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                          {subject}
-                          <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("canHelpWith", subject)} />
-                        </span>
-                      ))}
+                      {form
+                        .watch("canHelpWith")
+                        ?.map((subject: string, index: number) => (
+                          <span
+                            key={index}
+                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                          >
+                            {subject}
+                            <X
+                              size={14}
+                              className="cursor-pointer hover:text-red-400"
+                              onClick={() => removeTag("canHelpWith", subject)}
+                            />
+                          </span>
+                        ))}
                     </div>
                   </div>
 
@@ -1026,30 +1156,51 @@ const EditProfilePage = () => {
                     <div className="flex gap-2">
                       <Input
                         value={currentPreferenceTag}
-                        onChange={(e) => setCurrentPreferenceTag(e.target.value)}
+                        onChange={(e) =>
+                          setCurrentPreferenceTag(e.target.value)
+                        }
                         placeholder="Add preference..."
                         onKeyPress={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
-                            addTag("perferences", currentPreferenceTag, setCurrentPreferenceTag);
+                            addTag(
+                              "perferences",
+                              currentPreferenceTag,
+                              setCurrentPreferenceTag,
+                            );
                           }
                         }}
                       />
                       <Button
                         type="button"
-                        onClick={() => addTag("perferences", currentPreferenceTag, setCurrentPreferenceTag)}
+                        onClick={() =>
+                          addTag(
+                            "perferences",
+                            currentPreferenceTag,
+                            setCurrentPreferenceTag,
+                          )
+                        }
                         className="bg-[#00D1C1] hover:bg-[#00b8aa]"
                       >
                         <Plus size={18} />
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {form.watch("perferences")?.map((pref: string, index: number) => (
-                        <span key={index} className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                          {pref}
-                          <X size={14} className="cursor-pointer hover:text-red-400" onClick={() => removeTag("perferences", pref)} />
-                        </span>
-                      ))}
+                      {form
+                        .watch("perferences")
+                        ?.map((pref: string, index: number) => (
+                          <span
+                            key={index}
+                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                          >
+                            {pref}
+                            <X
+                              size={14}
+                              className="cursor-pointer hover:text-red-400"
+                              onClick={() => removeTag("perferences", pref)}
+                            />
+                          </span>
+                        ))}
                     </div>
                   </div>
 
@@ -1099,7 +1250,9 @@ const EditProfilePage = () => {
                             ) : (
                               <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-gray-400">
                                 <FileText className="h-10 w-10" />
-                                <span className="text-sm font-medium">Certificate file</span>
+                                <span className="text-sm font-medium">
+                                  Certificate file
+                                </span>
                               </div>
                             )}
                             <button
@@ -1154,7 +1307,9 @@ const EditProfilePage = () => {
                             ) : (
                               <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-gray-400">
                                 <FileText className="h-10 w-10" />
-                                <span className="text-sm font-medium">Preview unavailable</span>
+                                <span className="text-sm font-medium">
+                                  Preview unavailable
+                                </span>
                               </div>
                             )}
                             <button
@@ -1210,7 +1365,9 @@ const EditProfilePage = () => {
                   disabled={isLoading}
                   className="bg-primary hover:bg-[#042a2a] text-white px-8 h-12 rounded-lg"
                 >
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Save Changes
                 </Button>
               </div>
