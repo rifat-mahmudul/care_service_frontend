@@ -1,9 +1,24 @@
 "use client";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { BookOpen, Award, Globe } from "lucide-react";
+import { BookOpen, Award, Globe, Play } from "lucide-react";
 
 const AcademySection = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handlePlayVideo = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        videoRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+
   return (
     <section className="py-20 bg-gradient-to-r from-[#E9E5FF] to-[#D9D0FF] overflow-hidden">
       <div className="container mx-auto px-4">
@@ -40,16 +55,47 @@ const AcademySection = () => {
           {/* ডান পাশে ভিডিও এবং ব্যাজেস */}
           <div className="relative flex justify-center lg:justify-end">
             <div className="relative w-full max-w-[400px] md:max-w-[550px] aspect-square flex justify-center items-center">
-              {/* ভিডিও কন্টেইনার - পুরো ভিডিও দেখানোর জন্য object-contain ব্যবহার করা হয়েছে */}
-              <div className="relative w-[90%] h-[90%] rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl border-4 border-white bg-black/20">
+              {/* ভিডিও কন্টেইনার */}
+              <div className="relative w-[90%] h-[90%] rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl border-4 border-white bg-black/20 group">
                 <video
+                  ref={videoRef}
                   src="/cat_video.mp4"
                   className="w-full h-full object-contain"
-                  autoPlay
                   loop
                   muted
                   playsInline
                 />
+
+                {/* Play Button Overlay */}
+                {!isPlaying && (
+                  <button
+                    onClick={handlePlayVideo}
+                    className="absolute inset-0 flex items-center justify-center bg-black/30 transition-all group-hover:bg-black/40"
+                  >
+                    <div className="bg-white/90 hover:bg-white rounded-full p-4 md:p-6 transition-all transform hover:scale-110 shadow-xl">
+                      <Play className="w-8 h-8 md:w-12 md:h-12 text-[#7C3AED] fill-[#7C3AED]" />
+                    </div>
+                  </button>
+                )}
+
+                {/* Pause button when video is playing - optional, appears on hover */}
+                {isPlaying && (
+                  <button
+                    onClick={handlePlayVideo}
+                    className="absolute bottom-4 right-4 bg-black/60 hover:bg-black/80 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <div className="bg-white rounded-full p-1">
+                      <svg
+                        className="w-4 h-4 text-[#7C3AED]"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <rect x="6" y="4" width="4" height="16" rx="1" />
+                        <rect x="14" y="4" width="4" height="16" rx="1" />
+                      </svg>
+                    </div>
+                  </button>
+                )}
               </div>
 
               {/* ব্যাজেস - দুই কর্নারে */}
