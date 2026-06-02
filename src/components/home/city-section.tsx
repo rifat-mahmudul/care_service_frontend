@@ -1,153 +1,233 @@
 "use client";
 import React, { useState } from "react";
-import { MapPin, ChevronRight } from "lucide-react";
+import { ChevronRight, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 
-interface City {
-  country: string;
-  cities: string[];
+interface APICountry {
+  _id: string;
+  countryName: string;
+  cityName: string[];
+  image?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-const CitySection = () => {
-  // শুরুতে শুধুমাত্র একটি নির্দিষ্ট দেশ ওপেন থাকবে
-  const [expandedCountry, setExpandedCountry] = useState<string | null>(
-    "Singapore",
-  );
+interface APIResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+  data: APICountry[];
+}
 
-  const citiesData: City[] = [
-    { country: "Singapore", cities: ["Singapore"] },
-    { country: "Hong Kong", cities: ["Hong Kong"] },
-    {
-      country: "Thailand",
-      cities: [
-        "Bangkok",
-        "Chiang Mai",
-        "Hua Hin",
-        "Koh Samui",
-        "Pattaya",
-        "Phuket",
-        "Pai (Coming Soon)",
-      ],
+// Shadcn UI স্টাইলের স্কেলিটন কম্পোনেন্ট
+const Skeleton = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => {
+  return (
+    <div
+      className={`animate-pulse rounded-md bg-gray-200/80 dark:bg-gray-800 ${className}`}
+      {...props}
+    />
+  );
+};
+
+// কার্ড বেসড ডিজাইনের জন্য স্কেলিটন লোডিং স্টেট
+const CitySectionSkeleton = () => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[1, 2, 3].map((index) => (
+        <div
+          key={index}
+          className="border border-gray-100 rounded-3xl overflow-hidden bg-white space-y-4 shadow-sm"
+        >
+          {/* ইমেজ স্কেলিটন */}
+          <Skeleton className="h-48 w-full rounded-t-3xl rounded-b-none" />
+          {/* কন্টেন্ট স্কেলিটন */}
+          <div className="p-6 space-y-3">
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-5 w-16 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-44" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const CitySection = () => {
+  const [expandedCountry, setExpandedCountry] = useState<string | null>(null);
+
+  const {
+    data: apiResponse,
+    isLoading,
+    isError,
+  } = useQuery<APIResponse>({
+    queryKey: ["country-city"],
+    queryFn: async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/country`);
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
     },
-    {
-      country: "Vietnam",
-      cities: ["Da Nang", "Hanoi", "Ho Chi Minh City", "Hoi An"],
-    },
-    {
-      country: "Malaysia",
-      cities: ["Genting Highlands", "Johor Bahru", "Kuala Lumpur", "Penang"],
-    },
-    {
-      country: "Indonesia",
-      cities: ["Bali", "Batam", "Jakarta", "Labuan Bajo", "Surabaya"],
-    },
-    {
-      country: "Philippines",
-      cities: [
-        "Cebu",
-        "Manila",
-        "Clark / Angeles",
-        "Davao",
-        "Boracay (Coming Soon)",
-        "Palawan (Coming Soon)",
-        "Dumaguete (Coming Soon)",
-      ],
-    },
-    {
-      country: "South Korea",
-      cities: [
-        "Seoul",
-        "Busan (Coming Soon)",
-        "Incheon (Coming Soon)",
-        "Jeju (Coming Soon)",
-      ],
-    },
-    {
-      country: "Taiwan",
-      cities: ["Taipei", "Taichung", "Kaohsiung", "Tainan (Coming Soon)"],
-    },
-    { country: "Cambodia", cities: ["Siem Reap", "Phnom Penh"] },
-  ];
+  });
+
+  const countriesData = apiResponse?.data || [];
+
+  React.useEffect(() => {
+    if (countriesData.length > 0 && !expandedCountry) {
+      setExpandedCountry(countriesData[0].countryName);
+    }
+  }, [countriesData, expandedCountry]);
 
   const toggleCountry = (countryName: string) => {
     setExpandedCountry(expandedCountry === countryName ? null : countryName);
   };
 
   return (
-    <section>
+    <section className="py-16 bg-gradient-to-b from-gray-50/30 to-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#0A2B3E] mb-4">
+        {/* হেডার সেকশন */}
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-[#0A2B3E] tracking-tight mb-4">
             Built city by city across Asia
           </h2>
-          <p className="text-gray-600 max-w-3xl mx-auto">
+          <p className="text-gray-500 max-w-2xl mx-auto text-base">
             JetSet Cares is expanding through carefully selected cities with a
             focus on trusted childcare depth before broad expansion.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-          {citiesData.map((country) => {
-            const isExpanded = expandedCountry === country.country;
+        {/* এরর স্টেট */}
+        {isError && (
+          <div className="text-center py-12 text-red-500 font-medium">
+            Failed to load cities data. Please try again later.
+          </div>
+        )}
 
-            return (
-              <div
-                key={country.country}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100 overflow-hidden"
-              >
-                <button
-                  onClick={() => toggleCountry(country.country)}
-                  className={`w-full px-6 py-4 flex justify-between items-center transition-colors ${
-                    isExpanded ? "bg-[#40E0D0]/10" : "bg-white hover:bg-gray-50"
+        {/* লোডিং ও মেইন কন্টেন্ট গ্রিড */}
+        {isLoading ? (
+          <CitySectionSkeleton />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+            {countriesData.map((country) => {
+              const isExpanded = expandedCountry === country.countryName;
+              const totalCities = country.cityName.length;
+
+              return (
+                <div
+                  key={country._id}
+                  className={`bg-white rounded-3xl border transition-all duration-300 overflow-hidden ${
+                    isExpanded
+                      ? "border-gray-200 shadow-md ring-1 ring-gray-100"
+                      : "border-gray-100 hover:border-gray-200 hover:shadow-sm"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <MapPin
-                      className={`w-5 h-5 ${isExpanded ? "text-[#40E0D0]" : "text-gray-400"}`}
-                    />
-                    <h3 className="font-semibold text-lg text-[#0A2B3E]">
-                      {country.country}
-                    </h3>
-                  </div>
-                  <ChevronRight
-                    className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isExpanded ? "rotate-90 text-[#40E0D0]" : ""}`}
-                  />
-                </button>
-
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                      <div className="p-6 pt-2 grid grid-cols-1 gap-1 border-t border-gray-50">
-                        {country.cities.map((city) => (
-                          <div
-                            key={city}
-                            className="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0"
-                          >
-                            <span
-                              className={`text-sm ${city.includes("Coming Soon") ? "text-gray-400 italic" : "text-gray-700 font-medium"}`}
-                            >
-                              {city}
-                            </span>
-                            {!city.includes("Coming Soon") && (
-                              <span className="text-[10px] uppercase tracking-wider bg-green-50 text-green-600 font-bold px-2 py-0.5 rounded-full border border-green-100">
-                                Active
-                              </span>
-                            )}
-                          </div>
-                        ))}
+                  {/* কার্ড টপ ব্যানার ইমেজ */}
+                  <div className="relative h-48 w-full overflow-hidden bg-gray-50">
+                    {country.image ? (
+                      <Image
+                        src={country.image}
+                        alt={country.countryName}
+                        width={1000}
+                        height={1000}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">
+                        <Globe className="w-10 h-10 mb-2 stroke-[1.5]" />
+                        <span className="text-xs">No image available</span>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-        </div>
+                    )}
+                  </div>
+
+                  {/* কার্ডের কন্টেন্ট ও ইন্টারঅ্যাকশন বাটন */}
+                  <button
+                    onClick={() => toggleCountry(country.countryName)}
+                    className="w-full text-left p-6 block transition-colors bg-white hover:bg-gray-50/50"
+                  >
+                    <div className="flex justify-between items-start gap-4 mb-2">
+                      <h3 className="font-bold text-2xl text-[#0A2B3E] capitalize tracking-tight">
+                        {country.countryName}
+                      </h3>
+                      <span className="text-[11px] uppercase tracking-wider bg-emerald-50 text-emerald-600 font-bold px-2.5 py-0.5 rounded-full border border-emerald-100/60 shrink-0 mt-1">
+                        Active
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-2">
+                      <p className="text-gray-400 text-sm font-medium">
+                        Trusted care across {totalCities}{" "}
+                        {totalCities > 1 ? "cities" : "city"}
+                      </p>
+                      <div
+                        className={`p-1.5 rounded-full border border-gray-100 bg-white transition-all duration-300 shadow-sm ${
+                          isExpanded
+                            ? "bg-[#0A2B3E] text-white border-[#0A2B3E]"
+                            : "text-[#0A2B3E]"
+                        }`}
+                      >
+                        <ChevronRight
+                          className={`w-4 h-4 transition-transform duration-300 ${
+                            isExpanded ? "rotate-90" : ""
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* ড্রপডাউন ড্রয়ার (শহরের তালিকা) */}
+                  <AnimatePresence initial={false}>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                      >
+                        <div className="px-6 pb-6 pt-2 grid grid-cols-1 gap-1.5 border-t border-gray-50 bg-gray-50/40">
+                          {country.cityName.map((city) => {
+                            const isComingSoon = city
+                              .toLowerCase()
+                              .includes("coming soon");
+
+                            return (
+                              <div
+                                key={city}
+                                className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-white border border-gray-100/50 shadow-2xs"
+                              >
+                                <span
+                                  className={`text-sm font-semibold ${
+                                    isComingSoon
+                                      ? "text-gray-400 italic font-normal"
+                                      : "text-gray-600"
+                                  }`}
+                                >
+                                  {city}
+                                </span>
+                                {!isComingSoon && (
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );
