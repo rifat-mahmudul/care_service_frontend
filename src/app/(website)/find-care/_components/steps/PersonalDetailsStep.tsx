@@ -117,9 +117,26 @@ export function PersonalDetailsStep({
               className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-[#8E8E9A] bg-white"
             >
               <option value="">Select gender</option>
-              <option value="male">Male</option>
+
               <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="male">Male</option>
+
+              <option value="cisgender-woman">Cisgender Woman</option>
+              <option value="cisgender-man">Cisgender Man</option>
+
+              <option value="transgender-woman">Transgender Woman</option>
+              <option value="transgender-man">Transgender Man</option>
+
+              <option value="nonbinary">Nonbinary</option>
+              <option value="genderqueer">Genderqueer</option>
+              <option value="agender">Agender</option>
+              <option value="bigender">Bigender</option>
+              <option value="genderfluid">Genderfluid</option>
+
+              <option value="demiboy">Demiboy</option>
+              <option value="demigirl">Demigirl</option>
+              <option value="two-spirit">Two-Spirit</option>
+              <option value="pangender">Pangender</option>
             </select>
           </div>
 
