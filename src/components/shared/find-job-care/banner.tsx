@@ -13,7 +13,7 @@ const Banner = ({ title, description, banner }: BannerProps) => {
   const bannerImage =
     Array.isArray(banner) && banner.length > 0
       ? banner[0]
-      : banner || "/when-you.jpg";
+      : banner || "/placeholder.png";
 
   const secondImage =
     Array.isArray(banner) && banner.length > 1 ? banner[1] : bannerImage;
@@ -30,12 +30,11 @@ const Banner = ({ title, description, banner }: BannerProps) => {
             {title}
           </h1>
           <p className="text-[#333333] text-lg leading-relaxed">
-            {description ||
-              "Explore caregiver positions that suit your lifestyle. Reach out to families near you and take the next step toward your new job today!"}
+            {description}
           </p>
 
           <Link href="/get-started">
-            <button className="flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-semibold hover:bg-[#001D3D] transition-all group mt-5">
+            <button className="flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-semibold transition-all group mt-5">
               Get Started
               <ArrowRight
                 size={20}
