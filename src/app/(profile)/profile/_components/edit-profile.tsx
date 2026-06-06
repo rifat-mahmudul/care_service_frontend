@@ -53,7 +53,11 @@ type ProfileFormValues = z.input<typeof profileSchema>;
 interface Country {
   _id: string;
   countryName: string;
-  cityName: string;
+  cities?: Array<{
+    cityName: string;
+    neighborhoods: string[];
+  }>;
+  cityName?: string[]; // For backward compatibility
 }
 
 interface Language {
@@ -91,6 +95,9 @@ const EditProfilePage = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [languages, setLanguages] = useState<Language[]>([]);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [availableNeighborhoods, setAvailableNeighborhoods] = useState<
+    string[]
+  >([]);
   const [countryValue, setCountryValue] = useState("");
   const [cityValue, setCityValue] = useState("");
   const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
@@ -171,16 +178,61 @@ const EditProfilePage = () => {
     fetchLanguages();
   }, []);
 
+  // Helper function to get cities with their neighborhoods
+  const getCityNeighborhoods = (
+    countryName: string,
+    cityName: string,
+  ): string[] => {
+    const country = countries.find((c) => c.countryName === countryName);
+    if (!country) return [];
+
+    // New API format with cities array containing neighborhoods
+    if (country.cities && country.cities.length > 0) {
+      const city = country.cities.find((c) => c.cityName === cityName);
+      return city?.neighborhoods || [];
+    }
+
+    // Old format - no neighborhoods available
+    return [];
+  };
+
   // Update cities when country changes
   const updateCities = (countryName: string) => {
     if (countryName && countries) {
-      const cities = countries
-        .filter((item) => item.countryName === countryName)
-        .map((item) => item.cityName)
-        .filter((value, index, self) => self.indexOf(value) === index);
+      const country = countries.find((c) => c.countryName === countryName);
+      let cities: string[] = [];
+
+      if (country?.cities && country.cities.length > 0) {
+        // New format with cities array
+        cities = country.cities.map((item) => item.cityName);
+      } else if (country?.cityName && country.cityName.length > 0) {
+        // Old format with cityName array
+        cities = country.cityName;
+      }
+
       setAvailableCities(cities);
     } else {
       setAvailableCities([]);
+    }
+  };
+
+  // Update neighborhoods when city changes
+  const updateNeighborhoods = (countryName: string, cityName: string) => {
+    if (countryName && cityName) {
+      const neighborhoods = getCityNeighborhoods(countryName, cityName);
+      setAvailableNeighborhoods(neighborhoods);
+
+      // Reset neighborhoods value if current value is not in the new list
+      const currentNeighborhood = form.getValues("neighborhoods");
+      if (
+        currentNeighborhood &&
+        neighborhoods.length > 0 &&
+        !neighborhoods.includes(currentNeighborhood)
+      ) {
+        form.setValue("neighborhoods", "");
+      }
+    } else {
+      setAvailableNeighborhoods([]);
     }
   };
 
@@ -195,10 +247,13 @@ const EditProfilePage = () => {
       }
       if (name === "city") {
         setCityValue(value.city || "");
+        if (value.city && countryValue) {
+          updateNeighborhoods(countryValue, value.city);
+        }
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, countries]);
+  }, [form, countries, countryValue]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -258,6 +313,9 @@ const EditProfilePage = () => {
 
         if (data.country) {
           updateCities(data.country);
+          if (data.city) {
+            updateNeighborhoods(data.country, data.city);
+          }
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -599,7 +657,7 @@ const EditProfilePage = () => {
                 </div>
               </div>
 
-              {/* Location Fields - Using native select for better compatibility */}
+              {/* Location Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <Label>Country</Label>
@@ -610,7 +668,9 @@ const EditProfilePage = () => {
                       setCountryValue(value);
                       form.setValue("country", value);
                       form.setValue("city", "");
+                      form.setValue("neighborhoods", "");
                       setCityValue("");
+                      setAvailableNeighborhoods([]);
                       updateCities(value);
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00D1C1] mt-2"
@@ -632,6 +692,10 @@ const EditProfilePage = () => {
                       const value = e.target.value;
                       setCityValue(value);
                       form.setValue("city", value);
+                      form.setValue("neighborhoods", "");
+                      if (value && countryValue) {
+                        updateNeighborhoods(countryValue, value);
+                      }
                     }}
                     disabled={availableCities.length === 0}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00D1C1] mt-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -650,23 +714,53 @@ const EditProfilePage = () => {
                 </div>
               </div>
 
-              {/* Neighborhoods Field - Active after city is selected */}
+              {/* Neighborhoods Field - Now properly conditional */}
               <div className="mt-4">
                 <Label>Neighborhoods</Label>
-                <Input
-                  {...form.register("neighborhoods")}
-                  placeholder={
-                    cityValue
-                      ? "Enter your neighborhood..."
-                      : "Select a city first to add neighborhood"
-                  }
-                  disabled={!cityValue}
-                  className={`mt-2 focus-visible:ring-[#00D1C1] ${!cityValue ? "bg-gray-50 cursor-not-allowed" : ""}`}
-                />
-                {cityValue && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Enter your neighborhood, street name, or area in {cityValue}
-                  </p>
+                {!cityValue ? (
+                  // No city selected yet
+                  <div>
+                    <Input
+                      value=""
+                      disabled
+                      placeholder="Select a city first"
+                      className="mt-2 bg-gray-50 cursor-not-allowed"
+                    />
+                    <p className="text-xs text-amber-600 mt-1">
+                      Please select a country and city first
+                    </p>
+                  </div>
+                ) : availableNeighborhoods.length > 0 ? (
+                  // City has predefined neighborhoods - show dropdown
+                  <select
+                    value={form.watch("neighborhoods") || ""}
+                    onChange={(e) => {
+                      form.setValue("neighborhoods", e.target.value);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00D1C1] mt-2"
+                  >
+                    <option value="">
+                      Select a neighborhood in {cityValue}
+                    </option>
+                    {availableNeighborhoods.map((neighborhood, idx) => (
+                      <option key={idx} value={neighborhood}>
+                        {neighborhood}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  // City has no predefined neighborhoods - allow manual input
+                  <div>
+                    <Input
+                      {...form.register("neighborhoods")}
+                      placeholder={`Enter your neighborhood in ${cityValue}`}
+                      className="mt-2 focus-visible:ring-[#00D1C1]"
+                    />
+                    <p className="text-xs text-blue-600 mt-1">
+                      No predefined neighborhoods found. You can type your
+                      neighborhood manually.
+                    </p>
+                  </div>
                 )}
               </div>
 
