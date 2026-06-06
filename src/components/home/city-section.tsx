@@ -5,10 +5,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 
+interface CityObject {
+  cityName: string;
+  neighborhoods: string[];
+}
+
 interface APICountry {
   _id: string;
   countryName: string;
-  cityName: string[];
+  cityName?: string[]; // Old format
+  cities?: CityObject[]; // New format with neighborhoods
+  neighborhoods?: string[]; // Legacy field
   image?: string;
   createdAt: string;
   updatedAt: string;
@@ -26,7 +33,37 @@ interface APIResponse {
   data: APICountry[];
 }
 
-// Shadcn UI স্টাইলের স্কেলিটন কম্পোনেন্ট
+// Helper function to get cities array regardless of API format
+const getCitiesForCountry = (
+  country: APICountry,
+): { name: string; neighborhoods?: string[] }[] => {
+  // New format with cities array (has neighborhoods)
+  if (country.cities && country.cities.length > 0) {
+    return country.cities.map((city) => ({
+      name: city.cityName,
+      neighborhoods: city.neighborhoods,
+    }));
+  }
+
+  // Old format with simple cityName array
+  if (country.cityName && country.cityName.length > 0) {
+    return country.cityName.map((cityName) => ({
+      name: cityName,
+      neighborhoods: undefined,
+    }));
+  }
+
+  return [];
+};
+
+// Helper to get total city count
+const getTotalCityCount = (country: APICountry): number => {
+  if (country.cities && country.cities.length > 0) return country.cities.length;
+  if (country.cityName && country.cityName.length > 0)
+    return country.cityName.length;
+  return 0;
+};
+
 const Skeleton = ({
   className,
   ...props
@@ -39,7 +76,6 @@ const Skeleton = ({
   );
 };
 
-// কার্ড বেসড ডিজাইনের জন্য স্কেলিটন লোডিং স্টেট
 const CitySectionSkeleton = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -48,9 +84,7 @@ const CitySectionSkeleton = () => {
           key={index}
           className="border border-gray-100 rounded-3xl overflow-hidden bg-white space-y-4 shadow-sm"
         >
-          {/* ইমেজ স্কেলিটন */}
           <Skeleton className="h-48 w-full rounded-t-3xl rounded-b-none" />
-          {/* কন্টেন্ট স্কেলিটন */}
           <div className="p-6 space-y-3">
             <div className="flex justify-between items-center">
               <Skeleton className="h-6 w-32" />
@@ -95,7 +129,6 @@ const CitySection = () => {
   return (
     <section className="py-16 bg-gradient-to-b from-gray-50/30 to-white">
       <div className="container mx-auto px-4">
-        {/* হেডার সেকশন */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-extrabold text-[#0A2B3E] tracking-tight mb-4">
             Built city by city across Asia
@@ -106,21 +139,20 @@ const CitySection = () => {
           </p>
         </div>
 
-        {/* এরর স্টেট */}
         {isError && (
           <div className="text-center py-12 text-red-500 font-medium">
             Failed to load cities data. Please try again later.
           </div>
         )}
 
-        {/* লোডিং ও মেইন কন্টেন্ট গ্রিড */}
         {isLoading ? (
           <CitySectionSkeleton />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
             {countriesData.map((country) => {
               const isExpanded = expandedCountry === country.countryName;
-              const totalCities = country.cityName.length;
+              const totalCities = getTotalCityCount(country);
+              const cities = getCitiesForCountry(country);
 
               return (
                 <div
@@ -131,7 +163,6 @@ const CitySection = () => {
                       : "border-gray-100 hover:border-gray-200 hover:shadow-sm"
                   }`}
                 >
-                  {/* কার্ড টপ ব্যানার ইমেজ */}
                   <div className="relative h-48 w-full overflow-hidden bg-gray-50">
                     {country.image ? (
                       <Image
@@ -149,7 +180,6 @@ const CitySection = () => {
                     )}
                   </div>
 
-                  {/* কার্ডের কন্টেন্ট ও ইন্টারঅ্যাকশন বাটন */}
                   <button
                     onClick={() => toggleCountry(country.countryName)}
                     className="w-full text-left p-6 block transition-colors bg-white hover:bg-gray-50/50"
@@ -184,7 +214,6 @@ const CitySection = () => {
                     </div>
                   </button>
 
-                  {/* ড্রপডাউন ড্রয়ার (শহরের তালিকা) */}
                   <AnimatePresence initial={false}>
                     {isExpanded && (
                       <motion.div
@@ -194,28 +223,47 @@ const CitySection = () => {
                         transition={{ duration: 0.25, ease: "easeInOut" }}
                       >
                         <div className="px-6 pb-6 pt-2 grid grid-cols-1 gap-1.5 border-t border-gray-50 bg-gray-50/40">
-                          {country.cityName.map((city) => {
-                            const isComingSoon = city
+                          {cities.map((city) => {
+                            const isComingSoon = city.name
                               .toLowerCase()
                               .includes("coming soon");
 
                             return (
                               <div
-                                key={city}
-                                className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-white border border-gray-100/50 shadow-2xs"
+                                key={city.name}
+                                className="flex flex-col gap-1 py-2.5 px-3 rounded-xl bg-white border border-gray-100/50 shadow-2xs"
                               >
-                                <span
-                                  className={`text-sm font-semibold ${
-                                    isComingSoon
-                                      ? "text-gray-400 italic font-normal"
-                                      : "text-gray-600"
-                                  }`}
-                                >
-                                  {city}
-                                </span>
-                                {!isComingSoon && (
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                )}
+                                <div className="flex items-center justify-between">
+                                  <span
+                                    className={`text-sm font-semibold ${
+                                      isComingSoon
+                                        ? "text-gray-400 italic font-normal"
+                                        : "text-gray-600"
+                                    }`}
+                                  >
+                                    {city.name}
+                                  </span>
+                                  {!isComingSoon && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  )}
+                                </div>
+
+                                {/* Display neighborhoods if available */}
+                                {city.neighborhoods &&
+                                  city.neighborhoods.length > 0 && (
+                                    <div className="flex flex-wrap gap-1.5 mt-1">
+                                      {city.neighborhoods.map(
+                                        (neighborhood) => (
+                                          <span
+                                            key={neighborhood}
+                                            className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500"
+                                          >
+                                            {neighborhood}
+                                          </span>
+                                        ),
+                                      )}
+                                    </div>
+                                  )}
                               </div>
                             );
                           })}
