@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
+import Link from "next/link";
 
 const Hero = () => {
   const [backgroundImage, setBackgroundImage] = useState("/banner.jpeg");
@@ -48,12 +49,16 @@ const Hero = () => {
               they live, stay, and explore across Asia.
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
-              <Button className="rounded-full px-8 h-12 bg-[#40E0D0] hover:bg-[#2CB0A0] text-black font-semibold">
-                Find Trusted Childcare
-              </Button>
-              <Button className="rounded-full px-8 h-12 bg-transparent border-2 border-white hover:bg-white/10 text-white">
-                Apply to Become a Partner
-              </Button>
+              <Link href={`#categories`}>
+                <Button className="rounded-full px-8 h-12 bg-[#40E0D0] hover:bg-[#2CB0A0] text-black font-semibold">
+                  Find Trusted Childcare
+                </Button>
+              </Link>
+              <Link href={`/login`}>
+                <Button className="rounded-full px-8 h-12 bg-transparent border-2 border-white hover:bg-white/10 text-white">
+                  Apply to Become a Partner
+                </Button>
+              </Link>
             </div>
             {/* Tagline */}
             <p className="text-[#40E0D0] text-sm italic">
