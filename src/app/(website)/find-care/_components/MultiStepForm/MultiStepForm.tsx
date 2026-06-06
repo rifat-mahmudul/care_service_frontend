@@ -10,8 +10,6 @@ import { EmailStep } from "../steps/EmailStep";
 import { PasswordStep } from "../steps/PasswordStep";
 import { LocationStep } from "../steps/LocationStep";
 import { PersonalDetailsStep } from "../steps/PersonalDetailsStep";
-import { TypeStep } from "../steps/TypeStep";
-import { HelpStep } from "../steps/HelpStep";
 
 interface FormData {
   type?: string;
@@ -20,6 +18,7 @@ interface FormData {
   password?: string;
   country: string;
   city: string;
+  neighborhood?: string;
   selectedDays: string[];
   timeRange: [number, number];
   applyForAllDays: boolean;
@@ -42,6 +41,7 @@ const INITIAL_FORM_DATA: FormData = {
   password: "",
   country: "",
   city: "",
+  neighborhood: "",
   selectedDays: [],
   timeRange: [10, 12],
   applyForAllDays: false,
@@ -109,6 +109,7 @@ export function MultiStepForm() {
         gender: userProfile.gender || prev.gender,
         country: userProfile.country || prev.country,
         city: userProfile.city || prev.city,
+        neighborhood: userProfile.neighborhoods || prev.neighborhood,
         subscriptionId: userProfile.subscription || prev.subscriptionId,
         nidNumber: userProfile.nidNumber || prev.nidNumber,
       }));
@@ -137,6 +138,7 @@ export function MultiStepForm() {
         subscriptionId: formData.subscriptionId,
         country: formData.country,
         city: formData.city,
+        neighborhoods: formData.neighborhood,
         gender: formData.gender,
         NIDNumber: formData.nidNumber,
       };
@@ -193,6 +195,7 @@ export function MultiStepForm() {
       gender: formData.gender,
       country: formData.country,
       city: formData.city,
+      neighborhoods: formData.neighborhood,
       nidNumber: formData.nidNumber,
       typeOfInterest: formData.type,
       helpOfInterest: formData.help,
@@ -254,6 +257,7 @@ export function MultiStepForm() {
       categoryId: formData.categoryId,
       country: formData.country,
       city: formData.city,
+      neighborhoods: formData.neighborhood,
     };
 
     console.log(
@@ -306,91 +310,19 @@ export function MultiStepForm() {
   const getSteps = () => {
     const steps = [];
 
-    // Step 1: Type (always show)
-    steps.push({
-      title: "Type",
-      component: (
-        <TypeStep
-          key="type"
-          onNext={(data) => {
-            setFormData((p) => ({ ...p, ...data }));
-            setCurrentStep(1);
-          }}
-          onBack={() => setCurrentStep(Math.max(currentStep - 1, 0))}
-          initialValue={formData.type}
-        />
-      ),
-    });
+    // Note: Type and Help steps are temporarily commented out
+    // Step order: Personal Details -> Location -> (Email if not logged in) -> Password
 
-    // Step 2: Help (always show)
+    // Step 0: Personal Details (always first)
     steps.push({
-      title: "Help",
-      component: (
-        <HelpStep
-          key="help"
-          onNext={(data) => {
-            setFormData((p) => ({ ...p, ...data }));
-            setCurrentStep(2);
-          }}
-          onBack={() => setCurrentStep(Math.max(currentStep - 1, 0))}
-          initialValue={formData.help}
-        />
-      ),
-    });
-
-    // Step 3: Location (always show)
-    steps.push({
-      title: "Location",
-      component: (
-        <LocationStep
-          key="location"
-          onNext={(data) => {
-            setFormData((p) => ({ ...p, ...data }));
-            setCurrentStep(3);
-          }}
-          onBack={() => setCurrentStep(Math.max(currentStep - 1, 0))}
-          initialCountry={formData.country}
-          initialCity={formData.city}
-        />
-      ),
-    });
-
-    // Step 4: Email (skip if logged in)
-    if (!userProfile) {
-      steps.push({
-        title: "Email",
-        component: (
-          <EmailStep
-            key="email"
-            onNext={(data) => {
-              setFormData((p) => ({ ...p, ...data }));
-              setCurrentStep(4);
-            }}
-            onBack={() => setCurrentStep(Math.max(currentStep - 1, 0))}
-          />
-        ),
-      });
-    }
-
-    // Step 5: Personal Details (always show, but pre-filled if logged in)
-    steps.push({
+      id: "personal",
       title: "Personal Details",
       component: (
         <PersonalDetailsStep
           key="personal"
           onNext={(data) => {
             setFormData((p) => ({ ...p, ...data }));
-
-            if (userProfile) {
-              // Logged in user - update profile and register service
-              // First update profile, then register service
-              updateProfile().then(() => {
-                registerServiceForLoggedInUser();
-              });
-            } else {
-              // New user - go to password step
-              setCurrentStep(5);
-            }
+            setCurrentStep(1); // Move to Location step
           }}
           onBack={() => setCurrentStep(Math.max(currentStep - 1, 0))}
           initialData={userProfile}
@@ -399,9 +331,56 @@ export function MultiStepForm() {
       ),
     });
 
-    // Step 6: Password (only for new users) - with sign up functionality
+    // Step 1: Location (always second)
+    steps.push({
+      id: "location",
+      title: "Location",
+      component: (
+        <LocationStep
+          key="location"
+          onNext={(data) => {
+            setFormData((p) => ({ ...p, ...data }));
+
+            if (userProfile) {
+              // Logged in user - after location, update profile and register service
+              updateProfile().then(() => {
+                registerServiceForLoggedInUser();
+              });
+            } else {
+              // New user - go to email step
+              setCurrentStep(2);
+            }
+          }}
+          onBack={() => setCurrentStep(0)} // Back to Personal Details
+          initialCountry={formData.country}
+          initialCity={formData.city}
+          initialNeighborhood={formData.neighborhood}
+        />
+      ),
+    });
+
+    // Step 2: Email (only for new users)
     if (!userProfile) {
       steps.push({
+        id: "email",
+        title: "Email",
+        component: (
+          <EmailStep
+            key="email"
+            onNext={(data) => {
+              setFormData((p) => ({ ...p, ...data }));
+              setCurrentStep(3); // Move to Password step
+            }}
+            onBack={() => setCurrentStep(1)} // Back to Location
+          />
+        ),
+      });
+    }
+
+    // Step 3: Password (only for new users)
+    if (!userProfile) {
+      steps.push({
+        id: "password",
         title: "Password",
         component: (
           <PasswordStep
@@ -412,7 +391,7 @@ export function MultiStepForm() {
               setFormData((p) => ({ ...p, ...data }));
               submitRegistration(data.password);
             }}
-            onBack={() => setCurrentStep(Math.max(currentStep - 1, 0))}
+            onBack={() => setCurrentStep(2)} // Back to Email
             isSubmitting={isSubmitting}
           />
         ),
@@ -423,7 +402,17 @@ export function MultiStepForm() {
   };
 
   const steps = getSteps();
-  const stepsToRender = steps.filter((_, index) => index >= currentStep);
+  const currentStepData = steps[currentStep];
+
+  if (!currentStepData) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Loading form...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -436,7 +425,7 @@ export function MultiStepForm() {
       </div>
 
       {/* Current Step */}
-      {stepsToRender[0]?.component}
+      {currentStepData.component}
     </div>
   );
 }

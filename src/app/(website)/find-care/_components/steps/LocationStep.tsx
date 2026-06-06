@@ -8,14 +8,19 @@ import { useQuery } from "@tanstack/react-query";
 interface Country {
   _id: string;
   countryName: string;
-  cityName: string;
+  cities?: Array<{
+    cityName: string;
+    neighborhoods: string[];
+  }>;
+  cityName?: string[]; // For backward compatibility
 }
 
 interface LocationStepProps {
-  onNext: (data: { country: string; city: string }) => void;
+  onNext: (data: { country: string; city: string; neighborhood?: string }) => void;
   onBack: () => void;
   initialCountry?: string;
   initialCity?: string;
+  initialNeighborhood?: string;
 }
 
 export function LocationStep({
@@ -23,10 +28,13 @@ export function LocationStep({
   onBack,
   initialCountry = "",
   initialCity = "",
+  initialNeighborhood = "",
 }: LocationStepProps) {
   const [selectedCountry, setSelectedCountry] = useState(initialCountry);
   const [selectedCity, setSelectedCity] = useState(initialCity);
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState(initialNeighborhood);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [availableNeighborhoods, setAvailableNeighborhoods] = useState<string[]>([]);
 
   // Fetch countries data
   const { data: countriesData, isLoading } = useQuery({
@@ -46,32 +54,80 @@ export function LocationStep({
     ? Array.from(new Map(countriesData.map(item => [item.countryName, item])).values())
     : [];
 
+  // Helper function to get cities with their neighborhoods
+  const getCityNeighborhoods = (countryName: string, cityName: string): string[] => {
+    const country = countriesData?.find((c) => c.countryName === countryName);
+    if (!country) return [];
+
+    // New API format with cities array containing neighborhoods
+    if (country.cities && country.cities.length > 0) {
+      const city = country.cities.find((c) => c.cityName === cityName);
+      return city?.neighborhoods || [];
+    }
+
+    // Old format - no neighborhoods available
+    return [];
+  };
+
   // Update cities when country changes
   useEffect(() => {
     if (selectedCountry && countriesData) {
-      const cities = countriesData
-        .filter(item => item.countryName === selectedCountry)
-        .map(item => item.cityName)
-        .filter((value, index, self) => self.indexOf(value) === index); // Get unique cities
+      const country = countriesData.find((c) => c.countryName === selectedCountry);
+      let cities: string[] = [];
+
+      if (country?.cities && country.cities.length > 0) {
+        // New format with cities array
+        cities = country.cities.map((item) => item.cityName);
+      } else if (country?.cityName && country.cityName.length > 0) {
+        // Old format with cityName array
+        cities = country.cityName;
+      }
+
       setAvailableCities(cities);
       setSelectedCity(""); // Reset city when country changes
+      setSelectedNeighborhood(""); // Reset neighborhood when country changes
+      setAvailableNeighborhoods([]); // Clear neighborhoods
     } else {
       setAvailableCities([]);
+      setAvailableNeighborhoods([]);
     }
   }, [selectedCountry, countriesData]);
 
-  // Set initial city if provided
+  // Update neighborhoods when city changes
+  useEffect(() => {
+    if (selectedCountry && selectedCity) {
+      const neighborhoods = getCityNeighborhoods(selectedCountry, selectedCity);
+      setAvailableNeighborhoods(neighborhoods);
+      setSelectedNeighborhood(""); // Reset neighborhood when city changes
+    } else {
+      setAvailableNeighborhoods([]);
+    }
+  }, [selectedCountry, selectedCity]);
+
+  // Set initial values if provided
   useEffect(() => {
     if (initialCity && availableCities.includes(initialCity)) {
       setSelectedCity(initialCity);
     }
   }, [initialCity, availableCities]);
 
+  useEffect(() => {
+    if (initialNeighborhood && availableNeighborhoods.includes(initialNeighborhood)) {
+      setSelectedNeighborhood(initialNeighborhood);
+    }
+  }, [initialNeighborhood, availableNeighborhoods]);
+
   const handleContinue = () => {
     if (selectedCountry && selectedCity) {
-      onNext({ country: selectedCountry, city: selectedCity });
+      onNext({ 
+        country: selectedCountry, 
+        city: selectedCity,
+        neighborhood: selectedNeighborhood || undefined 
+      });
     }
   };
+
+  const isValid = selectedCountry && selectedCity;
 
   if (isLoading) {
     return (
@@ -129,6 +185,37 @@ export function LocationStep({
             </div>
           )}
 
+          {selectedCity && availableNeighborhoods.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Neighborhood (Optional)
+              </label>
+              <select
+                value={selectedNeighborhood}
+                onChange={(e) => setSelectedNeighborhood(e.target.value)}
+                className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-primary bg-white"
+              >
+                <option value="">Select a neighborhood (optional)</option>
+                {availableNeighborhoods.map((neighborhood, index) => (
+                  <option key={index} value={neighborhood}>
+                    {neighborhood}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-2">
+                Select a neighborhood to find more specific care providers
+              </p>
+            </div>
+          )}
+
+          {selectedCity && availableNeighborhoods.length === 0 && (
+            <div className="bg-blue-50 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                ℹ️ No specific neighborhoods listed for {selectedCity}. You can continue with just the city.
+              </p>
+            </div>
+          )}
+
           <div className="flex gap-3">
             <Button
               onClick={onBack}
@@ -139,7 +226,7 @@ export function LocationStep({
             </Button>
             <Button
               onClick={handleContinue}
-              disabled={!selectedCountry || !selectedCity}
+              disabled={!isValid}
               className="flex-1 bg-primary hover:bg-primary text-white py-2 rounded-full font-semibold"
             >
               Continue
