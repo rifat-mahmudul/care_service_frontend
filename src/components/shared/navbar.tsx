@@ -123,7 +123,7 @@ const Navbar = () => {
         // Show only Find Care for job seekers
         return [
           {
-            title: "Find Care",
+            title: "Find Trusted Care",
             content: <FindCareCategory />,
           },
         ];
@@ -133,7 +133,7 @@ const Navbar = () => {
     // Default: Show both for non-logged in users or other roles
     return [
       {
-        title: "Find Care",
+        title: "Find Trusted Care",
         content: <FindCareCategory />,
       },
       {
@@ -295,13 +295,13 @@ const Navbar = () => {
                   <SheetTitle className="text-left">
                     <div className="flex items-center">
                       <Image
-                        src="/logo.png"
+                        src="/jetset-logo.webp"
                         alt="Logo"
                         width={50}
                         height={50}
-                        className="mr-3 h-[50px] w-[50px] object-cover"
+                        className="mr-3 h-[90px] w-[90px] object-cover"
                       />
-                      <span>Menu</span>
+                      {/* <span>Menu</span> */}
                     </div>
                   </SheetTitle>
                 </SheetHeader>

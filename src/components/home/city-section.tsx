@@ -127,18 +127,8 @@ const CitySection = () => {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-b from-gray-50/30 to-white">
+    <section className="bg-gradient-to-b from-gray-50/30 to-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-[#0A2B3E] tracking-tight mb-4">
-            Built city by city across Asia
-          </h2>
-          <p className="text-gray-500 max-w-2xl mx-auto text-base">
-            JetSet Cares is expanding through carefully selected cities with a
-            focus on trusted childcare depth before broad expansion.
-          </p>
-        </div>
-
         {isError && (
           <div className="text-center py-12 text-red-500 font-medium">
             Failed to load cities data. Please try again later.

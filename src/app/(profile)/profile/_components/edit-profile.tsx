@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
@@ -980,22 +981,33 @@ const EditProfilePage = () => {
                         </option>
                       ))}
                     </select>
+                    {/* Replace this part */}
                     <div className="flex flex-wrap gap-2 mt-2">
                       {form
                         .watch("language")
-                        ?.map((lang: string, index: number) => (
-                          <span
-                            key={index}
-                            className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                          >
-                            {lang}
-                            <X
-                              size={14}
-                              className="cursor-pointer hover:text-red-400"
-                              onClick={() => removeTag("language", lang)}
-                            />
-                          </span>
-                        ))}
+                        ?.map((lang: string | any, index: number) => {
+                          // Handle if lang is an object
+                          const languageName =
+                            typeof lang === "object" && lang !== null
+                              ? lang.language ||
+                                lang.languageName ||
+                                Object.values(lang)[0]
+                              : lang;
+
+                          return (
+                            <span
+                              key={index}
+                              className="bg-primary text-white px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                            >
+                              {languageName}
+                              <X
+                                size={14}
+                                className="cursor-pointer hover:text-red-400"
+                                onClick={() => removeTag("language", lang)}
+                              />
+                            </span>
+                          );
+                        })}
                     </div>
                   </div>
 
