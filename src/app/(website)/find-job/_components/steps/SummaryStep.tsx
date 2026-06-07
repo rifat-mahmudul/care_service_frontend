@@ -20,7 +20,7 @@ export function SummaryStep({ data, onBack }: SummaryStepProps) {
     console.log("First Name:", data.firstName);
     console.log("Last Name:", data.lastName);
     console.log("Gender:", data.gender);
-    console.log("NID Number:", data.nidNumber);
+    // console.log("NID Number:", data.nidNumber);
     console.log("Selected Days:", data.days?.day);
     console.log("Selected Times:", data.days?.time);
     console.table(data);
@@ -52,12 +52,12 @@ export function SummaryStep({ data, onBack }: SummaryStepProps) {
               <span className="text-sm capitalize">{data.gender}</span>
             </div>
 
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <span className="font-medium">NID Number :</span>
               <span className="text-sm">
                 {data.nidNumber || "Not provided"}
               </span>
-            </div>
+            </div> */}
 
             <div className="flex justify-between">
               <span className="font-medium">Location :</span>

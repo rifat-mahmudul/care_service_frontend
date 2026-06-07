@@ -10,7 +10,6 @@ interface PersonalDetailsStepProps {
     firstName: string;
     lastName: string;
     gender: string;
-    nidNumber: string;
     termsAccepted: boolean;
   }) => void;
   onBack: () => void;
@@ -27,7 +26,6 @@ export function PersonalDetailsStep({
   const [firstName, setFirstName] = useState(initialData?.firstName || "");
   const [lastName, setLastName] = useState(initialData?.lastName || "");
   const [gender, setGender] = useState(initialData?.gender || "");
-  const [nidNumber, setNidNumber] = useState(initialData?.nidNumber || "");
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Update form if initialData changes
@@ -36,41 +34,18 @@ export function PersonalDetailsStep({
       setFirstName(initialData.firstName || "");
       setLastName(initialData.lastName || "");
       setGender(initialData.gender || "");
-      setNidNumber(initialData.nidNumber || "");
     }
   }, [initialData]);
 
   const handleSubmit = () => {
-    // For logged in users, NID number is optional
-    if (isLoggedIn) {
-      if (firstName.trim() && lastName.trim() && gender && termsAccepted) {
-        onNext({ firstName, lastName, gender, nidNumber, termsAccepted });
-      }
-    } else {
-      // For new users, NID number is required
-      if (
-        firstName.trim() &&
-        lastName.trim() &&
-        gender &&
-        nidNumber.trim() &&
-        termsAccepted
-      ) {
-        onNext({ firstName, lastName, gender, nidNumber, termsAccepted });
-      }
+    if (firstName.trim() && lastName.trim() && gender && termsAccepted) {
+      onNext({ firstName, lastName, gender, termsAccepted });
     }
   };
 
   // Determine if submit button should be disabled
   const isSubmitDisabled = () => {
-    const baseConditions = !firstName || !lastName || !gender || !termsAccepted;
-
-    if (isLoggedIn) {
-      // For logged in users, NID is optional
-      return baseConditions;
-    } else {
-      // For new users, NID is required
-      return baseConditions || !nidNumber;
-    }
+    return !firstName || !lastName || !gender || !termsAccepted;
   };
 
   return (
@@ -117,49 +92,22 @@ export function PersonalDetailsStep({
               className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-[#8E8E9A] bg-white"
             >
               <option value="">Select gender</option>
-
               <option value="female">Female</option>
               <option value="male">Male</option>
-
               <option value="cisgender-woman">Cisgender Woman</option>
               <option value="cisgender-man">Cisgender Man</option>
-
               <option value="transgender-woman">Transgender Woman</option>
               <option value="transgender-man">Transgender Man</option>
-
               <option value="nonbinary">Nonbinary</option>
               <option value="genderqueer">Genderqueer</option>
               <option value="agender">Agender</option>
               <option value="bigender">Bigender</option>
               <option value="genderfluid">Genderfluid</option>
-
               <option value="demiboy">Demiboy</option>
               <option value="demigirl">Demigirl</option>
               <option value="two-spirit">Two-Spirit</option>
               <option value="pangender">Pangender</option>
             </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              NID Number{" "}
-              {!isLoggedIn && <span className="text-red-500">*</span>}
-              {isLoggedIn && (
-                <span className="text-gray-400 text-xs ml-1">(Optional)</span>
-              )}
-            </label>
-            <input
-              type="text"
-              placeholder="Enter your NID number"
-              value={nidNumber}
-              onChange={(e) => setNidNumber(e.target.value)}
-              className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-[#8E8E9A]"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              {isLoggedIn
-                ? "Your National ID number is optional but recommended for verification purposes"
-                : "Your National ID number will be used for verification purposes"}
-            </p>
           </div>
 
           <p className="text-xs text-gray-600 leading-relaxed">

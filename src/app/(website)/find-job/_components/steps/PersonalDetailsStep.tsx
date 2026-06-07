@@ -11,7 +11,6 @@ interface PersonalDetailsStepProps {
     firstName: string;
     lastName: string;
     gender: string;
-    nidNumber: string;
     termsAccepted: boolean;
   }) => void;
   onBack: () => void;
@@ -35,9 +34,6 @@ export function PersonalDetailsStep({
   const [gender, setGender] = useState(
     data?.gender || initialData?.gender || "",
   );
-  const [nidNumber, setNidNumber] = useState(
-    data?.nidNumber || initialData?.nidNumber || "",
-  );
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,33 +43,23 @@ export function PersonalDetailsStep({
       setFirstName(initialData.firstName || "");
       setLastName(initialData.lastName || "");
       setGender(initialData.gender || "");
-      setNidNumber(initialData.nidNumber || "");
     }
   }, [initialData]);
 
   const handleSubmit = async () => {
-    // For logged in users, NID is optional
-    if (isLoggedIn) {
-      if (!firstName.trim() || !lastName.trim() || !gender || !termsAccepted) {
-        return;
-      }
-    } else {
-      // For new users, NID is required
-      if (
-        !firstName.trim() ||
-        !lastName.trim() ||
-        !gender ||
-        !nidNumber.trim() ||
-        !termsAccepted
-      ) {
-        return;
-      }
+    if (!firstName.trim() || !lastName.trim() || !gender || !termsAccepted) {
+      return;
     }
 
     setIsSubmitting(true);
 
     try {
-      await onNext({ firstName, lastName, gender, nidNumber, termsAccepted });
+      await onNext({
+        firstName,
+        lastName,
+        gender,
+        termsAccepted,
+      });
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       setIsSubmitting(false);
@@ -81,13 +67,7 @@ export function PersonalDetailsStep({
   };
 
   const isSubmitDisabled = () => {
-    const baseConditions = !firstName || !lastName || !gender || !termsAccepted;
-
-    if (isLoggedIn) {
-      return baseConditions;
-    } else {
-      return baseConditions || !nidNumber;
-    }
+    return !firstName.trim() || !lastName.trim() || !gender || !termsAccepted;
   };
 
   return (
@@ -134,33 +114,22 @@ export function PersonalDetailsStep({
               className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-[#8E8E9A] bg-white"
             >
               <option value="">Select gender</option>
-              <option value="male">Male</option>
-              <option value="male">Male</option>
               <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="male">Male</option>
+              <option value="cisgender-woman">Cisgender Woman</option>
+              <option value="cisgender-man">Cisgender Man</option>
+              <option value="transgender-woman">Transgender Woman</option>
+              <option value="transgender-man">Transgender Man</option>
+              <option value="nonbinary">Nonbinary</option>
+              <option value="genderqueer">Genderqueer</option>
+              <option value="agender">Agender</option>
+              <option value="bigender">Bigender</option>
+              <option value="genderfluid">Genderfluid</option>
+              <option value="demiboy">Demiboy</option>
+              <option value="demigirl">Demigirl</option>
+              <option value="two-spirit">Two-Spirit</option>
+              <option value="pangender">Pangender</option>
             </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              NID Number{" "}
-              {!isLoggedIn && <span className="text-red-500">*</span>}
-              {isLoggedIn && (
-                <span className="text-gray-400 text-xs ml-1">(Optional)</span>
-              )}
-            </label>
-            <input
-              type="text"
-              placeholder="Enter your NID number"
-              value={nidNumber}
-              onChange={(e) => setNidNumber(e.target.value)}
-              className="w-full px-4 py-4 border-2 border-[#8E8E9A] rounded-full focus:outline-none focus:border-[#8E8E9A]"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              {isLoggedIn
-                ? "Your National ID number is optional but recommended for verification purposes"
-                : "Your National ID number will be used for verification purposes"}
-            </p>
           </div>
 
           <p className="text-xs text-gray-600 leading-relaxed">
@@ -208,10 +177,8 @@ export function PersonalDetailsStep({
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Processing...</span>
                 </div>
-              ) : isLoggedIn ? (
-                "Continue"
               ) : (
-                "Sign Up"
+                "Continue"
               )}
             </Button>
           </div>

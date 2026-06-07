@@ -174,7 +174,7 @@ const Navbar = () => {
                 alt="Logo"
                 width={100}
                 height={500}
-                className="h-[50px] w-[50px] object-cover sm:h-[80px] sm:w-[80px]"
+                className="h-[65px] w-[65px] object-cover sm:h-[80px] sm:w-[80px]"
                 priority
               />
             </div>
