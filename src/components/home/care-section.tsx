@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import { ArrowRight } from "lucide-react"; 
-import Image from "next/image";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const CareSection = () => {
   return (
@@ -20,19 +20,21 @@ const CareSection = () => {
           </p>
         </div>
 
-        <button className="flex items-center gap-3 bg-primary text-white px-8 py-4 rounded-full font-semibold hover:bg-[#002244] transition-all group">
-          Get Started
-          <ArrowRight
-            size={20}
-            className="group-hover:translate-x-1 transition-transform"
-          />
-        </button>
+        <Link href={`/login`} className="mt-4!">
+          <button className="flex items-center gap-3 bg-primary text-white px-8 py-4 rounded-full font-semibold transition-all group">
+            Get Started
+            <ArrowRight
+              size={20}
+              className="group-hover:translate-x-1 transition-transform"
+            />
+          </button>
+        </Link>
       </div>
 
       {/* Right Image Grid Column */}
-      <div className="grid grid-cols-2 gap-4 h-full">
-        {/* Left column of images */}
-        <div className="space-y-4">
+      {/* <div className="grid grid-cols-2 gap-4 h-full"> */}
+      {/* Left column of images */}
+      {/* <div className="space-y-4">
           <Image
             src="/when-you.jpg"
             alt="Caregiver with baby"
@@ -47,10 +49,10 @@ const CareSection = () => {
             height={1000}
             className="w-full rounded-2xl h-[450px] object-cover bg-[#DED0C1]"
           />
-        </div>
+        </div> */}
 
-        {/* Right column of images */}
-        <div className="space-y-4 pt-8">
+      {/* Right column of images */}
+      {/* <div className="space-y-4 pt-8">
           <Image
             src="/when-you.jpg"
             alt="Caregiver portrait"
@@ -72,8 +74,8 @@ const CareSection = () => {
             height={1000}
             className="w-full rounded-2xl h-[300px] object-cover bg-[#C8D6F5]"
           />
-        </div>
-      </div>
+        </div> */}
+      {/* </div> */}
     </section>
   );
 };

@@ -10,7 +10,7 @@ const Hero = () => {
       {/* MOBILE LAYOUT (lg:hidden) - Background Image with Natural Height */}
       {/* ---------------------------------------------------------------- */}
       <div 
-        className="flex flex-col w-full px-6 pt-24 pb-12 lg:hidden h-auto relative bg-no-repeat bg-center"
+        className="flex flex-col w-full px-6 pt-28 pb-12 lg:hidden h-auto relative bg-no-repeat bg-center"
         style={{
           backgroundImage: `url('/mobile-banner.webp')`,
           backgroundSize: "100% auto", // ইমেজের উইডথ ১০০% থাকবে এবং হাইট নিজে থেকে এডজাস্ট হবে

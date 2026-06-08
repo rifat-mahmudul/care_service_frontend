@@ -115,7 +115,7 @@ const Navbar = () => {
         // Show only Find Jobs for care seekers
         return [
           {
-            title: "Find Trusted Childcare",
+            title: "Parent",
             content: <FindJobCategory />,
           },
         ];
@@ -137,7 +137,7 @@ const Navbar = () => {
         content: <FindCareCategory />,
       },
       {
-        title: "Find Trusted Childcare",
+        title: "Find Trusted care",
         content: <FindJobCategory />,
       },
     ];
@@ -174,7 +174,7 @@ const Navbar = () => {
                 alt="Logo"
                 width={100}
                 height={500}
-                className="h-[65px] w-[65px] object-cover sm:h-[80px] sm:w-[80px]"
+                className="h-[100px] w-[100px] object-cover sm:h-[80px] sm:w-[80px]"
                 priority
               />
             </div>
@@ -297,9 +297,9 @@ const Navbar = () => {
                       <Image
                         src="/jetset-logo.webp"
                         alt="Logo"
-                        width={50}
-                        height={50}
-                        className="mr-3 h-[90px] w-[90px] object-cover"
+                        width={1000}
+                        height={1000}
+                        className="mr-3 h-[100px] w-[100px] object-cover"
                       />
                       {/* <span>Menu</span> */}
                     </div>
