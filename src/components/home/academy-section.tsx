@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { BookOpen, Award, Globe, Play } from "lucide-react";
+import { BookOpen, Award, Globe, Play, Pause } from "lucide-react";
 
 const AcademySection = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -22,8 +22,8 @@ const AcademySection = () => {
   return (
     <section className="py-20 bg-gradient-to-r from-[#E9E5FF] to-[#D9D0FF] overflow-hidden">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* বাম পাশে কন্টেন্ট */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left Side Content */}
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 bg-[#9B87F5]/20 rounded-full px-4 py-2">
               <BookOpen className="w-4 h-4 text-[#7C3AED]" />
@@ -52,63 +52,63 @@ const AcademySection = () => {
             </Button>
           </div>
 
-          {/* ডান পাশে ভিডিও এবং ব্যাজেস */}
+          {/* Right Side Video & Badges */}
           <div className="relative flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-[400px] md:max-w-[550px] aspect-square flex justify-center items-center">
-              {/* ভিডিও কন্টেইনার */}
-              <div className="relative w-[90%] h-[90%] rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl border-4 border-white bg-black/20 group">
-                <video
-                  ref={videoRef}
-                  src="/cat_video.mp4"
-                  className="w-full h-full object-contain"
-                  loop
-                  muted
-                  playsInline
-                />
+            <div className="relative w-full max-w-[450px] md:max-w-[500px] lg:max-w-[550px]">
+              {/* Video Container - Fixed aspect ratio matching video */}
+              <div className="relative rounded-3xl md:rounded-[40px] overflow-hidden shadow-2xl border-4 border-white bg-[#b2a5ed] group">
+                <div
+                  className="relative w-full"
+                  style={{ paddingBottom: "56.25%" }}
+                >
+                  <video
+                    ref={videoRef}
+                    src="/cat_video.mp4"
+                    className="absolute top-0 left-0 w-full h-full object-cover"
+                    loop
+                    muted
+                    playsInline
+                  />
 
-                {/* Play Button Overlay */}
-                {!isPlaying && (
-                  <button
-                    onClick={handlePlayVideo}
-                    className="absolute inset-0 flex items-center justify-center bg-black/30 transition-all group-hover:bg-black/40"
-                  >
-                    <div className="bg-white/90 hover:bg-white rounded-full p-4 md:p-6 transition-all transform hover:scale-110 shadow-xl">
-                      <Play className="w-8 h-8 md:w-12 md:h-12 text-[#7C3AED] fill-[#7C3AED]" />
-                    </div>
-                  </button>
-                )}
+                  {/* Play Button Overlay */}
+                  {!isPlaying && (
+                    <button
+                      onClick={handlePlayVideo}
+                      className="absolute inset-0 flex items-center justify-center bg-black/30 transition-all group-hover:bg-black/40 cursor-pointer z-10"
+                    >
+                      <div className="bg-white/95 hover:bg-white rounded-full p-4 md:p-5 transition-all transform hover:scale-110 shadow-xl">
+                        <Play className="w-8 h-8 md:w-10 md:h-10 text-[#7C3AED] fill-[#7C3AED] ml-0.5" />
+                      </div>
+                    </button>
+                  )}
 
-                {/* Pause button when video is playing - optional, appears on hover */}
-                {isPlaying && (
-                  <button
-                    onClick={handlePlayVideo}
-                    className="absolute bottom-4 right-4 bg-black/60 hover:bg-black/80 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <div className="bg-white rounded-full p-1">
-                      <svg
-                        className="w-4 h-4 text-[#7C3AED]"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <rect x="6" y="4" width="4" height="16" rx="1" />
-                        <rect x="14" y="4" width="4" height="16" rx="1" />
-                      </svg>
-                    </div>
-                  </button>
-                )}
+                  {/* Pause button when video is playing */}
+                  {isPlaying && (
+                    <button
+                      onClick={handlePlayVideo}
+                      className="absolute bottom-4 right-4 bg-black/60 hover:bg-black/80 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer z-10"
+                    >
+                      <div className="bg-white rounded-full p-1.5">
+                        <Pause className="w-4 h-4 text-[#7C3AED]" />
+                      </div>
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* ব্যাজেস - দুই কর্নারে */}
-              <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6 bg-white rounded-2xl p-4 md:p-5 shadow-[0_10px_25px_rgba(0,0,0,0.1)] border border-gray-100 z-20 animate-bounce-slow">
-                <Award className="w-10 h-10 md:w-14 md:h-14 text-[#F59E0B]" />
+              {/* Badges */}
+              {/* Top Right Badge */}
+              <div className="absolute -top-8 -right-4 md:-top-10 md:-right-6 bg-white rounded-2xl p-3 md:p-4 shadow-xl border border-gray-100 z-20 animate-bounce-slow">
+                <Award className="w-5 h-5 md:w-7 md:h-7 text-[#F59E0B]" />
               </div>
 
-              <div className="absolute -bottom-4 -left-4 md:-bottom-6 md:-left-6 bg-white rounded-2xl p-4 md:p-5 shadow-[0_10px_25px_rgba(0,0,0,0.1)] border border-gray-100 z-20">
-                <Globe className="w-10 h-10 md:w-14 md:h-14 text-[#40E0D0]" />
+              {/* Bottom Left Badge */}
+              <div className="absolute -bottom-6 -left-4 md:-bottom-8 md:-left-6 bg-white rounded-2xl p-3 md:p-4 shadow-xl border border-gray-100 z-20 animate-float">
+                <Globe className="w-5 h-5 md:w-7 md:h-7 text-[#40E0D0]" />
               </div>
 
-              {/* ডেকোরেটিভ ব্যাকগ্রাউন্ড এলিমেন্ট */}
-              <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[110%] bg-[#7C3AED]/10 rounded-full blur-3xl"></div>
+              {/* Decorative Background Element */}
+              <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[#7C3AED]/10 rounded-full blur-3xl"></div>
             </div>
           </div>
         </div>
@@ -118,15 +118,31 @@ const AcademySection = () => {
         @keyframes bounce-slow {
           0%,
           100% {
-            transform: translateY(0) rotate(12deg);
+            transform: translateY(0) rotate(8deg);
           }
           50% {
-            transform: translateY(-10px) rotate(12deg);
+            transform: translateY(-12px) rotate(8deg);
           }
         }
+
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0) rotate(-5deg);
+          }
+          50% {
+            transform: translateY(-10px) rotate(-5deg);
+          }
+        }
+
         .animate-bounce-slow {
-          animation: bounce-slow 4s ease-in-out infinite;
-          transform: rotate(12deg);
+          animation: bounce-slow 3s ease-in-out infinite;
+          transform: rotate(8deg);
+        }
+
+        .animate-float {
+          animation: float 3.5s ease-in-out infinite;
+          transform: rotate(-5deg);
         }
       `}</style>
     </section>
