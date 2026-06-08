@@ -8,14 +8,18 @@ const ProviderSection = () => {
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4 text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-[#0A2B3E] mb-4">
-          For providers who represent trust well
+          Become a JetSet Care Partner
         </h2>
 
         <p className="text-gray-600 max-w-2xl mx-auto mb-8">
-          JetSet Cares is for childcare providers who are warm, reliable, well
-          presented, responsive, and ready for real family bookings. If you want
-          to be part of a platform built on trust, professionalism, and strong
-          family experience, we would love to grow with you.
+          JetSet Cares is for trusted childcare and pet care professionals who
+          are warm, reliable, well presented, responsive and recommended by the
+          families they already support. Whether you care for children, pets, or
+          both, we want partners who come with real experience, real references,
+          and real trust from the families and little ones already in their
+          care. If you want to grow with a platform built on safety,
+          professionalism, and strong family experiences, we would love to
+          welcome you as a JetSet Care Partner.
         </p>
 
         {/* ট্রাস্ট ব্যাজেস */}
