@@ -26,16 +26,17 @@ const ProviderSection = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto mb-10">
           <div className="text-center">
             <div className="w-12 h-12 bg-[#40E0D0]/10 rounded-full flex items-center justify-center mx-auto mb-2">
+              <Star className="w-6 h-6 text-[#40E0D0]" />
+            </div>
+            <p className="text-sm font-medium">Family Recommended</p>
+          </div>
+          <div className="text-center">
+            <div className="w-12 h-12 bg-[#40E0D0]/10 rounded-full flex items-center justify-center mx-auto mb-2">
               <Shield className="w-6 h-6 text-[#40E0D0]" />
             </div>
             <p className="text-sm font-medium">ID Verified</p>
           </div>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-[#40E0D0]/10 rounded-full flex items-center justify-center mx-auto mb-2">
-              <Star className="w-6 h-6 text-[#40E0D0]" />
-            </div>
-            <p className="text-sm font-medium">Top Rated</p>
-          </div>
+
           <div className="text-center">
             <div className="w-12 h-12 bg-[#40E0D0]/10 rounded-full flex items-center justify-center mx-auto mb-2">
               <Heart className="w-6 h-6 text-[#40E0D0]" />
@@ -46,13 +47,21 @@ const ProviderSection = () => {
             <div className="w-12 h-12 bg-[#40E0D0]/10 rounded-full flex items-center justify-center mx-auto mb-2">
               <Clock className="w-6 h-6 text-[#40E0D0]" />
             </div>
-            <p className="text-sm font-medium">Responsive</p>
+            <p className="text-sm font-medium">Reliable and Responsive</p>
           </div>
         </div>
 
-        <Button className="rounded-full px-8 h-12 bg-[#40E0D0] hover:bg-[#2CB0A0] text-black">
-          Apply to Become a Partner
-        </Button>
+        <div className="hidden sm:block">
+          <Button className="rounded-full px-8 h-12 bg-[#40E0D0] hover:bg-[#2CB0A0] text-black">
+            Apply as a JetSet Care Partner
+          </Button>
+        </div>
+
+        <div className="block sm:hidden">
+          <Button className="rounded-full px-8 h-12 bg-[#40E0D0] hover:bg-[#2CB0A0] text-black">
+            Become a JetSet Care Partner
+          </Button>
+        </div>
       </div>
     </section>
   );
