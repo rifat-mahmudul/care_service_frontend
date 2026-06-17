@@ -20,8 +20,8 @@ const CareSection = () => {
           </p>
         </div>
 
-        <Link href={`/login`} className="mt-4!">
-          <button className="flex items-center gap-3 bg-primary text-white px-8 py-4 rounded-full font-semibold transition-all group">
+        <Link href={`/login`}>
+          <button className="flex items-center gap-3 bg-primary text-white px-8 py-4 rounded-full font-semibold transition-all group mt-4">
             Get Started
             <ArrowRight
               size={20}
@@ -30,52 +30,6 @@ const CareSection = () => {
           </button>
         </Link>
       </div>
-
-      {/* Right Image Grid Column */}
-      {/* <div className="grid grid-cols-2 gap-4 h-full"> */}
-      {/* Left column of images */}
-      {/* <div className="space-y-4">
-          <Image
-            src="/when-you.jpg"
-            alt="Caregiver with baby"
-            width={1000}
-            height={1000}
-            className="w-full rounded-2xl h-[280px] object-cover bg-[#D1E1FF]"
-          />
-          <Image
-            src="/when-you.jpg"
-            alt="Caregiver with senior"
-            width={1000}
-            height={1000}
-            className="w-full rounded-2xl h-[450px] object-cover bg-[#DED0C1]"
-          />
-        </div> */}
-
-      {/* Right column of images */}
-      {/* <div className="space-y-4 pt-8">
-          <Image
-            src="/when-you.jpg"
-            alt="Caregiver portrait"
-            width={1000}
-            height={1000}
-            className="w-full rounded-2xl h-[220px] object-cover bg-[#E5D1C1]"
-          />
-          <Image
-            src="/when-you.jpg"
-            alt="Medical professional with senior"
-            width={1000}
-            height={1000}
-            className="w-full rounded-2xl h-[280px] object-cover bg-[#99FFEB]"
-          />
-          <Image
-            src="/when-you.jpg"
-            alt="Child portrait"
-            width={1000}
-            height={1000}
-            className="w-full rounded-2xl h-[300px] object-cover bg-[#C8D6F5]"
-          />
-        </div> */}
-      {/* </div> */}
     </section>
   );
 };
