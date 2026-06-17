@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface PersonalDetailsStepProps {
   data: any;
@@ -154,7 +155,14 @@ export function PersonalDetailsStep({
               I agree to the{" "}
               <span className="text-blue-600 underline">
                 terms &amp; conditions
-              </span>
+              </span>{" "}
+              and{" "}
+              <Link
+                href="/privacy-policy"
+                className="text-blue-600 underline underline-offset-2"
+              >
+                Privacy Policy
+              </Link>
             </label>
           </div>
 

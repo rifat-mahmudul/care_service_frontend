@@ -1,5 +1,6 @@
 import React from "react";
 import { Facebook, Linkedin, Twitter, Instagram } from "lucide-react";
+import Link from "next/link";
 
 const Footer = () => {
   const usefulLinks = [
@@ -10,7 +11,7 @@ const Footer = () => {
 
   const otherLinks = [
     { name: "Contact Us", href: "#" },
-    { name: "Privacy Policy", href: "#" },
+    { name: "Privacy Policy", href: "/privacy-policy" },
     { name: "Terms Of Service", href: "#" },
   ];
 
@@ -61,12 +62,12 @@ const Footer = () => {
             <ul className="space-y-4">
               {usefulLinks.map((link) => (
                 <li key={link.name}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-slate-800 hover:text-slate-900 text-sm transition-colors"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -80,12 +81,12 @@ const Footer = () => {
             <ul className="space-y-4">
               {otherLinks.map((link) => (
                 <li key={link.name}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-slate-800 hover:text-slate-900 text-sm transition-colors"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
