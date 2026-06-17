@@ -96,7 +96,14 @@ export function PasswordStep({
           </div>
 
           <p className="text-xs text-center text-gray-500 mt-4">
-            By signing up, you agree to our Terms of Service and{" "}
+            By signing up, you agree to our{" "}
+            <Link
+              href="/terms-and-conditions"
+              className="text-blue-600 underline underline-offset-2"
+            >
+              Terms and Conditions
+            </Link>{" "}
+            and{" "}
             <Link
               href="/privacy-policy"
               className="text-blue-600 underline underline-offset-2"

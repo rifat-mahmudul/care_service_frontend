@@ -12,7 +12,7 @@ const Footer = () => {
   const otherLinks = [
     { name: "Contact Us", href: "#" },
     { name: "Privacy Policy", href: "/privacy-policy" },
-    { name: "Terms Of Service", href: "#" },
+    { name: "Terms and Conditions", href: "/terms-and-conditions" },
   ];
 
   const socialIcons = [

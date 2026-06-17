@@ -131,9 +131,12 @@ export function PersonalDetailsStep({
               className="text-sm cursor-pointer text-[#4B4B4B]"
             >
               I agree to the{" "}
-              <span className="text-blue-600 underline">
-                terms &amp; conditions
-              </span>{" "}
+              <Link
+                href="/terms-and-conditions"
+                className="text-blue-600 underline underline-offset-2"
+              >
+                Terms and Conditions
+              </Link>{" "}
               and{" "}
               <Link
                 href="/privacy-policy"
