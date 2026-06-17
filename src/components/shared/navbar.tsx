@@ -172,9 +172,9 @@ const Navbar = () => {
               <Image
                 src="/jetset-logo.webp"
                 alt="Logo"
-                width={100}
-                height={500}
-                className="h-[100px] w-[100px] object-cover sm:h-[80px] sm:w-[80px]"
+                width={1000}
+                height={1000}
+                className="object-cover h-[120px] w-[120px]"
                 priority
               />
             </div>
