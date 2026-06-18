@@ -146,7 +146,7 @@ const Navbar = () => {
   const navItems = getNavItems();
 
   const navbarClasses = `w-full fixed z-50 top-0 transition-all duration-300 ${
-    scrolled ? "bg-white shadow-md py-3" : "bg-transparent py-5"
+    scrolled ? "bg-white shadow-md " : "bg-transparent"
   }`;
 
   const textColorClasses = isHomePage

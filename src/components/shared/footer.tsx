@@ -7,6 +7,7 @@ const Footer = () => {
     { name: "Explore Freelancers", href: "#" },
     { name: "About Us", href: "#" },
     { name: "Blogs", href: "#" },
+    { name: "FAQ", href: "/faq" },
   ];
 
   const otherLinks = [

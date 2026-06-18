@@ -118,7 +118,7 @@ export default function Categories() {
 
   return (
     <section id="categories">
-      <div className="container mx-auto space-y-10 py-10 px-4 md:px-6 lg:px-8">
+      <div className="container mx-auto space-y-10  px-4 md:px-6 lg:px-8">
         <div>
           <h1 className="text-center text-3xl md:text-4xl font-bold tracking-tight lg:max-w-3xl mx-auto opacity-85">
             More than a booking. Real peace of mind.

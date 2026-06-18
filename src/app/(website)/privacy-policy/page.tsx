@@ -182,7 +182,7 @@ const policySections = [
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="bg-slate-50 pt-32 pb-16">
+    <div className="bg-slate-50 pt-32 pb-16 mt-10">
       <div className="container">
         <article className="mx-auto max-w-4xl">
           <div className="mb-10 border-b border-slate-200 pb-8">

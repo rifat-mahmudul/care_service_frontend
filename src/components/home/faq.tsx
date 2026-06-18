@@ -1,10 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import Link from "next/link";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  ArrowRight,
+  BadgeCheck,
+  HeartHandshake,
+  MessageCircleQuestion,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
 const faqGroups = [
   {
     category: "General Questions",
+    intro:
+      "Start here to understand what JetSet Cares is, who it serves, and how the platform is designed for modern families.",
     items: [
       {
         question: "What is JetSet Cares?",
@@ -36,6 +52,8 @@ const faqGroups = [
   },
   {
     category: "Family Questions",
+    intro:
+      "Everything families usually ask before creating an account, sending a message, or confirming care in a new city.",
     items: [
       {
         question: "How do families sign up?",
@@ -86,6 +104,8 @@ const faqGroups = [
   },
   {
     category: "Safety and Trust",
+    intro:
+      "The most important questions around reviews, verification, and what families should do when something does not feel right.",
     items: [
       {
         question: "Are partners verified?",
@@ -126,6 +146,8 @@ const faqGroups = [
   },
   {
     category: "Partner Questions",
+    intro:
+      "A dedicated section for providers who want to apply, complete onboarding, and understand JetSet expectations.",
     items: [
       {
         question: "How do I become a JetSet partner?",
@@ -181,6 +203,8 @@ const faqGroups = [
   },
   {
     category: "Booking and Payment Questions",
+    intro:
+      "Clear answers around membership, platform fees, refunds, and how JetSet keeps payment records structured.",
     items: [
       {
         question: "How do payments work?",
@@ -221,6 +245,8 @@ const faqGroups = [
   },
   {
     category: "Care Categories",
+    intro:
+      "A quick overview of the kinds of services JetSet plans to make discoverable across launch cities.",
     items: [
       {
         question: "What childcare services are available?",
@@ -236,81 +262,278 @@ const faqGroups = [
   },
 ];
 
+const highlights = [
+  {
+    title: "Human-reviewed answers",
+    description: "The page is structured so families and partners can find answers without digging through long paragraphs.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Trust-first navigation",
+    description: "Grouped by real user intent like safety, family onboarding, partner approval, and payments.",
+    icon: HeartHandshake,
+  },
+  {
+    title: "Faster decisions",
+    description: "Category jump links and clear sections make the page feel more like a product guide than a plain FAQ.",
+    icon: Sparkles,
+  },
+];
+
+const totalQuestions = faqGroups.reduce(
+  (count, group) => count + group.items.length,
+  0
+);
+
 const Faq = () => {
-  const [openKey, setOpenKey] = useState("General Questions-0");
-
-  const toggleFaq = (key: string) => {
-    setOpenKey(openKey === key ? "" : key);
-  };
-
   return (
-    <section className="bg-[#E9F5FF] py-16 font-sans">
-      <div className="container max-w-5xl">
-        <div className="mb-12 text-center">
-          <h2 className="mb-4 text-4xl font-bold text-[#002B5B]">
-            Frequently Asked Questions
-          </h2>
-        </div>
+    <div className="bg-[#f4fbfd] text-slate-900 mt-20">
+      <section className="relative overflow-hidden bg-[#062c43] px-4 py-16 text-white sm:px-6 lg:px-8 lg:py-24">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(62,224,207,0.35),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(95,168,255,0.25),_transparent_30%)]" />
+        <div className="absolute left-8 top-10 h-28 w-28 rounded-full border border-white/15 bg-white/5 blur-2xl" />
+        <div className="absolute bottom-0 right-0 h-52 w-52 translate-x-1/4 translate-y-1/4 rounded-full bg-[#3ee0cf]/20 blur-3xl" />
 
-        <div className="space-y-10">
-          {faqGroups.map((group) => (
-            <div key={group.category}>
-              <h3 className="mb-4 text-2xl font-semibold text-[#002B5B]">
-                {group.category}
-              </h3>
+        <div className="container relative">
+          <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+            <div className="max-w-3xl">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
+                <MessageCircleQuestion className="h-4 w-4 text-[#7cebdd]" />
+                Help center for families and partners
+              </div>
 
-              <div className="space-y-4">
-                {group.items.map((faq, index) => {
-                  const key = `${group.category}-${index}`;
-                  const isOpen = openKey === key;
+              <h1 className="max-w-2xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+                Answers that feel calm, clear, and built around trust.
+              </h1>
+              <p className="mt-6 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg">
+                We turned the old homepage FAQ into a full destination page so
+                people can browse by topic, understand the platform faster, and
+                move forward with confidence.
+              </p>
 
-                  return (
-                    <div
-                      key={key}
-                      className="overflow-hidden border border-[#72B7FB] bg-white transition-all duration-300"
-                    >
-                      <button
-                        onClick={() => toggleFaq(key)}
-                        className="flex w-full items-center justify-between gap-4 p-4 text-left transition-colors hover:bg-slate-50"
-                      >
-                        <span className="text-base font-medium leading-6 text-[#002B5B] md:text-lg">
-                          {faq.question}
-                        </span>
-
-                        <div className="ml-2 flex-shrink-0">
-                          {isOpen ? (
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#007BFF]">
-                              <div className="h-0.5 w-3 bg-white" />
-                            </div>
-                          ) : (
-                            <div className="relative flex h-6 w-6 items-center justify-center rounded-full bg-[#007BFF]">
-                              <div className="h-0.5 w-3 bg-white" />
-                              <div className="absolute h-3 w-0.5 bg-white" />
-                            </div>
-                          )}
-                        </div>
-                      </button>
-
-                      <div
-                        className={`transition-all duration-300 ease-in-out ${
-                          isOpen
-                            ? "max-h-[700px] opacity-100"
-                            : "max-h-0 opacity-0"
-                        }`}
-                      >
-                        <div className="whitespace-pre-line border-t border-[#72B7FB]/30 px-4 pb-4 pt-3 text-sm leading-relaxed text-[#666666]">
-                          {faq.answer}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Link
+                  href="#faq-directory"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#3ee0cf] px-6 py-3 text-sm font-semibold text-slate-950 transition-transform duration-300 hover:-translate-y-0.5 hover:bg-[#7cebdd]"
+                >
+                  Browse Questions
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                >
+                  Back to Home
+                </Link>
               </div>
             </div>
-          ))}
+
+            <div className="grid gap-4">
+              <div className="rounded-[28px] border border-white/15 bg-white/10 p-6 backdrop-blur-md">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-3xl bg-white/10 p-5">
+                    <p className="text-sm text-slate-300">Question sets</p>
+                    <p className="mt-2 text-3xl font-semibold">
+                      {faqGroups.length}
+                    </p>
+                  </div>
+                  <div className="rounded-3xl bg-white/10 p-5">
+                    <p className="text-sm text-slate-300">Live answers</p>
+                    <p className="mt-2 text-3xl font-semibold">
+                      {totalQuestions}+
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-3xl border border-white/10 bg-[#041f31]/70 p-5">
+                  <p className="text-sm uppercase tracking-[0.25em] text-[#7cebdd]">
+                    Top topics
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {faqGroups.slice(0, 4).map((group) => (
+                      <a
+                        key={group.category}
+                        href={`#${group.category
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+/g, "-")}`}
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 transition-colors hover:bg-white/10"
+                      >
+                        {group.category}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[28px] border border-[#9deee5] bg-white p-6 text-slate-900 shadow-[0_20px_60px_rgba(6,44,67,0.15)]">
+                <div className="flex items-start gap-3">
+                  <div className="rounded-2xl bg-[#dffaf7] p-3 text-[#0b7c72]">
+                    <BadgeCheck className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-semibold">
+                      Built for support, not clutter
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      This page now works as a proper support hub, which also
+                      gives the homepage more breathing room.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section className="px-4 py-14 sm:px-6 lg:px-8">
+        <div className="container">
+          <div className="grid gap-6 md:grid-cols-3">
+            {highlights.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-[28px] border border-[#d7efee] bg-white p-6 shadow-[0_18px_50px_rgba(6,44,67,0.08)]"
+              >
+                <div className="inline-flex rounded-2xl bg-[#dffaf7] p-3 text-[#0b7c72]">
+                  <item.icon className="h-5 w-5" />
+                </div>
+                <h2 className="mt-5 text-xl font-semibold text-[#062c43]">
+                  {item.title}
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="faq-directory"
+        className="px-4 pb-20 sm:px-6 lg:px-8 lg:pb-24"
+      >
+        <div className="container">
+          <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#0b7c72]">
+                FAQ Directory
+              </p>
+              <h2 className="mt-3 text-3xl font-semibold text-[#062c43] sm:text-4xl">
+                Find the right section first, then open the details you need.
+              </h2>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              {faqGroups.map((group) => (
+                <a
+                  key={group.category}
+                  href={`#${group.category
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, "-")}`}
+                  className="rounded-full border border-[#b7ece6] bg-white px-4 py-2 text-sm font-medium text-[#0b7c72] transition-all hover:-translate-y-0.5 hover:border-[#3ee0cf] hover:bg-[#edfffc]"
+                >
+                  {group.category}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-8">
+            {faqGroups.map((group, groupIndex) => {
+              const sectionId = group.category
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-");
+
+              return (
+                <section
+                  key={group.category}
+                  id={sectionId}
+                  className="overflow-hidden rounded-[32px] border border-[#d7efee] bg-white shadow-[0_24px_80px_rgba(6,44,67,0.08)]"
+                >
+                  <div className="border-b border-[#dff1f0] bg-[linear-gradient(135deg,rgba(6,44,67,0.04),rgba(62,224,207,0.08))] px-6 py-7 sm:px-8">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="max-w-2xl">
+                        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#0b7c72]">
+                          Section {groupIndex + 1}
+                        </p>
+                        <h3 className="mt-2 text-2xl font-semibold text-[#062c43] sm:text-3xl">
+                          {group.category}
+                        </h3>
+                        <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
+                          {group.intro}
+                        </p>
+                      </div>
+
+                      <div className="inline-flex h-fit items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
+                        <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#3ee0cf]" />
+                        {group.items.length} questions
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="px-6 py-3 sm:px-8 sm:py-4">
+                    <Accordion
+                      type="single"
+                      collapsible
+                      defaultValue={`${sectionId}-0`}
+                      className="space-y-4"
+                    >
+                      {group.items.map((faq, index) => (
+                        <AccordionItem
+                          key={`${group.category}-${index}`}
+                          value={`${sectionId}-${index}`}
+                          className="overflow-hidden rounded-[24px] border border-[#d9ecea] bg-[#fbffff] px-5 data-[state=open]:border-[#8be7dc] data-[state=open]:bg-white"
+                        >
+                          <AccordionTrigger className="gap-4 py-5 text-left text-base font-semibold leading-7 text-[#062c43] hover:no-underline sm:text-lg">
+                            {faq.question}
+                          </AccordionTrigger>
+                          <AccordionContent className="whitespace-pre-line pb-5 text-sm leading-7 text-slate-600 sm:text-base">
+                            {faq.answer}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+
+          <div className="mt-10 rounded-[32px] bg-[#062c43] px-6 py-8 text-white shadow-[0_24px_80px_rgba(6,44,67,0.18)] sm:px-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-2xl">
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#7cebdd]">
+                  Still need help?
+                </p>
+                <h3 className="mt-3 text-2xl font-semibold sm:text-3xl">
+                  Explore the platform or review our policy pages next.
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-slate-200 sm:text-base">
+                  The new FAQ page now sits as its own support destination, and
+                  the footer links users directly into it from anywhere on the
+                  website.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/privacy-policy"
+                  className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                >
+                  Privacy Policy
+                </Link>
+                <Link
+                  href="/terms-and-conditions"
+                  className="rounded-full bg-[#3ee0cf] px-5 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-[#7cebdd]"
+                >
+                  Terms and Conditions
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 };
 
