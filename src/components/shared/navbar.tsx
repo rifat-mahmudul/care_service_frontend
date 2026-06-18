@@ -33,7 +33,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import FindCareCategory from "./nav-component/find-care-category";
 import FindJobCategory from "./nav-component/find-job-category";
@@ -54,9 +54,7 @@ const Navbar = () => {
   const [userData, setUserData] = useState<any>(null);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // Modal state
 
-  const pathname = usePathname();
   const router = useRouter();
-  const isHomePage = pathname === "/";
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
   const role = session?.user?.role;
@@ -64,23 +62,17 @@ const Navbar = () => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isHomePage) {
-      setScrolled(true);
-      return;
-    }
-
     const handleScroll = () => {
-      const isScrolled = window.scrollY > 10;
-      setScrolled(isScrolled);
+      setScrolled(window.scrollY > 8);
     };
 
-    window.addEventListener("scroll", handleScroll);
     handleScroll();
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [isHomePage]);
+  }, []);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -145,15 +137,11 @@ const Navbar = () => {
 
   const navItems = getNavItems();
 
-  const navbarClasses = `w-full fixed z-50 top-0 transition-all duration-300 ${
-    scrolled ? "bg-white shadow-md " : "bg-transparent"
+  const navbarClasses = `w-full fixed z-50 top-0 border-b border-slate-200/80 bg-white/95 backdrop-blur transition-all duration-300 ${
+    scrolled ? "shadow-sm" : "shadow-none"
   }`;
 
-  const textColorClasses = isHomePage
-    ? scrolled
-      ? "text-slate-900"
-      : "text-white"
-    : "text-slate-900";
+  const textColorClasses = "text-slate-900";
 
   const getUserInitials = () => {
     if (userData?.firstName && userData?.lastName) {
@@ -258,14 +246,14 @@ const Navbar = () => {
                 <>
                   <Link href="/login">
                     <Button
-                      className={`text-sm bg-inherit hover:bg-inherit font-medium !hover:text-white ${textColorClasses}`}
+                      className={`text-sm bg-inherit font-medium ${textColorClasses} hover:bg-slate-100 hover:text-slate-900`}
                     >
                       Log in
                     </Button>
                   </Link>
                   <Button
                     onClick={() => setIsJoinModalOpen(true)}
-                    className="rounded-3xl px-6"
+                    className="rounded-3xl bg-[#2ed3c7] px-6 text-slate-950 hover:bg-[#22c1b5]"
                   >
                     Join Now
                   </Button>
@@ -281,7 +269,7 @@ const Navbar = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`h-10 w-10 p-0 ${textColorClasses} hover:bg-transparent`}
+                  className={`h-10 w-10 p-0 ${textColorClasses} hover:bg-slate-100`}
                 >
                   {isOpen ? (
                     <X className="h-7 w-7" />
@@ -341,7 +329,7 @@ const Navbar = () => {
                         <Link href="/login" onClick={() => setIsOpen(false)}>
                           <Button
                             variant="outline"
-                            className="w-full !text-white !hover:text-white"
+                            className="w-full text-slate-900 hover:text-slate-900"
                           >
                             Log in
                           </Button>
@@ -351,7 +339,7 @@ const Navbar = () => {
                             setIsOpen(false);
                             setIsJoinModalOpen(true);
                           }}
-                          className="w-full rounded-3xl"
+                          className="w-full rounded-3xl bg-[#2ed3c7] text-slate-950 hover:bg-[#22c1b5]"
                         >
                           Join Now
                         </Button>

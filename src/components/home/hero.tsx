@@ -1,116 +1,92 @@
 "use client";
-import React from "react";
-import { Button } from "../ui/button";
+
+import Image from "next/image";
 import Link from "next/link";
+import { ShieldCheck, Star, Headphones } from "lucide-react";
+import { Button } from "../ui/button";
+
+const trustPoints = [
+  {
+    icon: ShieldCheck,
+    title: "Vetted & Verified",
+    description: "Every partner is screened and trusted",
+  },
+  {
+    icon: Star,
+    title: "Highly Rated",
+    description: "Real reviews from real families",
+  },
+  {
+    icon: Headphones,
+    title: "24/7 Support",
+    description: "We are here whenever you need us",
+  },
+];
 
 const Hero = () => {
   return (
-    <div className="relative bg-[#0a2332] lg:block">
-      {/* ---------------------------------------------------------------- */}
-      {/* MOBILE LAYOUT (lg:hidden) - Background Image with Natural Height */}
-      {/* ---------------------------------------------------------------- */}
-      <div 
-        className="flex flex-col w-full px-6 pt-28 pb-12 lg:hidden h-auto relative bg-no-repeat bg-center"
-        style={{
-          backgroundImage: `url('/mobile-banner.webp')`,
-          backgroundSize: "100% auto", // ইমেজের উইডথ ১০০% থাকবে এবং হাইট নিজে থেকে এডজাস্ট হবে
-        }}
-      >
-        {/* টেক্সট ক্লিয়ারলি পড়ার জন্য ডার্ক ওভারলে */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a2332] via-[#0a2332]/40 to-[#0a2332]/95 z-0"></div>
-
-        {/* আসল কন্টেন্ট ব্লক */}
-        <div className="relative z-10 flex flex-col space-y-6">
-          
-          {/* Top Text Group */}
-          <div className="space-y-4">
-            {/* 2. Headline */}
-            <h1 className="text-3xl md:text-4xl font-bold leading-tight font-serif">
-              <span className="text-[#40E0D0]">Trusted childcare</span>
-              <br />
-              <span className="text-white">for families on the move</span>
+    <section className="relative overflow-hidden bg-white pt-24">
+      <div className="container relative px-4 sm:px-6">
+        <div className="grid items-center gap-12 lg:grid-cols-[1fr_0.9fr] lg:gap-14">
+          <div className="max-w-2xl">
+            <h1 className="text-4xl font-semibold leading-tight text-[#16324f] sm:text-5xl lg:text-6xl">
+              More than a booking.
+              <span className="mt-1 block text-[#28c7be]">
+                Real peace of mind.
+              </span>
             </h1>
 
-            {/* 3. Short Paragraph */}
-            <p className="text-white/75 text-sm md:text-base leading-relaxed">
-              JetSet Cares helps traveling families, expat families, and globally
-              mobile parents find trusted childcare in the cities where they live,
-              stay, and explore across Asia.
+            <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">
+              JetSet Cares connects families with trusted childcare, pet care,
+              and family support in the places that matter. Safety. Reliability.
+              Professionalism. Everywhere in Asia.
             </p>
-          </div>
 
-          {/* এই গ্যাপটা ইমেজের মেইন ফোকাস এরিয়াকে টেক্সট ও বাটনের মাঝখানে ন্যাচারাল জায়গা দিবে */}
-          <div className="w-full aspect-[4/3] sm:aspect-[16/9]"></div>
-
-          {/* Bottom Button & Tagline Group - ইমেজের নিচেই টাইটলি লেগে থাকবে */}
-          <div className="space-y-4">
-            {/* 5. Buttons */}
-            <div className="flex flex-col gap-3 w-full">
-              <Link href="#categories" className="w-full">
-                <Button className="w-full rounded-full h-12 bg-[#40E0D0] hover:bg-[#2CB0A0] text-black font-semibold text-base font-serif">
-                  Find Trusted Childcare
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+              <Link href="#categories">
+                <Button className="h-12 rounded-full bg-[#2ed3c7] px-8 text-base font-semibold text-slate-950 shadow-[0_12px_30px_rgba(46,211,199,0.28)] transition-all hover:bg-[#22c1b5]">
+                  Find Trusted Care
                 </Button>
               </Link>
-              <Link href="/login" className="w-full">
-                <Button className="w-full rounded-full h-12 bg-transparent border-2 border-white hover:bg-white/10 text-white text-base font-serif">
-                  Apply to Become a Partner
+              <Link href="/login">
+                <Button className="h-12 rounded-full border-2 border-[#35d4c8] bg-transparent px-8 text-base font-semibold text-[#1f8f88] transition-all hover:bg-[#eafffd]">
+                  Become a Partner
                 </Button>
               </Link>
             </div>
 
-            {/* 6. Tagline */}
-            <p className="text-[#40E0D0] text-sm italic pt-1">
-              JetSet Cares About You!
-            </p>
-          </div>
-
-        </div>
-      </div>
-
-      {/* ---------------------------------------------------------------- */}
-      {/* DESKTOP LAYOUT (hidden lg:flex) */}
-      {/* ---------------------------------------------------------------- */}
-      <div
-        className="hidden lg:flex min-h-screen items-center pt-20 pb-20 relative bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url('/banner.jpeg')`,
-        }}
-      >
-        <div className="absolute inset-0 bg-black/30 z-0"></div>
-
-        <div className="container mx-auto relative z-10 px-6">
-          <div className="flex justify-start">
-            <div className="w-1/2 space-y-6">
-              <h1 className="text-5xl lg:text-6xl font-bold leading-tight font-serif">
-                <span className="text-[#40E0D0]">Trusted childcare</span>
-                <br />
-                <span className="text-white">for families on the move</span>
-              </h1>
-              <p className="text-white/90 text-lg max-w-xl">
-                JetSet Cares helps traveling families, expat families, and
-                globally mobile parents find trusted childcare in the cities
-                where they live, stay, and explore across Asia.
-              </p>
-              <div className="flex gap-4 pt-4">
-                <Link href="#categories">
-                  <Button className="rounded-full px-8 h-12 bg-[#40E0D0] hover:bg-[#2CB0A0] text-black font-semibold font-serif">
-                    Find Trusted Childcare
-                  </Button>
-                </Link>
-                <Link href="/login">
-                  <Button className="rounded-full px-8 h-12 bg-transparent border-2 border-white hover:bg-white/10 text-white font-serif">
-                    Apply to Become a Partner
-                  </Button>
-                </Link>
-              </div>
-              <p className="text-[#40E0D0] text-sm italic">
-                JetSet Cares About You!
-              </p>
+            <div className="mt-10 grid gap-5 sm:grid-cols-3">
+              {trustPoints.map((item) => (
+                <div key={item.title} className="flex items-start gap-3">
+                  <div className="mt-1 rounded-full bg-[#e8fbf8] p-2 text-[#1eb7ac]">
+                    <item.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#16324f]">
+                      {item.title}
+                    </p>
+                    <p className="mt-1 text-sm leading-5 text-slate-500">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
+
+          <div className="mx-auto flex w-full max-w-[520px] items-center justify-center lg:mr-0 lg:max-w-[600px]">
+            <Image
+              src="/banner3.png"
+              alt="JetSet Cares app preview"
+              width={1000}
+              height={1000}
+              priority
+              className="h-auto w-full object-contain"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
