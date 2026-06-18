@@ -133,7 +133,7 @@ const Navbar = () => {
     // Default: Show both for non-logged in users or other roles
     return [
       {
-        title: "Find Trusted Care",
+        title: "Parent",
         content: <FindCareCategory />,
       },
       {
