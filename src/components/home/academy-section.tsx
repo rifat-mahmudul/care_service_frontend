@@ -13,6 +13,7 @@ const AcademySection = () => {
         videoRef.current.pause();
         setIsPlaying(false);
       } else {
+        videoRef.current.muted = false;
         videoRef.current.play();
         setIsPlaying(true);
       }
@@ -66,7 +67,6 @@ const AcademySection = () => {
                     src="/cat_video.mp4"
                     className="absolute top-0 left-0 w-full h-full object-cover"
                     loop
-                    muted
                     playsInline
                   />
 
