@@ -1,5 +1,5 @@
 import React from "react";
-import Image from "next/image";
+// import Image from "next/image";
 import Link from "next/link";
 import {
   Facebook,
@@ -35,15 +35,15 @@ const Footer = () => {
         <div className="mb-10 rounded-[32px] border border-white/40 bg-white/25 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm md:p-8">
           <div className="grid gap-10 lg:grid-cols-[1.35fr_0.8fr_1.15fr]">
             <div className="space-y-5">
-              <Link href="/" className="inline-flex items-center">
+              {/* <Link href="/" className="inline-flex items-center">
                 <Image
                   src="/jetset-logo.webp"
                   alt="JetSet Cares logo"
-                  width={120}
-                  height={120}
+                  width={1000}
+                  height={1000}
                   className="h-[90px] w-[90px] object-cover"
                 />
-              </Link>
+              </Link> */}
 
               <div className="space-y-3">
                 <p className="max-w-sm text-lg font-semibold leading-8 text-slate-900">
