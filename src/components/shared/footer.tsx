@@ -18,12 +18,6 @@ const Footer = () => {
     { name: "Terms and Conditions", href: "/terms-and-conditions" },
   ];
 
-  const supportLinks = [
-    { name: "Contact Us", href: "#" },
-    { name: "Explore Freelancers", href: "#" },
-    { name: "Blogs", href: "#" },
-  ];
-
   const socialIcons = [
     {
       Icon: Facebook,
@@ -39,7 +33,7 @@ const Footer = () => {
     <footer className="overflow-hidden bg-[#3ee0cf] pt-16 text-slate-900">
       <div className="container">
         <div className="mb-10 rounded-[32px] border border-white/40 bg-white/25 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm md:p-8">
-          <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.9fr_1fr]">
+          <div className="grid gap-10 lg:grid-cols-[1.35fr_0.8fr_1.15fr]">
             <div className="space-y-5">
               <Link href="/" className="inline-flex items-center">
                 <Image
@@ -70,22 +64,6 @@ const Footer = () => {
               </h4>
               <ul className="space-y-3">
                 {quickLinks.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm font-medium text-slate-800 transition-colors hover:text-slate-950"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="mb-5 text-lg font-bold text-slate-900">Explore</h4>
-              <ul className="space-y-3">
-                {supportLinks.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
