@@ -24,13 +24,13 @@ const Footer = () => {
       href: "https://www.facebook.com/jetsetcares",
       label: "Facebook",
     },
-    { Icon: Linkedin, href: "#", label: "LinkedIn" },
-    { Icon: Twitter, href: "#", label: "Twitter" },
     {
       Icon: Instagram,
       href: "https://www.instagram.com/jetsetcare?igsh=MXh4ZjBlMGI4NzNpMg==",
       label: "Instagram",
     },
+    { Icon: Linkedin, href: "#", label: "LinkedIn" },
+    { Icon: Twitter, href: "#", label: "Twitter" },
   ];
 
   return (
