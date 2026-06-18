@@ -4,11 +4,10 @@ import Link from "next/link";
 import {
   Facebook,
   Instagram,
-  Linkedin,
   Mail,
   MapPin,
   Phone,
-  Twitter,
+  Youtube,
 } from "lucide-react";
 
 const Footer = () => {
@@ -29,8 +28,11 @@ const Footer = () => {
       href: "https://www.instagram.com/jetsetcare?igsh=MXh4ZjBlMGI4NzNpMg==",
       label: "Instagram",
     },
-    { Icon: Linkedin, href: "#", label: "LinkedIn" },
-    { Icon: Twitter, href: "#", label: "Twitter" },
+    {
+      Icon: Youtube,
+      href: "https://youtube.com/@jetsetcares?si=69ookj5sCBgsAWRa",
+      label: "Twitter",
+    },
   ];
 
   return (
