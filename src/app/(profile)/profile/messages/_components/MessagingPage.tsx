@@ -10,7 +10,9 @@ import { useSocket } from "@/components/provider/SocketContext";
 import { toast } from "sonner";
 
 const getAvatarUrl = (value?: string | string[]) =>
-  Array.isArray(value) ? value[0] || "/default-avatar.jpg" : value || "/default-avatar.jpg";
+  Array.isArray(value)
+    ? value[0] || "/default-avatar.jpg"
+    : value || "/default-avatar.jpg";
 
 const getId = (value: any) => String(value?._id || value || "");
 
@@ -31,7 +33,9 @@ interface MessagingPageProps {
   initialConversationId?: string;
 }
 
-export default function MessagingPage({ initialConversationId }: MessagingPageProps) {
+export default function MessagingPage({
+  initialConversationId,
+}: MessagingPageProps) {
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
   const myId = (session?.user as any)?.id;
@@ -49,7 +53,8 @@ export default function MessagingPage({ initialConversationId }: MessagingPagePr
 
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const selectedChat =
-    conversations.find((chat) => String(chat._id) === selectedConversationId) || null;
+    conversations.find((chat) => String(chat._id) === selectedConversationId) ||
+    null;
 
   const fetchConversations = React.useCallback(async () => {
     if (!token || !baseUrl) return;
@@ -91,31 +96,36 @@ export default function MessagingPage({ initialConversationId }: MessagingPagePr
     });
   }, []);
 
-  const updateConversationPreview = React.useCallback((newMessage: any) => {
-    const conversationId = getId(newMessage.conversationId);
-    const messageTime =
-      newMessage.createdAt || newMessage.lastMessageAt || new Date().toISOString();
+  const updateConversationPreview = React.useCallback(
+    (newMessage: any) => {
+      const conversationId = getId(newMessage.conversationId);
+      const messageTime =
+        newMessage.createdAt ||
+        newMessage.lastMessageAt ||
+        new Date().toISOString();
 
-    setConversations((prev) =>
-      sortConversations(
-        prev.map((c) =>
-          String(c._id) === conversationId
-            ? {
-                ...c,
-                lastMessage: newMessage.message,
-                lastMessageAt: messageTime,
-                updatedAt: messageTime,
-                unreadCount:
-                  getId(newMessage.receiverId) === String(myId) &&
-                  conversationId !== selectedConversationId
-                    ? (c.unreadCount || 0) + 1
-                    : c.unreadCount || 0,
-              }
-            : c,
+      setConversations((prev) =>
+        sortConversations(
+          prev.map((c) =>
+            String(c._id) === conversationId
+              ? {
+                  ...c,
+                  lastMessage: newMessage.message,
+                  lastMessageAt: messageTime,
+                  updatedAt: messageTime,
+                  unreadCount:
+                    getId(newMessage.receiverId) === String(myId) &&
+                    conversationId !== selectedConversationId
+                      ? (c.unreadCount || 0) + 1
+                      : c.unreadCount || 0,
+                }
+              : c,
+          ),
         ),
-      ),
-    );
-  }, [myId, selectedConversationId]);
+      );
+    },
+    [myId, selectedConversationId],
+  );
 
   // ১. সব কনভারসেশন ফেচ করা
   useEffect(() => {
@@ -191,7 +201,11 @@ export default function MessagingPage({ initialConversationId }: MessagingPagePr
       fetchConversations();
     };
 
-    const handleConversationRead = ({ conversationId }: { conversationId: string }) => {
+    const handleConversationRead = ({
+      conversationId,
+    }: {
+      conversationId: string;
+    }) => {
       setConversations((prev) =>
         prev.map((chat) =>
           String(chat._id) === String(conversationId)
@@ -222,7 +236,7 @@ export default function MessagingPage({ initialConversationId }: MessagingPagePr
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // ১. বেসিক চেক
     if (!inputValue.trim() || !selectedChat || !token || !baseUrl) {
       console.warn("Input, Chat or Token missing");
@@ -258,12 +272,12 @@ export default function MessagingPage({ initialConversationId }: MessagingPagePr
       });
 
       const result = await res.json();
-      
+
       if (res.ok && result.success) {
         // মেসেজ লিস্ট আপডেট করা
         addMessage(result.data);
         setInputValue("");
-        
+
         // কনভারসেশন লিস্টে লাস্ট মেসেজ আপডেট করা
         updateConversationPreview(result.data);
       } else {
@@ -314,7 +328,8 @@ export default function MessagingPage({ initialConversationId }: MessagingPagePr
         <div className="flex-1 overflow-y-auto">
           {visibleConversations.map((chat) => {
             const otherUser = getOtherUser(chat, myId);
-            const previewTime = chat.lastMessageAt || chat.updatedAt || chat.createdAt;
+            const previewTime =
+              chat.lastMessageAt || chat.updatedAt || chat.createdAt;
             return (
               <div
                 key={chat._id}
@@ -326,9 +341,7 @@ export default function MessagingPage({ initialConversationId }: MessagingPagePr
                 }`}
               >
                 <Avatar className="h-12 w-12 border">
-                  <AvatarImage
-                    src={getAvatarUrl(otherUser?.profileImage)}
-                  />
+                  <AvatarImage src={getAvatarUrl(otherUser?.profileImage)} />
                   <AvatarFallback>
                     {otherUser?.firstName?.[0] || "U"}
                   </AvatarFallback>
@@ -339,7 +352,9 @@ export default function MessagingPage({ initialConversationId }: MessagingPagePr
                       {otherUser?.firstName || "User"}
                     </h4>
                     <span className="text-[10px] text-gray-400 font-medium">
-                      {previewTime ? format(new Date(previewTime), "hh:mm a") : ""}
+                      {previewTime
+                        ? format(new Date(previewTime), "hh:mm a")
+                        : ""}
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 truncate mt-1">
@@ -368,16 +383,12 @@ export default function MessagingPage({ initialConversationId }: MessagingPagePr
                 <h4 className="font-bold text-[#001F3F]">
                   {getOtherUser(selectedChat, myId)?.firstName || "User"}
                 </h4>
-                  <p className="text-[10px] text-green-600 font-semibold uppercase tracking-wider">
-                  Online
-                </p>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50">
               {messages.map((msg) => {
-                const isMe =
-                  getId(msg.senderId) === String(myId);
+                const isMe = getId(msg.senderId) === String(myId);
                 return (
                   <div
                     key={msg._id}
