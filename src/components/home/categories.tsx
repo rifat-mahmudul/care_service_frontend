@@ -3,10 +3,10 @@
 
 import { MoveRight, CheckCircle, Lock } from "lucide-react";
 import Image from "next/image";
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import RoleSelectionModal from "./RoleSelectionModal";
+import { useRouter } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────
 interface Category {
@@ -72,6 +72,7 @@ const CategorySkeleton = () => (
 export default function Categories() {
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
+  const router = useRouter();
 
   const {
     data: categories = [],
@@ -82,10 +83,6 @@ export default function Categories() {
     queryFn: fetchCategories,
     staleTime: 1000 * 60 * 5,
   });
-
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null,
-  );
 
   // Fetch user profile if logged in
   const { data: userProfile } = useQuery({
@@ -115,6 +112,15 @@ export default function Categories() {
 
   // Get user's categories
   const userCategories = userProfile?.category || [];
+
+  const handleCategoryClick = (category: Category) => {
+    const targetUrl = `/all-find-jobs?id=${category._id}`;
+    if (!session) {
+      router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
+      return;
+    }
+    router.push(targetUrl);
+  };
 
   return (
     <section id="categories">
@@ -155,7 +161,7 @@ export default function Categories() {
                 <button
                   key={cat._id}
                   type="button"
-                  onClick={() => !disabled && setSelectedCategory(cat)}
+                  onClick={() => !disabled && handleCategoryClick(cat)}
                   disabled={disabled}
                   className={`group text-left shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-xl transition-all duration-200 bg-white border relative overflow-hidden flex flex-col ${
                     disabled
@@ -224,16 +230,6 @@ export default function Categories() {
             })
           )}
 
-          {/* Role Selection Modal */}
-          {selectedCategory && (
-            <RoleSelectionModal
-              isOpen={!!selectedCategory}
-              onClose={() => setSelectedCategory(null)}
-              categoryName={selectedCategory.name}
-              categoryId={selectedCategory._id}
-              userProfile={userProfile}
-            />
-          )}
         </div>
 
         {/* Show user's added categories summary if logged in and has categories */}

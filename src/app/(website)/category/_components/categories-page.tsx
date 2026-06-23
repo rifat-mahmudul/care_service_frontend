@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { MoveRight, Sparkles, ShieldCheck, Globe2 } from "lucide-react";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import RoleSelectionModal from "@/components/home/RoleSelectionModal";
+import { useRouter } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────
 interface Category {
@@ -32,9 +32,7 @@ const fetchCategories = async (): Promise<Category[]> => {
 export default function CategoriesPage() {
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null,
-  );
+  const router = useRouter();
 
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ["categories"],
@@ -59,6 +57,15 @@ export default function CategoriesPage() {
 
   const isCategoryDisabled = (id: string) =>
     userProfile?.category?.includes(id);
+
+  const handleCategoryClick = (category: Category) => {
+    const targetUrl = `/all-find-jobs?id=${category._id}`;
+    if (!session) {
+      router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
+      return;
+    }
+    router.push(targetUrl);
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] mt-16">
@@ -117,7 +124,7 @@ export default function CategoriesPage() {
                 return (
                   <div
                     key={cat._id}
-                    onClick={() => !disabled && setSelectedCategory(cat)}
+                    onClick={() => !disabled && handleCategoryClick(cat)}
                     className={`group relative bg-white rounded-[2rem] p-3 border border-gray-100 shadow-sm transition-all duration-500 flex flex-col h-full ${
                       disabled
                         ? "opacity-60 cursor-not-allowed"
@@ -174,17 +181,6 @@ export default function CategoriesPage() {
               })}
         </div>
       </section>
-
-      {/* Role Selection Modal */}
-      {selectedCategory && (
-        <RoleSelectionModal
-          isOpen={!!selectedCategory}
-          onClose={() => setSelectedCategory(null)}
-          categoryName={selectedCategory.name}
-          categoryId={selectedCategory._id}
-          userProfile={userProfile}
-        />
-      )}
     </div>
   );
 }

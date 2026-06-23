@@ -9,7 +9,6 @@ import {
   User,
   LogOut,
   Settings,
-  Info,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -33,28 +32,17 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import FindCareCategory from "./nav-component/find-care-category";
 import FindJobCategory from "./nav-component/find-job-category";
 import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [userData, setUserData] = useState<any>(null);
-  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // Modal state
 
-  const router = useRouter();
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
   const role = session?.user?.role;
@@ -126,11 +114,11 @@ const Navbar = () => {
     return [
       {
         title: "Parent",
-        content: <FindCareCategory />,
+        content: <FindJobCategory />,
       },
       {
-        title: "Find Trusted care",
-        content: <FindJobCategory />,
+        title: "Find Trusted Care",
+        content: <FindCareCategory />,
       },
     ];
   };
@@ -148,6 +136,12 @@ const Navbar = () => {
       return `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase();
     }
     return session?.user?.email?.[0].toUpperCase() || "U";
+  };
+
+  const getRoleLabel = (value?: string) => {
+    if (value === "find care") return "Parent";
+    if (value === "find job") return "Find Trusted Care";
+    return value || "User";
   };
 
   return (
@@ -219,7 +213,7 @@ const Navbar = () => {
                           : session.user?.email}
                       </p>
                       <p className="text-sm text-muted-foreground capitalize">
-                        {userData?.role || "User"}
+                        {getRoleLabel(userData?.role)}
                       </p>
                     </div>
                     <DropdownMenuSeparator />
@@ -251,12 +245,11 @@ const Navbar = () => {
                       Log in
                     </Button>
                   </Link>
-                  <Button
-                    onClick={() => setIsJoinModalOpen(true)}
-                    className="rounded-3xl bg-[#2ed3c7] px-6 text-slate-950 hover:bg-[#22c1b5]"
-                  >
-                    Join Now
-                  </Button>
+                  <Link href="/signup">
+                    <Button className="rounded-3xl bg-[#2ed3c7] px-6 text-slate-950 hover:bg-[#22c1b5]">
+                      Join Now
+                    </Button>
+                  </Link>
                 </>
               )}
             </div>
@@ -306,7 +299,7 @@ const Navbar = () => {
                           {userData?.firstName || "User"}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {userData?.role}
+                          {getRoleLabel(userData?.role)}
                         </p>
                       </div>
                     </div>
@@ -334,15 +327,11 @@ const Navbar = () => {
                             Log in
                           </Button>
                         </Link>
-                        <Button
-                          onClick={() => {
-                            setIsOpen(false);
-                            setIsJoinModalOpen(true);
-                          }}
-                          className="w-full rounded-3xl bg-[#2ed3c7] text-slate-950 hover:bg-[#22c1b5]"
-                        >
-                          Join Now
-                        </Button>
+                        <Link href="/signup" onClick={() => setIsOpen(false)}>
+                          <Button className="w-full rounded-3xl bg-[#2ed3c7] text-slate-950 hover:bg-[#22c1b5]">
+                            Join Now
+                          </Button>
+                        </Link>
                       </>
                     ) : (
                       <Button variant="destructive" onClick={() => signOut()}>
@@ -356,38 +345,6 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
-
-      {/* Registration Guidance Modal */}
-      <Dialog open={isJoinModalOpen} onOpenChange={setIsJoinModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader className="flex flex-col items-center justify-center text-center space-y-3">
-            <div className="bg-primary/10 p-3 rounded-full">
-              <Info className="h-8 w-8 text-primary" />
-            </div>
-            <DialogTitle className="text-2xl font-bold">
-              Get Started
-            </DialogTitle>
-            <DialogDescription className="text-base text-gray-600">
-              To create an account, you first need to choose a service category.
-              This helps us personalize your experience.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 text-center text-sm text-muted-foreground border-y border-gray-100 my-2">
-            You will be redirected to our category selection page.
-          </div>
-          <DialogFooter className="sm:justify-center">
-            <Button
-              className="w-full rounded-full h-11 text-white font-bold shadow-lg"
-              onClick={() => {
-                setIsJoinModalOpen(false);
-                router.push("/category");
-              }}
-            >
-              Select Category & Continue
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

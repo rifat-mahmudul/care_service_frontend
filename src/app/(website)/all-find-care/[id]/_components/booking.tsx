@@ -6,8 +6,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 interface ServiceDay {
   day: string;
@@ -61,13 +63,15 @@ interface BookingResponse {
 
 const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
   const params = useParams();
+  const router = useRouter();
+  const { data: session } = useSession();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTI5ZDIzYzYzN2VmOGQ5OTkwZTU3NCIsInJvbGUiOiJmaW5kIGNhcmUiLCJlbWFpbCI6ImZpbmRjYXJlQGdtYWlsLmNvbSIsImZpcnN0TmFtZSI6InNhdXJhdiIsImxhc3ROYW1lIjoic2Fya2FyIiwic3Vic2NyaXB0aW9uIjp0cnVlLCJpYXQiOjE3NzI3MzAwODIsImV4cCI6MTc3MzMzNDg4Mn0.x06UDfpAbvSzJBUP9Cx8vl_mRMujyRBeeGVDyYEo1cU";
+  const token = session?.user?.accessToken;
+  const role = session?.user?.role;
 
   const bookingServiceId = serviceId || (params?.id as string);
 
@@ -213,6 +217,17 @@ const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
 
   // Handle booking
   const handleBookNow = () => {
+    if (!token) {
+      toast.error("Please log in as a parent to book a service.");
+      router.push("/login");
+      return;
+    }
+
+    if (role !== "find care") {
+      setError("Only Parent accounts can book a service.");
+      return;
+    }
+
     if (!date || !selectedTime || !bookingServiceId) {
       setError("Missing required information for booking");
       return;
@@ -264,6 +279,11 @@ const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
           {error}
+        </div>
+      )}
+      {role === "find job" && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-700">
+          Find Trusted Care accounts can offer services, but they cannot book them.
         </div>
       )}
 
@@ -357,7 +377,8 @@ const Booking = ({ days = [], serviceId = "" }: BookingProps) => {
                 !date ||
                 !isDateAvailable(date) ||
                 !selectedTime ||
-                bookingMutation.isPending
+                bookingMutation.isPending ||
+                role === "find job"
               }
               onClick={handleBookNow}
             >

@@ -1,10 +1,9 @@
-import React from "react";
-import CategoriesPage from "./_components/categories-page";
+import SignupExperience from "@/components/auth/SignupExperience";
 
 const page = () => {
   return (
     <div>
-      <CategoriesPage />
+      <SignupExperience />
     </div>
   );
 };

@@ -68,7 +68,12 @@ const FindJobCategory = () => {
   });
 
   const handleCategoryClick = (categoryId: string) => {
-    router.push(`/all-find-jobs?id=${categoryId}`);
+    const targetUrl = `/all-find-jobs?id=${categoryId}`;
+    if (!session) {
+      router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
+      return;
+    }
+    router.push(targetUrl);
   };
 
   // Get categories to display based on login status

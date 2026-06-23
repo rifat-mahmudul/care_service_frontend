@@ -174,7 +174,7 @@ const FindJobsDetails = () => {
               Authentication Required
             </DialogTitle>
             <DialogDescription className="text-center pt-4">
-              Please log in to view job details and book services.
+              Please log in to view this trusted care profile and book services.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">

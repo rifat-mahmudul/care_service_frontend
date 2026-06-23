@@ -173,7 +173,8 @@ const FindCareDetails = () => {
               Authentication Required
             </DialogTitle>
             <DialogDescription className="text-center pt-4">
-              Please log in to view caregiver details and book services.
+              Please log in to view this parent profile and continue the
+              conversation.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">
@@ -234,7 +235,7 @@ const FindCareDetails = () => {
     reviews.length > 0 ? reviews[reviews.length - 1] : null;
 
   return (
-    <div className="mt-20 space-y-16">
+    <div className="mt-28 space-y-16">
       <ProfileHero
         userId={userInfo?._id}
         name={`${userInfo?.firstName || ""} ${userInfo?.lastName || ""}`}

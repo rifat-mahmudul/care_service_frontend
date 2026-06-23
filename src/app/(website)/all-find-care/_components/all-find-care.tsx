@@ -288,7 +288,7 @@ const AllFindCare = () => {
               Authentication Required
             </DialogTitle>
             <DialogDescription className="text-center pt-4">
-              Please log in to view available caregivers and book services.
+              Please log in to view parent requests and continue the conversation.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">

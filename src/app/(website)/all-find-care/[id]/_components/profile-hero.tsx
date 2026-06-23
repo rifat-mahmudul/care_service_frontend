@@ -32,6 +32,7 @@ export function ProfileHero({
   const router = useRouter();
   const session = useSession();
   const token = session?.data?.user?.accessToken;
+  const role = session?.data?.user?.role;
   const [loading, setLoading] = useState(false);
 
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -45,6 +46,11 @@ export function ProfileHero({
 
     if (!userId) {
       toast.error("Unable to find this user's profile.");
+      return;
+    }
+
+    if (role === "find job") {
+      toast.error("Find Trusted Care accounts cannot start booking chats from this page.");
       return;
     }
 
@@ -120,10 +126,10 @@ export function ProfileHero({
 
         <Button
           onClick={handleJoinToConnect}
-          disabled={loading}
+          disabled={loading || role === "find job"}
           className="bg-primary hover:bg-primary text-white rounded-full font-bold shadow-lg transition-transform active:scale-95 px-8"
         >
-          {loading ? "Connecting..." : "Join To Connect"}
+          {loading ? "Connecting..." : "Start Chat"}
         </Button>
       </div>
     </div>

@@ -19,14 +19,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { ProfileCardSkeleton } from "@/components/shared/find-job-care/profile-card-skeleton";
 import { BannerSkeleton } from "@/components/shared/find-job-care/banner-skeleton";
 import { useSession } from "next-auth/react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 // Types for the API response
 interface User {
@@ -95,7 +87,6 @@ const AllFindJobs = () => {
   const session = useSession();
   const token = session?.data?.user?.accessToken;
   const isAuthenticated = session?.status === "authenticated";
-  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [availableFilter, setAvailableFilter] = useState("all");
@@ -145,13 +136,12 @@ const AllFindJobs = () => {
   });
 
   React.useEffect(() => {
-    if (
-      session?.status === "loading" ||
-      session?.status === "unauthenticated"
-    ) {
-      setShowLoginDialog(true);
+    if (session?.status === "unauthenticated" && id) {
+      router.replace(
+        `/login?callbackUrl=${encodeURIComponent(`/all-find-jobs?id=${id}`)}`,
+      );
     }
-  }, [session?.status]);
+  }, [id, router, session?.status]);
 
   const caregivers = data?.data || [];
   const locationOptions = useMemo(
@@ -264,43 +254,8 @@ const AllFindJobs = () => {
     return tags.slice(0, 3);
   };
 
-  const handleLogin = () => {
-    setShowLoginDialog(false);
-    router.push("/login");
-  };
-
-  // If not authenticated, show nothing or a loading state while dialog is shown
-  if (!isAuthenticated && session?.status !== "loading") {
-    return (
-      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-center">
-              Authentication Required
-            </DialogTitle>
-            <DialogDescription className="text-center pt-4">
-              Please log in to access the Find Jobs page and view available
-              opportunities.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowLoginDialog(false);
-                router.back();
-              }}
-              className="w-full sm:w-auto"
-            >
-              Go Back
-            </Button>
-            <Button onClick={handleLogin} className="w-full sm:w-auto">
-              Login
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (

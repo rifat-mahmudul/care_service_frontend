@@ -48,7 +48,7 @@ const ProfileCard = ({
   const formattedLocation = formatLocation(location);
 
   return (
-    <div>
+    <section id="profile">
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8 flex flex-col gap-6 relative">
         {/* Top Section: Image and Info */}
         <div className="flex flex-col md:flex-row gap-6">
@@ -134,7 +134,7 @@ const ProfileCard = ({
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
