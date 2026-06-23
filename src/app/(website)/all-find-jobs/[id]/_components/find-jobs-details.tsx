@@ -188,10 +188,7 @@ const FindJobsDetails = () => {
             >
               Go Back
             </Button>
-            <Button
-              onClick={handleLogin}
-              className="w-full sm:w-auto"
-            >
+            <Button onClick={handleLogin} className="w-full sm:w-auto">
               Login
             </Button>
           </DialogFooter>
@@ -235,7 +232,7 @@ const FindJobsDetails = () => {
     reviews.length > 0 ? reviews[reviews.length - 1] : null;
 
   return (
-    <div className="mt-20 space-y-16">
+    <div className="mt-28 space-y-16">
       <ProfileHero
         userId={userInfo?._id}
         name={`${userInfo?.firstName || ""} ${userInfo?.lastName || ""}`}

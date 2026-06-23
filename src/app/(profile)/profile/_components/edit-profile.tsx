@@ -35,6 +35,8 @@ const profileSchema = z.object({
   bio: z.string().optional(),
   country: z.string().optional(),
   city: z.string().optional(),
+  gender: z.string().optional(),
+  hourRate: z.number().optional(),
   experience: z.number().optional(),
   language: z.array(z.string()).default([]),
   languageLavel: z.string().optional(),
@@ -72,6 +74,25 @@ const LANGUAGE_LEVELS = [
   { value: "conversational", label: "Conversational" },
   { value: "fluent", label: "Fluent" },
   { value: "native", label: "Native" },
+];
+
+const GENDER_OPTIONS = [
+  { value: "female", label: "Female" },
+  { value: "male", label: "Male" },
+  { value: "cisgender-woman", label: "Cisgender Woman" },
+  { value: "cisgender-man", label: "Cisgender Man" },
+  { value: "transgender-woman", label: "Transgender Woman" },
+  { value: "transgender-man", label: "Transgender Man" },
+  { value: "nonbinary", label: "Nonbinary" },
+  { value: "genderqueer", label: "Genderqueer" },
+  { value: "agender", label: "Agender" },
+  { value: "bigender", label: "Bigender" },
+  { value: "genderfluid", label: "Genderfluid" },
+  { value: "demiboy", label: "Demiboy" },
+  { value: "demigirl", label: "Demigirl" },
+  { value: "two-spirit", label: "Two-Spirit" },
+  { value: "pangender", label: "Pangender" },
+  { value: "other", label: "Other" },
 ];
 
 const getPrimaryImage = (value?: string | string[]) =>
@@ -130,6 +151,8 @@ const EditProfilePage = () => {
       bio: "",
       country: "",
       city: "",
+      gender: "",
+      hourRate: 0,
       experience: 0,
       language: [],
       languageLavel: "",
@@ -279,6 +302,7 @@ const EditProfilePage = () => {
 
         const result = await response.json();
         const data = result.data;
+        const resolvedCountry = data.country || data.countery || "";
         const primaryImage = getPrimaryImage(data.profileImage);
         const photos = Array.from(
           new Set([primaryImage, ...(data.galary || [])].filter(Boolean)),
@@ -290,8 +314,10 @@ const EditProfilePage = () => {
           email: data.email || "",
           phone: data.phone || "",
           bio: data.bio || "",
-          country: data.country || "",
+          country: resolvedCountry,
           city: data.city || "",
+          gender: data.gender || "",
+          hourRate: data.hourRate || 0,
           experience: data.exprience || data.experience || 0,
           language: data.language || [],
           languageLavel: data.languageLavel || "",
@@ -306,16 +332,16 @@ const EditProfilePage = () => {
           neighborhoods: data.neighborhoods || "",
         });
 
-        setCountryValue(data.country || "");
+        setCountryValue(resolvedCountry);
         setCityValue(data.city || "");
         setExistingPhotos(photos);
         setSelectedMainPhoto(primaryImage ? `existing:${primaryImage}` : "");
         setExistingCertificates(data.certifications || []);
 
-        if (data.country) {
-          updateCities(data.country);
+        if (resolvedCountry) {
+          updateCities(resolvedCountry);
           if (data.city) {
-            updateNeighborhoods(data.country, data.city);
+            updateNeighborhoods(resolvedCountry, data.city);
           }
         }
       } catch (error) {
@@ -337,6 +363,7 @@ const EditProfilePage = () => {
         : "";
       const payload = {
         ...values,
+        countery: values.country || "",
         galary: existingPhotos,
         certifications: existingCertificates,
         profileImage: selectedExistingMain,
@@ -389,6 +416,8 @@ const EditProfilePage = () => {
       form.setValue("profileImage", primaryImage);
       form.setValue("galary", photos);
       form.setValue("certifications", data.certifications || []);
+      form.setValue("gender", data.gender || "");
+      form.setValue("hourRate", data.hourRate || 0);
       toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Profile update error:", error);
@@ -656,6 +685,37 @@ const EditProfilePage = () => {
                   <Label>Phone Number</Label>
                   <Input {...form.register("phone")} className="mt-2" />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label>Gender</Label>
+                  <select
+                    value={form.watch("gender") || ""}
+                    onChange={(e) => form.setValue("gender", e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#00D1C1] mt-2"
+                  >
+                    <option value="">Select gender</option>
+                    {GENDER_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {role === "find job" && (
+                  <div>
+                    <Label>Hourly Rate</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      placeholder="Enter your hourly rate"
+                      {...form.register("hourRate", { valueAsNumber: true })}
+                      className="mt-2"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Location Fields */}

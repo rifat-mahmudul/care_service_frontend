@@ -9,12 +9,24 @@ import {
   Heart,
   Briefcase,
   Users,
-  ChevronRight,
   Trash2,
   AlertCircle,
   Loader2,
+  Plus,
+  CheckCircle2,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface Category {
   _id: string;
@@ -35,8 +47,10 @@ interface UserProfile {
   role: string;
   category: string[];
   country: string;
+  countery?: string;
   city: string;
   gender: string;
+  hourRate?: number;
   nidNumber?: string;
   subscription?: string;
 }
@@ -49,6 +63,8 @@ const MyServices = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(
     null,
   );
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [addingCategoryId, setAddingCategoryId] = useState<string | null>(null);
 
   // Fetch user profile
   const {
@@ -69,7 +85,10 @@ const MyServices = () => {
       );
       if (!response.ok) throw new Error("Failed to fetch profile");
       const json = await response.json();
-      return json.data;
+      return {
+        ...json.data,
+        country: json.data.country || json.data.countery || "",
+      };
     },
     enabled: !!token,
   });
@@ -94,6 +113,13 @@ const MyServices = () => {
     if (!allCategories || !userProfile?.category) return [];
     return allCategories.filter((cat) =>
       userProfile.category.includes(cat._id),
+    );
+  }, [allCategories, userProfile]);
+
+  const availableCategories = React.useMemo(() => {
+    if (!allCategories || !userProfile?.category) return [];
+    return allCategories.filter(
+      (cat) => !userProfile.category.includes(cat._id),
     );
   }, [allCategories, userProfile]);
 
@@ -139,6 +165,55 @@ const MyServices = () => {
     if (hasCare) return "Find Care";
     if (hasJob) return "Find Job";
     return "Unknown";
+  };
+
+  const handleAddService = async (categoryId: string) => {
+    if (!token || !userProfile) return;
+
+    if (userProfile.role !== "find job") {
+      toast.error("Only Find Trusted Care accounts can add services.");
+      return;
+    }
+
+    setAddingCategoryId(categoryId);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/service/register-service`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            role: userProfile.role,
+            categoryId,
+            gender: userProfile.gender,
+            ...(userProfile.country ? { country: userProfile.country } : {}),
+            ...(userProfile.city ? { city: userProfile.city } : {}),
+            ...(userProfile.hourRate && userProfile.hourRate > 0
+              ? { hourRate: userProfile.hourRate }
+              : {}),
+            subscriptionId: userProfile.subscription || "",
+          }),
+        },
+      );
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to add service");
+      }
+
+      toast.success("Service added successfully.");
+      setIsAddDialogOpen(false);
+      await refetchProfile();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to add service",
+      );
+    } finally {
+      setAddingCategoryId(null);
+    }
   };
 
   // Get service icon
@@ -196,6 +271,29 @@ const MyServices = () => {
     );
   }
 
+  if (userProfile.role !== "find job") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+          <Briefcase className="w-16 h-16 text-primary/60 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            My Services is only for Find Trusted Care
+          </h2>
+          <p className="text-gray-500 mb-6">
+            Parent accounts can browse and book services, but they cannot add
+            services here.
+          </p>
+          <Button
+            onClick={() => router.push("/")}
+            className="bg-primary text-white"
+          >
+            Back to Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div>
@@ -212,15 +310,15 @@ const MyServices = () => {
                 </span>
               </h1>
               <p className="text-gray-500 mt-2">
-                Manage your active care and job services
+                Manage the service categories you offer
               </p>
             </div>
             <button
-              onClick={() => router.push("/category")}
+              onClick={() => setIsAddDialogOpen(true)}
               className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 self-start"
             >
-              Add New Service
-              <ChevronRight className="w-4 h-4" />
+              <Plus className="w-4 h-4" />
+              New Service
             </button>
           </div>
         </div>
@@ -244,17 +342,13 @@ const MyServices = () => {
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 mb-1">Care Services</p>
-                <p className="text-3xl font-bold text-pink-600">
-                  {
-                    userServices.filter((s) =>
-                      s.findCareUser?.includes(userProfile._id),
-                    ).length
-                  }
+                <p className="text-sm text-gray-500 mb-1">Available to Add</p>
+                <p className="text-3xl font-bold text-emerald-600">
+                  {availableCategories.length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-pink-50 rounded-full flex items-center justify-center">
-                <Heart className="w-6 h-6 text-pink-600" />
+              <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center">
+                <Plus className="w-6 h-6 text-emerald-600" />
               </div>
             </div>
           </div>
@@ -262,13 +356,9 @@ const MyServices = () => {
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 mb-1">Job Services</p>
+                <p className="text-sm text-gray-500 mb-1">Provider Services</p>
                 <p className="text-3xl font-bold text-blue-600">
-                  {
-                    userServices.filter((s) =>
-                      s.findJobUser?.includes(userProfile._id),
-                    ).length
-                  }
+                  {userServices.length}
                 </p>
               </div>
               <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
@@ -288,13 +378,13 @@ const MyServices = () => {
               No Services Added Yet
             </h3>
             <p className="text-gray-500 mb-6">
-              Start by adding care or job services to your profile
+              Start by adding the service categories you want to offer
             </p>
             <button
-              onClick={() => router.push("/category")}
+              onClick={() => setIsAddDialogOpen(true)}
               className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
             >
-              Browse Categories
+              Add Your First Service
             </button>
           </div>
         ) : (
@@ -351,32 +441,20 @@ const MyServices = () => {
                     <div className="flex items-center gap-4 mb-4 text-xs text-gray-400">
                       <div className="flex items-center gap-1">
                         <Users className="w-3 h-3" />
-                        <span>
-                          {service.findCareUser?.length || 0} Care Seekers
-                        </span>
+                        <span>{service.findCareUser?.length || 0} Parents</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Briefcase className="w-3 h-3" />
                         <span>
-                          {service.findJobUser?.length || 0} Job Providers
+                          {service.findJobUser?.length || 0} Providers
                         </span>
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                      <button
-                        onClick={() =>
-                          router.push(
-                            getServiceType(service) === "Find Care"
-                              ? `/all-find-care?id=${service._id}`
-                              : `/all-find-jobs?id=${service._id}`,
-                          )
-                        }
-                        className="flex-1 px-3 py-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                      >
-                        View Details
-                      </button>
+                      <div className="flex-1 px-3 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg">
+                        Added to your profile
+                      </div>
                       <button
                         onClick={() => setShowDeleteConfirm(service._id)}
                         className="px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1"
@@ -423,6 +501,80 @@ const MyServices = () => {
             </AnimatePresence>
           </div>
         )}
+
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Add New Service</DialogTitle>
+              <DialogDescription>
+                Choose a category to add it directly to your Find Trusted Care
+                profile.
+              </DialogDescription>
+            </DialogHeader>
+
+            {availableCategories.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-gray-200 p-10 text-center text-gray-500">
+                You already added all available service categories.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {availableCategories.map((category) => (
+                  <button
+                    key={category._id}
+                    type="button"
+                    onClick={() => handleAddService(category._id)}
+                    disabled={addingCategoryId === category._id}
+                    className="overflow-hidden rounded-2xl border border-gray-100 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg disabled:opacity-60"
+                  >
+                    <div className="relative h-40 w-full bg-gray-100">
+                      {category.image ? (
+                        <Image
+                          src={category.image}
+                          alt={category.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-primary">
+                          <Briefcase className="w-8 h-8" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {category.name}
+                          </h3>
+                          {category.description && (
+                            <p className="mt-2 text-sm text-gray-500 line-clamp-2">
+                              {category.description}
+                            </p>
+                          )}
+                        </div>
+                        {addingCategoryId === category._id ? (
+                          <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                        ) : (
+                          <CheckCircle2 className="w-5 h-5 text-primary/70" />
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsAddDialogOpen(false)}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

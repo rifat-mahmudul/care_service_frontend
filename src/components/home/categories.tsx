@@ -5,8 +5,10 @@ import { MoveRight, CheckCircle, Lock } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────
 interface Category {
@@ -73,6 +75,10 @@ export default function Categories() {
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const [addingCategoryId, setAddingCategoryId] = React.useState<string | null>(
+    null,
+  );
 
   const {
     data: categories = [],
@@ -114,6 +120,52 @@ export default function Categories() {
   const userCategories = userProfile?.category || [];
 
   const handleCategoryClick = (category: Category) => {
+    if (session?.user?.role === "find job" && token && userProfile) {
+      void (async () => {
+        setAddingCategoryId(category._id);
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/service/register-service`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                role: userProfile.role,
+                categoryId: category._id,
+                gender: userProfile.gender,
+                ...(userProfile.country
+                  ? { country: userProfile.country }
+                  : {}),
+                ...(userProfile.city ? { city: userProfile.city } : {}),
+                ...(userProfile.hourRate && userProfile.hourRate > 0
+                  ? { hourRate: userProfile.hourRate }
+                  : {}),
+                subscriptionId: userProfile.subscription || "",
+              }),
+            },
+          );
+
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.message || "Failed to add service");
+          }
+
+          toast.success("Service added successfully.");
+          await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+        } catch (error) {
+          toast.error(
+            error instanceof Error ? error.message : "Failed to add service",
+          );
+        } finally {
+          setAddingCategoryId(null);
+        }
+      })();
+      return;
+    }
+
     const targetUrl = `/all-find-jobs?id=${category._id}`;
     if (!session) {
       router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
@@ -162,18 +214,18 @@ export default function Categories() {
                   key={cat._id}
                   type="button"
                   onClick={() => !disabled && handleCategoryClick(cat)}
-                  disabled={disabled}
+                  disabled={disabled || addingCategoryId === cat._id}
                   className={`group text-left shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-xl transition-all duration-200 bg-white border relative overflow-hidden flex flex-col ${
-                    disabled
+                    disabled || addingCategoryId === cat._id
                       ? "opacity-70 cursor-not-allowed hover:scale-100 border-gray-200"
                       : "hover:scale-[1.02] hover:shadow-xl hover:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary border-gray-100"
                   }`}
                 >
                   {/* Disabled Overlay Badge */}
-                  {disabled && (
+                  {(disabled || addingCategoryId === cat._id) && (
                     <div className="absolute top-3 right-3 z-10 bg-black/80 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-lg">
                       <CheckCircle className="w-3 h-3" />
-                      Added
+                      {addingCategoryId === cat._id ? "Adding..." : "Added"}
                     </div>
                   )}
 

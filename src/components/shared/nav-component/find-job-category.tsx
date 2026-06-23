@@ -1,12 +1,14 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Briefcase, Users, Clock, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 interface Category {
   _id: string;
@@ -35,6 +37,8 @@ const FindJobCategory = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
+  const queryClient = useQueryClient();
+  const [addingCategoryId, setAddingCategoryId] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQuery<ApiResponse>({
     queryKey: ["nav-categories"],
@@ -68,6 +72,52 @@ const FindJobCategory = () => {
   });
 
   const handleCategoryClick = (categoryId: string) => {
+    if (session?.user?.role === "find job" && token && userProfile) {
+      void (async () => {
+        setAddingCategoryId(categoryId);
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/service/register-service`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                role: userProfile.role,
+                categoryId,
+                gender: userProfile.gender,
+                ...(userProfile.country
+                  ? { country: userProfile.country }
+                  : {}),
+                ...(userProfile.city ? { city: userProfile.city } : {}),
+                ...(userProfile.hourRate && userProfile.hourRate > 0
+                  ? { hourRate: userProfile.hourRate }
+                  : {}),
+                subscriptionId: userProfile.subscription || "",
+              }),
+            },
+          );
+
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.message || "Failed to add service");
+          }
+
+          toast.success("Service added successfully.");
+          await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+        } catch (error) {
+          toast.error(
+            error instanceof Error ? error.message : "Failed to add service",
+          );
+        } finally {
+          setAddingCategoryId(null);
+        }
+      })();
+      return;
+    }
+
     const targetUrl = `/all-find-jobs?id=${categoryId}`;
     if (!session) {
       router.push(`/login?callbackUrl=${encodeURIComponent(targetUrl)}`);
@@ -264,6 +314,7 @@ const FindJobCategory = () => {
                 <motion.button
                   key={category._id}
                   onClick={() => handleCategoryClick(category._id)}
+                  disabled={addingCategoryId === category._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -309,6 +360,12 @@ const FindJobCategory = () => {
 
                         {/* Stats */}
                         <div className="flex items-center gap-3 mt-2">
+                          {addingCategoryId === category._id && (
+                            <div className="flex items-center gap-1 text-xs text-primary">
+                              <Clock className="w-3 h-3" />
+                              <span>Adding...</span>
+                            </div>
+                          )}
                           {(category.findCareUser?.length || 0) > 0 && (
                             <div className="flex items-center gap-1 text-xs text-gray-400">
                               <Users className="w-3 h-3" />
