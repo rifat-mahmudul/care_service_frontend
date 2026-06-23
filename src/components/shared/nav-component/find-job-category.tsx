@@ -37,6 +37,7 @@ const FindJobCategory = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const token = session?.user?.accessToken;
+  const userRole = session?.user?.role;
   const queryClient = useQueryClient();
   const [addingCategoryId, setAddingCategoryId] = useState<string | null>(null);
 
@@ -72,7 +73,7 @@ const FindJobCategory = () => {
   });
 
   const handleCategoryClick = (categoryId: string) => {
-    if (session?.user?.role === "find job" && token && userProfile) {
+    if (userRole === "find job" && token && userProfile) {
       void (async () => {
         setAddingCategoryId(categoryId);
         try {
@@ -129,11 +130,13 @@ const FindJobCategory = () => {
   // Get categories to display based on login status
   const getDisplayCategories = () => {
     if (!token || !userProfile) {
-      // Not logged in - show all categories
       return data?.data || [];
     }
 
-    // Logged in - show only user's categories
+    if (userRole !== "find job") {
+      return data?.data || [];
+    }
+
     const userCategoryIds = userProfile?.category || [];
     const allCategories = data?.data || [];
     return allCategories.filter((cat) => userCategoryIds.includes(cat._id));
@@ -141,6 +144,7 @@ const FindJobCategory = () => {
 
   const displayCategories = getDisplayCategories();
   const allCategories = data?.data || [];
+  const isProviderView = userRole === "find job";
   const totalUsers = displayCategories.reduce(
     (sum, cat) =>
       sum + (cat.findCareUser?.length || 0) + (cat.findJobUser?.length || 0),
@@ -233,7 +237,12 @@ const FindJobCategory = () => {
   }
 
   // Logged in but no categories added yet
-  if (token && userProfile && displayCategories.length === 0) {
+  if (
+    isProviderView &&
+    token &&
+    userProfile &&
+    displayCategories.length === 0
+  ) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -281,12 +290,12 @@ const FindJobCategory = () => {
             <div>
               <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                 <Briefcase className="w-6 h-6 text-primary" />
-                {token && userProfile
+                {isProviderView && token && userProfile
                   ? "Your Job Categories"
                   : "Browse Categories"}
               </h2>
               <p className="text-gray-500 mt-1">
-                {token && userProfile
+                {isProviderView && token && userProfile
                   ? `You have ${displayCategories.length} active job categor${displayCategories.length !== 1 ? "ies" : "y"}`
                   : `Find the perfect job opportunities across ${allCategories.length} categories`}
               </p>
@@ -296,11 +305,6 @@ const FindJobCategory = () => {
                 <div className="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm font-medium">
                   {displayCategories.length} Categories
                 </div>
-                {data.meta.serviceActivationRequiresPaidMembership && (
-                  <div className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-xs font-medium">
-                    Premium Access
-                  </div>
-                )}
               </div>
             )}
           </div>
