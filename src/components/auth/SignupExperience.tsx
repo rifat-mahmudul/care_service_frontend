@@ -531,7 +531,7 @@ export default function SignupExperience() {
                     />
                   </div>
                   <h3 className="mb-2 text-lg font-semibold text-[#0A0A23] md:text-xl">
-                    Parent
+                    Find Trusted Care
                   </h3>
                   <p className="mb-6 text-sm leading-6 text-[#3B3B4F]">
                     Create an account to browse trusted care and book when you&apos;re ready.
@@ -573,13 +573,13 @@ export default function SignupExperience() {
                     />
                   </div>
                   <h3 className="mb-2 text-lg font-semibold text-[#0A0A23] md:text-xl">
-                    Find Trusted Care
+                    Join as a Partner
                   </h3>
                   <p className="mb-6 text-sm leading-6 text-[#3B3B4F]">
                     Select your service category and complete the full provider signup here.
                   </p>
                   <div className="flex items-center justify-between rounded-full bg-[#3ee0cf] px-4 py-3 text-sm font-bold text-slate-950 md:text-base">
-                    <span>Continue as Provider</span>
+                    <span>Continue as Partner</span>
                     <MoveRight className="h-5 w-5" />
                   </div>
                 </button>
@@ -1135,7 +1135,7 @@ export default function SignupExperience() {
                 Profile Submitted
               </DialogTitle>
               <DialogDescription className="max-w-md text-center text-sm leading-6 text-slate-600">
-                Your Find Trusted Care profile has been submitted successfully.
+                Your Partner profile has been submitted successfully.
                 The admin team will review your profile before approval.
               </DialogDescription>
             </DialogHeader>

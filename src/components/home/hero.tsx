@@ -28,7 +28,7 @@ const Hero = () => {
     <section className="relative overflow-hidden bg-white pt-24">
       <div className="container relative px-4 sm:px-6">
         <div className="grid items-center gap-12 lg:grid-cols-[1fr_0.9fr] lg:gap-14">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl -mt-80">
             <h1 className="text-4xl font-semibold leading-tight text-[#16324f] sm:text-5xl lg:text-6xl">
               More than a booking.
               <span className="mt-1 block text-[#28c7be]">
